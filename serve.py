@@ -11,7 +11,7 @@ import cgitb; cgitb.enable()  ## This line enables CGI error reporting
  
 server = HTTPServer
 handler = CGIHTTPRequestHandler
-server_address = ("", 8000)
+server_address = ("", 8001)
 handler.cgi_directories = ["/cgi-bin"]
  
 httpd = server(server_address, handler)

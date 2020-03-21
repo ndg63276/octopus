@@ -7,57 +7,78 @@
 <title>My Octopus Account</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
+const baseurl = 'https://api.octopus.energy/'
 
 function getCookie(cname) {
-        var name = cname + "=";
-        var ca = document.cookie.split(';');
-        for(var i = 0; i < ca.length; i++) {
-                var c = ca[i];
-                while (c.charAt(0) == ' ') {
-                        c = c.substring(1);
-                }
-                if (c.indexOf(name) == 0) {
-                        return c.substring(name.length, c.length);
-                }
-        }
-        return "";
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i < ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0) == ' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length, c.length);
+		}
+	}
+	return "";
 }
 
 function setCookie(cname, cvalue, exdays) {
-        var d = new Date();
-        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
-        var expires = "expires="+d.toUTCString();
-        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+	var d = new Date();
+	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+	var expires = "expires="+d.toUTCString();
+	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
 
-function logged_in(email) {
-	document.getElementById("loginstate").innerHTML = "You are logged in as "+email+".";
+function logged_in(address) {
+	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
 	document.getElementById("mainbody").innerHTML = "<a href='octopus.html'>Octopus Comparison</a><br />";
 }
 
-function do_login(account_no, apikey) {
-	email = "dummy";
-	setCookie("account_no", account_no, 365);
-	setCookie("apikey", apikey, 365);
-	return email;
+function do_login(account_no, apikey, storecreds) {
+	address = false;
+	$.ajax({
+		url: baseurl + "/v1/accounts/" + account_no,
+		type: 'GET',
+		headers: {
+			"Authorization": "Basic " + btoa(apikey+":")
+		},
+		dataType: 'json',
+		async: false,
+		success: function(json) {
+			address = json["properties"][0]["address_line_1"];
+			if (storecreds == true) {
+				setCookie("account_no", account_no, 365);
+				setCookie("apikey", apikey, 365);
+			} else {
+				console.log(storecreds);
+			}
+		},
+	})
+	return address;
 }
 
 function login() {
 	var account_no = document.getElementById("account_no").value;
 	var apikey = document.getElementById("apikey").value;
-	var email = do_login(account_no, apikey);
-	if (email) {
-		logged_in(email);
+	var storecreds = document.getElementById("storecreds").checked;
+	var address = do_login(account_no, apikey, storecreds);
+	if (address) {
+		logged_in(address);
 	} else {
 		document.getElementById("loginstate").innerHTML = 'Login failed';
 	}
 }
 
 function checklogin() {
-        var account_no = getCookie("account_no");
-        var apikey = getCookie("apikey");
-	var email = "dummy";
-        var to_return = {"account_no": account_no, "apikey": apikey, "email": email}
+	var account_no = getCookie("account_no");
+	var apikey = getCookie("apikey");
+	var address = false;
+	if (account_no != "" && apikey != "") {
+		address = do_login(account_no, apikey, true);
+	}
+	var to_return = {"account_no": account_no, "apikey": apikey, "address": address}
 	return to_return
 }
 
@@ -65,13 +86,14 @@ window.onload = function() {
 	user_info = checklogin();
 	var account_no = user_info["account_no"];
 	var apikey = user_info["apikey"];
-	if (apikey != null) {
-		var email = user_info["email"];
-		logged_in(email);
+	if (apikey != "") {
+		var address = user_info["address"];
+		logged_in(address);
 	} else {
 		document.getElementById("loginstate").innerHTML = "You are not logged in.";
 		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Account Number: </label><input id='account_no'><br />";
 		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>API Key: </label><input type='password' id='apikey'><br /><br />";
+		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
 		document.getElementById('apikey').onkeydown = function(e){if(e.keyCode == 13){login();}};
 	};
@@ -80,7 +102,7 @@ window.onload = function() {
 </script>
 <style>
 .l1 {
-	width: 100px;
+	width: 200px;
 	display: inline-block;
 }
 </style>
