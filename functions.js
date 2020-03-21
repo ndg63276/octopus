@@ -72,3 +72,47 @@ function checklogin() {
 	var to_return = {"account_no": account_no, "apikey": apikey, "address": address}
 	return to_return
 }
+
+function parseDateParam(param) {
+        var to_return = new Date();
+        if (param.startsWith('20')) {
+                year = param.substring(0, 4);
+                month = param.substring(4, 6);
+                day = param.substring(6, 8);
+                hour = 0;
+                min = 0;
+                sec = 0;
+                if (param.length > 8) { hour = param.substring(8, 10); }
+                if (param.length > 10) { min = param.substring(10, 12); }
+                if (param.length > 12) { sec = param.substring(12, 14); }
+                to_return = new Date(year, month-1, day, hour, min, sec);
+        } else {
+                var pattern = /-([0-9]+)(year|month|week|day|hour|min|sec).*/i;
+                var match = param.match(pattern);
+                if (match != null) {
+                        if (match[2].includes('year')) {
+                                to_return.setFullYear(to_return.getFullYear() - match[1]);
+                        }
+                        if (match[2].includes('month')) {
+                                to_return.setMonth(to_return.getMonth() - match[1]);
+                        }
+                        if (match[2].includes('week')) {
+                                to_return.setDate(to_return.getDate() - match[1] * 7);
+                        }
+                        if (match[2].includes('day')) {
+                                to_return.setDate(to_return.getDate() - match[1]);
+                        }
+                        if (match[2].includes('hour')) {
+                                to_return.setHours(to_return.getHours() - match[1]);
+                        }
+                        if (match[2].includes('min')) {
+                                to_return.setMinutes(to_return.getMinutes() - match[1]);
+                        }
+                        if (match[2].includes('sec')) {
+                                to_return.setSeconds(to_return.getSeconds() - match[1]);
+                        }
+                }
+        }
+        return to_return;
+}
+

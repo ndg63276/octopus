@@ -1,0 +1,126 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Octopus Comparison</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+<script src="functions.js"></script>
+<script>
+var pagelink = location.origin+location.pathname;
+user_info = checklogin();
+var account_no = user_info["account_no"];
+var apikey = user_info["apikey"]
+if (account_no == "" || apikey == "") {
+	window.location.replace("index.html");
+};
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+
+var startdate = new Date();
+if (urlParams.has('start')) {
+	var start = urlParams.get('start');
+	startdate = parseDateParam(start)
+} else {
+	startdate.setDate(startdate.getDate() - 1);
+}
+
+var enddate = new Date();
+if (urlParams.has('end')) {
+	var end = urlParams.get('end');
+	enddate = parseDateParam(end)
+}
+
+if (startdate.getFullYear() === enddate.getFullYear() &&
+	startdate.getMonth() === startdate.getMonth() &&
+	startdate.getDate() === enddate.getDate()) {
+		var tooltipFormat="HH:mm:ss";
+} else {
+		var tooltipFormat="DD-MM-YY HH:mm:ss";
+}
+
+go_prices = {};
+var goDataPoints = [];
+for (i in go_prices) {
+	goDataPoints.push({x: go_prices[i]["date"], y: go_prices[i]["price"]});
+}
+agile_prices = {};
+var agileDataPoints = [];
+for (i in agile_prices) {
+	goDataPoints.push({x: agile_prices[i]["date"], y: agile_prices[i]["price"]});
+}
+consumption = {};
+var consumptionDataPoints = [];
+for (i in consumption) {
+	consumption.push({x: consumption[i]["date"], y: consumption[i]["price"]});
+}
+
+var dataSets = [];
+dataSets.push({pointStyle:'line', borderColor:'#ff0000', label:'Go Prices', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
+dataSets.push({pointStyle:'line', borderColor:'#00ff00', label:'Agile Prices', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
+dataSets.push({pointStyle:'line', borderColor:'#0000ff', label:'Consumption', fill:false, steppedLine:true, yAxisID:'right', data:consumptionDataPoints});
+
+var config = {
+	type: 'line',
+	data: { datasets: dataSets },
+	options: {
+		title: { display: false },
+		legend: {
+			display: true,
+			position: 'bottom',
+			labels: { fontSize: 18, usePointStyle: true }
+		},
+		scales: {
+			xAxes: [{
+				type: 'time',
+				time: { tooltipFormat: tooltipFormat },
+				display: true,
+				scaleLabel: { display: false }
+			}],
+			yAxes: [
+			{
+				id: 'left',
+				display: true,
+				position: 'left',
+				type: 'linear',
+				scaleLabel: { display: false }
+			},
+			{
+				id: 'right',
+				display: true,
+				position: 'right',
+				type: 'linear',
+				scaleLabel: { display: false }
+			}
+			]
+		}
+	}
+};
+
+window.onload = function() {
+	var ctx = document.getElementById('myChart').getContext('2d');
+	var myChart = new Chart(ctx, config);
+};
+
+</script>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+
+
+<canvas id="myChart" width="800" height="400"></canvas>
+
+<br /><br /><center><form>
+<input type='button' onClick='window.location.href=pagelink+"?start=-1hour&end=now";' value='Last 1 hour' style='font-size:20px;height:100px;width:200px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-12hours&end=now";' value='Last 12 hours' style='font-size:20px;height:100px;width:200px'>
+<input type='button' onClick='window.location.reload(true);' value='Refresh' style='font-size:20px;height:100px;width:200px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-24hours&end=now";' value='Last 24 hours' style='font-size:20px;height:100px;width:200px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:20px;height:100px;width:200px'>
+
+</form></center><br />
+</body>
+</html>
