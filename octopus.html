@@ -11,7 +11,7 @@
 <script src="functions.js"></script>
 <script>
 var pagelink = location.origin+location.pathname;
-user_info = checklogin();
+user_info = check_login();
 var account_no = user_info["account_no"];
 var apikey = user_info["apikey"]
 if (account_no == "" || apikey == "") {
@@ -56,7 +56,7 @@ for (i in agile_prices) {
 consumption = {};
 var consumptionDataPoints = [];
 for (i in consumption) {
-	consumption.push({x: consumption[i]["date"], y: consumption[i]["price"]});
+	consumption.push({x: consumption[i]["date"], y: consumption[i]["usage"]});
 }
 
 var dataSets = [];
