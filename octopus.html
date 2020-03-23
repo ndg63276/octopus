@@ -43,15 +43,16 @@ if (startdate.getFullYear() === enddate.getFullYear() &&
 		var tooltipFormat="DD-MM-YY HH:mm:ss";
 }
 
-go_prices = {};
+go_prices = get_unit_rates(user_info, go_code, startdate, enddate);
 var goDataPoints = [];
 for (i in go_prices) {
-	goDataPoints.push({x: go_prices[i]["date"], y: go_prices[i]["price"]});
+	goDataPoints.push({x: go_prices[i]["valid_from"], y: go_prices[i]["value_inc_vat"]});
 }
-agile_prices = {};
+
+agile_prices = get_unit_rates(user_info, agile_code, startdate, enddate);
 var agileDataPoints = [];
 for (i in agile_prices) {
-	goDataPoints.push({x: agile_prices[i]["date"], y: agile_prices[i]["price"]});
+	agileDataPoints.push({x: agile_prices[i]["valid_from"], y: agile_prices[i]["value_inc_vat"]});
 }
 consumption = {};
 var consumptionDataPoints = [];
