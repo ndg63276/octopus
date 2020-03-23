@@ -1,4 +1,6 @@
 const baseurl = 'https://api.octopus.energy/'
+const go_code = 'GO-4H-0030';
+const agile_code = 'AGILE-18-02-21';
 
 function getCookie(cname) {
 	var name = cname + "=";
@@ -29,21 +31,16 @@ function logged_in(address) {
 
 function do_login(account_no, apikey, storecreds) {
 	to_return = {};
-	$.ajax({
-		url: baseurl + "/v1/accounts/" + account_no,
-		type: 'GET',
-		headers: {"Authorization": "Basic " + btoa(apikey+":")},
-		dataType: 'json',
-		async: false,
-		success: function(json) {
-			to_return["address"] = json["properties"][0]["address_line_1"];
-			to_return["postcode"] = json["properties"][0]["postcode"];
-			if (storecreds == true) {
-				setCookie("account_no", account_no, 365);
-				setCookie("apikey", apikey, 365);
-			}
-		},
-	})
+	var url = baseurl + "/v1/accounts/" + account_no;
+	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
+	var j = ajax_get(url, headers)
+	to_return["address"] = j["properties"][0]["address_line_1"];
+	to_return["postcode"] = j["properties"][0]["postcode"];
+	to_return["headers"] = headers;
+	if (storecreds == true) {
+		setCookie("account_no", account_no, 365);
+		setCookie("apikey", apikey, 365);
+	}
 	return to_return;
 }
 
@@ -53,7 +50,7 @@ function login() {
 	var storecreds = document.getElementById("storecreds").checked;
 	var user_info = do_login(account_no, apikey, storecreds);
 	if ("address" in user_info) {
-		logged_in(address);
+		logged_in(user_info["address"]);
 	} else {
 		document.getElementById("loginstate").innerHTML = 'Login failed';
 	}
@@ -65,45 +62,33 @@ function check_login() {
 	var to_return = {};
 	if (account_no != "" && apikey != "") {
 		to_return = do_login(account_no, apikey, true);
+		to_return["account_no"] = account_no;
+		to_return["apikey"] = apikey;
+		to_return["gsp"] = get_gsp(to_return)
 	}
-	to_return["account_no"] = account_no;
-	to_return["apikey"] = apikey;
 	return to_return;
 }
 
-function get_gsp(apikey, postcode) {
-	to_return = "";
-	$.ajax({
-		url: baseurl + "/v1/industry/grid-supply-points/",
-		type: "GET",
-		headers: {"Authorization": "Basic " + btoa(apikey+":")},
-		data: {"postcode": postcode},
-		dataType: 'json',
-		async: false,
-		success: function(json) {
-			to_return = json["results"][0]["group_id"];
-		}
-	})
-	return to_return;
+function get_gsp(user_info) {
+	var url = baseurl + "/v1/industry/grid-supply-points/";
+	var headers = user_info["headers"];
+	var data = {"postcode": user_info["postcode"]};
+	var j = ajax_get(url, headers,data);
+	return j["results"][0]["group_id"];
 }
 
-function get_tariff_code(apikey, code, gsp) {
-	to_return = "";
-	$.ajax({
-		url: baseurl + "/v1/products/" + code,
-		type: "GET",
-		headers: {"Authorization": "Basic " + btoa(apikey+":")},
-		dataType: 'json',
-		async: false,
-		success: function(json) {
-			to_return = json["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"]
-		}
-	})
-	return to_return;
+function get_tariff_code(user_info, code) {
+	var url = baseurl + "/v1/products/" + code;
+	var headers = user_info["headers"];
+	var j = ajax_get(url, headers);
+	var gsp = user_info["gsp"];
+	return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
 }
 
-function get_unit_rates(apikey, code, gsp, startdate=null, enddate=null) {
-	var tariff_code = get_tariff_code(apikey, code, gsp);
+function get_unit_rates(user_info, code, startdate=null, enddate=null) {
+	var apikey = user_info["apikey"];
+	var tariff_code = get_tariff_code(user_info, code);
+	var headers = user_info["headers"]
 	var results = [];
 	var data = {};
 	if (startdate != null) {
@@ -112,12 +97,8 @@ function get_unit_rates(apikey, code, gsp, startdate=null, enddate=null) {
 			data["period_to"] = enddate.toISOString();
 		}
 	}
-	var url = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
-	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
-	var j = ajax_get(url, headers, data);
-	for (result in j["results"]) {
-		results.push(j["results"][result]);
-	}
+	var j = {};
+	j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 	while (j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
 		for (result in j["results"]) {
