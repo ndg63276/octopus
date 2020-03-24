@@ -108,6 +108,46 @@ function get_unit_rates(user_info, code, startdate=null, enddate=null) {
 	return results;
 }
 
+function get_30min_unit_rates(user_info, code, startdate, enddate) {
+	var rates = get_unit_rates(user_info, code, startdate, enddate);
+	var to_return = {};
+	var i = 1;
+	var d = new Date(startdate.getTime());
+	d.setHours(0, 0, 0, 0);
+	while (d < enddate) {
+		if (d > startdate) {
+			to_return[i] = {};
+			to_return[i]['date'] = d.toISOString();
+			for (rate in rates) {
+				if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
+					to_return[i]['rate'] = rates[rate]['value_inc_vat'];
+					break;
+				}
+			}
+			i += 1;
+		} else {
+			to_return[0] = {};
+			to_return[0]['date'] = d.toISOString();
+			for (rate in rates) {
+				if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
+					to_return[0]['rate'] = rates[rate]['value_inc_vat'];
+					break;
+				}
+			}
+		}
+		d.setMinutes(d.getMinutes() + 30);
+	}
+	to_return[i] = {};
+	to_return[i]['date'] = d.toISOString();
+	for (rate in rates) {
+		if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
+			to_return[i]['rate'] = rates[rate]['value_inc_vat'];
+			break;
+		}
+	}
+	return to_return;
+}
+
 function ajax_get(url, headers, data) {
 	var to_return = {};
 	$.ajax({
