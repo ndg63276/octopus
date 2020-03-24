@@ -117,6 +117,21 @@ function get_consumption(user_info, startdate, enddate) {
 	return results;
 }
 
+function get_standing_charges(user_info, code, startdate, enddate) {
+	var tariff_code = get_tariff_code(user_info, code);
+	var headers = user_info["headers"];
+	var data = {};
+	if (startdate != null) {
+		data["period_from"] = startdate.toISOString();
+		if (enddate != null) {
+			data["period_to"] = enddate.toISOString();
+		}
+	}
+	var url = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standing-charges/";
+	var j = ajax_get(url, headers, data);
+	return j["results"];
+}
+
 function get_unit_rates(user_info, code, startdate, enddate) {
 	var tariff_code = get_tariff_code(user_info, code);
 	var headers = user_info["headers"];
