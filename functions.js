@@ -1,13 +1,13 @@
-const baseurl = 'https://api.octopus.energy/'
-const go_code = 'GO-4H-0030';
-const agile_code = 'AGILE-18-02-21';
+var baseurl = "https://api.octopus.energy/"
+var go_code = "GO-4H-0030";
+var agile_code = "AGILE-18-02-21";
 
 function getCookie(cname) {
 	var name = cname + "=";
-	var ca = document.cookie.split(';');
+	var ca = document.cookie.split(";");
 	for(var i = 0; i < ca.length; i++) {
 		var c = ca[i];
-		while (c.charAt(0) == ' ') {
+		while (c.charAt(0) == " ") {
 			c = c.substring(1);
 		}
 		if (c.indexOf(name) == 0) {
@@ -15,6 +15,10 @@ function getCookie(cname) {
 		}
 	}
 	return "";
+}
+
+function last_element(arr) {
+	return arr[arr.length-1]
 }
 
 function setCookie(cname, cvalue, exdays) {
@@ -34,8 +38,13 @@ function do_login(account_no, apikey, storecreds) {
 	var url = baseurl + "/v1/accounts/" + account_no;
 	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
 	var j = ajax_get(url, headers)
-	to_return["address"] = j["properties"][0]["address_line_1"];
-	to_return["postcode"] = j["properties"][0]["postcode"];
+	var last_property = last_element(j["properties"])
+	to_return["address"] = last_property["address_line_1"];
+	to_return["postcode"] = last_property["postcode"];
+	var last_meter_point = last_element(last_property["electricity_meter_points"])
+	to_return["mpan"] = last_meter_point["mpan"]
+	var last_meter = last_element(last_meter_point["meters"])
+	to_return["serial"] = last_meter["serial_number"]
 	to_return["headers"] = headers;
 	if (storecreds == true) {
 		setCookie("account_no", account_no, 365);
@@ -52,7 +61,7 @@ function login() {
 	if ("address" in user_info) {
 		logged_in(user_info["address"]);
 	} else {
-		document.getElementById("loginstate").innerHTML = 'Login failed';
+		document.getElementById("loginstate").innerHTML = "Login failed";
 	}
 }
 
@@ -85,10 +94,32 @@ function get_tariff_code(user_info, code) {
 	return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
 }
 
-function get_unit_rates(user_info, code, startdate=null, enddate=null) {
-	var apikey = user_info["apikey"];
+function get_consumption(user_info, startdate, enddate) {
+	var headers = user_info["headers"];
+	var mpan = user_info["mpan"];
+	var serial = user_info["serial"];
+	var results = [];
+	var data = {};
+	if (startdate != null) {
+		data["period_from"] = startdate.toISOString();
+		if (enddate != null) {
+			data["period_to"] = enddate.toISOString();
+		}
+	}
+	var j = {};
+	j["next"] = baseurl+"/v1/electricity-meter-points/"+mpan+"/meters/"+serial+"/consumption/";
+	while (j["next"] != null) {
+		var j = ajax_get(j["next"], headers, data);
+		for (result in j["results"]) {
+			results.push(j["results"][result]);
+		}
+	}
+	return results;
+}
+
+function get_unit_rates(user_info, code, startdate, enddate) {
 	var tariff_code = get_tariff_code(user_info, code);
-	var headers = user_info["headers"]
+	var headers = user_info["headers"];
 	var results = [];
 	var data = {};
 	if (startdate != null) {
@@ -117,20 +148,20 @@ function get_30min_unit_rates(user_info, code, startdate, enddate) {
 	while (d < enddate) {
 		if (d > startdate) {
 			to_return[i] = {};
-			to_return[i]['date'] = d.toISOString();
+			to_return[i]["date"] = d.toISOString();
 			for (rate in rates) {
-				if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
-					to_return[i]['rate'] = rates[rate]['value_inc_vat'];
+				if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
+					to_return[i]["rate"] = rates[rate]["value_inc_vat"];
 					break;
 				}
 			}
 			i += 1;
 		} else {
 			to_return[0] = {};
-			to_return[0]['date'] = d.toISOString();
+			to_return[0]["date"] = d.toISOString();
 			for (rate in rates) {
-				if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
-					to_return[0]['rate'] = rates[rate]['value_inc_vat'];
+				if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
+					to_return[0]["rate"] = rates[rate]["value_inc_vat"];
 					break;
 				}
 			}
@@ -138,10 +169,10 @@ function get_30min_unit_rates(user_info, code, startdate, enddate) {
 		d.setMinutes(d.getMinutes() + 30);
 	}
 	to_return[i] = {};
-	to_return[i]['date'] = d.toISOString();
+	to_return[i]["date"] = d.toISOString();
 	for (rate in rates) {
-		if (Date.parse(rates[rate]['valid_from']) <= d && Date.parse(rates[rate]['valid_to']) > d) {
-			to_return[i]['rate'] = rates[rate]['value_inc_vat'];
+		if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
+			to_return[i]["rate"] = rates[rate]["value_inc_vat"];
 			break;
 		}
 	}
@@ -167,7 +198,7 @@ function ajax_get(url, headers, data) {
 
 function parseDateParam(param) {
 	var to_return = new Date();
-	if (param.startsWith('20')) {
+	if (param.startsWith("20")) {
 		year = param.substring(0, 4);
 		month = param.substring(4, 6);
 		day = param.substring(6, 8);
@@ -182,25 +213,25 @@ function parseDateParam(param) {
 		var pattern = /-([0-9]+)(year|month|week|day|hour|min|sec).*/i;
 		var match = param.match(pattern);
 		if (match != null) {
-			if (match[2].includes('year')) {
+			if (match[2].includes("year")) {
 				to_return.setFullYear(to_return.getFullYear() - match[1]);
 			}
-			if (match[2].includes('month')) {
+			if (match[2].includes("month")) {
 				to_return.setMonth(to_return.getMonth() - match[1]);
 			}
-			if (match[2].includes('week')) {
+			if (match[2].includes("week")) {
 				to_return.setDate(to_return.getDate() - match[1] * 7);
 			}
-			if (match[2].includes('day')) {
+			if (match[2].includes("day")) {
 				to_return.setDate(to_return.getDate() - match[1]);
 			}
-			if (match[2].includes('hour')) {
+			if (match[2].includes("hour")) {
 				to_return.setHours(to_return.getHours() - match[1]);
 			}
-			if (match[2].includes('min')) {
+			if (match[2].includes("min")) {
 				to_return.setMinutes(to_return.getMinutes() - match[1]);
 			}
-			if (match[2].includes('sec')) {
+			if (match[2].includes("sec")) {
 				to_return.setSeconds(to_return.getSeconds() - match[1]);
 			}
 		}

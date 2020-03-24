@@ -54,19 +54,19 @@ var agileDataPoints = [];
 for (i in agile_prices) {
 	agileDataPoints.push({x: agile_prices[i]["date"], y: agile_prices[i]["rate"]});
 }
-consumption = {};
+consumption = get_consumption(user_info, startdate, enddate);
 var consumptionDataPoints = [];
 for (i in consumption) {
-	consumption.push({x: consumption[i]["date"], y: consumption[i]["usage"]});
+	consumptionDataPoints.push({x: consumption[i]["interval_start"], y: consumption[i]["consumption"]});
 }
 
 var dataSets = [];
-dataSets.push({pointStyle:'line', borderColor:'#ff0000', label:'Go Prices', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
-dataSets.push({pointStyle:'line', borderColor:'#00ff00', label:'Agile Prices', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
-dataSets.push({pointStyle:'line', borderColor:'#0000ff', label:'Consumption', fill:false, steppedLine:true, yAxisID:'right', data:consumptionDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
+dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
 
 var config = {
-	type: 'line',
+	type: 'bar',
 	data: { datasets: dataSets },
 	options: {
 		title: { display: false },
@@ -88,14 +88,14 @@ var config = {
 				display: true,
 				position: 'left',
 				type: 'linear',
-				scaleLabel: { display: false }
+				scaleLabel: { display: true, labelString: 'Price (p/kWh)' }
 			},
 			{
 				id: 'right',
 				display: true,
 				position: 'right',
 				type: 'linear',
-				scaleLabel: { display: false }
+				scaleLabel: { display: true, labelString: 'Consumption (kWh)' }
 			}
 			]
 		}
