@@ -101,6 +101,10 @@ function get_costs(user_info, code, startdate, enddate, tariff_code) {
 	var consumption = get_consumption(user_info, startdate, enddate);
 	var standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
 	var unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	return get_costs_from_data(consumption, unit_rates, standing_charges)
+}
+
+function get_costs_from_data(consumption, unit_rates, standing_charges) {
 	var rate_cost = 0;
 	var charge_cost = 0;
 	for (period in consumption) {
