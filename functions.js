@@ -94,6 +94,39 @@ function get_tariff_code(user_info, code) {
 	return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
 }
 
+function get_costs(user_info, code, startdate, enddate, tariff_code) {
+	if (tariff_code == null) {
+		tariff_code = get_tariff_code(user_info, code);
+	}
+	var consumption = get_consumption(user_info, startdate, enddate);
+	var standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
+	var unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	var rate_cost = 0;
+	var charge_cost = 0;
+	for (period in consumption) {
+		period_start = Date.parse(consumption[period]["interval_start"]);
+		period_consumption = consumption[period]["consumption"];
+		for (rate in unit_rates) {
+			period_rate_start = Date.parse(unit_rates[rate]["date"])
+			if (period_rate_start == period_start) {
+				period_rate = unit_rates[rate]["rate"];
+				period_cost = period_rate * period_consumption;
+				rate_cost += period_cost
+			}
+		}
+		for (charge in standing_charges) {
+			charge_start = Date.parse(standing_charges[charge]["valid_from"]);
+			charge_end = Date.parse(standing_charges[charge]["valid_to"]);
+			if (charge_start <= period_start && (charge_end > period_start || isNaN(charge_end))) {
+				// assume each period is 30 mins
+				period_cost = standing_charges[charge]["value_inc_vat"] / 48;
+				charge_cost += period_cost;
+			}
+		}
+	}
+	return rate_cost + charge_cost;
+}
+
 function get_consumption(user_info, startdate, enddate) {
 	var headers = user_info["headers"];
 	var mpan = user_info["mpan"];
@@ -117,8 +150,10 @@ function get_consumption(user_info, startdate, enddate) {
 	return results;
 }
 
-function get_standing_charges(user_info, code, startdate, enddate) {
-	var tariff_code = get_tariff_code(user_info, code);
+function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
+	if (tariff_code == null) {
+		tariff_code = get_tariff_code(user_info, code);
+	}
 	var headers = user_info["headers"];
 	var data = {};
 	if (startdate != null) {
@@ -132,8 +167,10 @@ function get_standing_charges(user_info, code, startdate, enddate) {
 	return j["results"];
 }
 
-function get_unit_rates(user_info, code, startdate, enddate) {
-	var tariff_code = get_tariff_code(user_info, code);
+function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
+	if (tariff_code == null) {
+		tariff_code = get_tariff_code(user_info, code);
+	}
 	var headers = user_info["headers"];
 	var results = [];
 	var data = {};
@@ -154,8 +191,8 @@ function get_unit_rates(user_info, code, startdate, enddate) {
 	return results;
 }
 
-function get_30min_unit_rates(user_info, code, startdate, enddate) {
-	var rates = get_unit_rates(user_info, code, startdate, enddate);
+function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
+	var rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	var to_return = {};
 	var i = 1;
 	var d = new Date(startdate.getTime());
@@ -182,14 +219,6 @@ function get_30min_unit_rates(user_info, code, startdate, enddate) {
 			}
 		}
 		d.setMinutes(d.getMinutes() + 30);
-	}
-	to_return[i] = {};
-	to_return[i]["date"] = d.toISOString();
-	for (rate in rates) {
-		if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
-			to_return[i]["rate"] = rates[rate]["value_inc_vat"];
-			break;
-		}
 	}
 	return to_return;
 }

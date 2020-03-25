@@ -33,6 +33,8 @@ var enddate = new Date();
 if (urlParams.has('end')) {
 	var end = urlParams.get('end');
 	enddate = parseDateParam(end)
+	// subtract 1 second so as not to get the next period of data
+	enddate.setSeconds(enddate.getSeconds()-1)
 }
 
 if (startdate.getFullYear() === enddate.getFullYear() &&
@@ -43,13 +45,15 @@ if (startdate.getFullYear() === enddate.getFullYear() &&
 		var tooltipFormat="DD-MM-YY HH:mm:ss";
 }
 
-go_prices = get_30min_unit_rates(user_info, go_code, startdate, enddate);
+go_tariff_code = get_tariff_code(user_info, go_code)
+go_prices = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
 var goDataPoints = [];
 for (i in go_prices) {
 	goDataPoints.push({x: go_prices[i]["date"], y: go_prices[i]["rate"]});
 }
 
-agile_prices = get_30min_unit_rates(user_info, agile_code, startdate, enddate);
+agile_tariff_code = get_tariff_code(user_info, agile_code)
+agile_prices = get_30min_unit_rates(user_info, agile_code, startdate, enddate, agile_tariff_code);
 var agileDataPoints = [];
 for (i in agile_prices) {
 	agileDataPoints.push({x: agile_prices[i]["date"], y: agile_prices[i]["rate"]});
