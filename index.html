@@ -11,9 +11,7 @@
 
 window.onload = function() {
 	user_info = check_login();
-	var account_no = user_info["account_no"];
-	var apikey = user_info["apikey"];
-	if (apikey != "") {
+	if ("apikey" in user_info && user_info["apikey"] != "" && user_info["apikey"] != null) {
 		var address = user_info["address"];
 		logged_in(address);
 	} else {
