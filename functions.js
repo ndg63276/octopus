@@ -2,6 +2,10 @@ var baseurl = "https://api.octopus.energy/"
 var go_code = "GO-4H-0030";
 var agile_code = "AGILE-18-02-21";
 
+function last_element(arr) {
+	return arr[arr.length-1]
+}
+
 function getCookie(cname) {
 	var name = cname + "=";
 	var ca = document.cookie.split(";");
@@ -17,13 +21,9 @@ function getCookie(cname) {
 	return "";
 }
 
-function last_element(arr) {
-	return arr[arr.length-1]
-}
-
-function setCookie(cname, cvalue, exdays) {
+function setCookie(cname, cvalue, exhours) {
 	var d = new Date();
-	d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+	d.setTime(d.getTime() + (exhours * 60 * 60 * 1000));
 	var expires = "expires="+d.toUTCString();
 	document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 }
@@ -47,8 +47,11 @@ function do_login(account_no, apikey, storecreds) {
 	to_return["serial"] = last_meter["serial_number"]
 	to_return["headers"] = headers;
 	if (storecreds == true) {
-		setCookie("account_no", account_no, 365);
-		setCookie("apikey", apikey, 365);
+		setCookie("account_no", account_no, 365*24);
+		setCookie("apikey", apikey, 365*24);
+	} else {
+		setCookie("account_no", account_no, 1);
+		setCookie("apikey", apikey, 1);
 	}
 	return to_return;
 }
