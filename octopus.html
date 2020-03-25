@@ -73,7 +73,12 @@ agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_
 var dataSets = [];
 dataSets.push({type: 'line', pointStyle:'line', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
 dataSets.push({type: 'line', pointStyle:'line', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
-dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
+if (consumptionDataPoints.length > 0) {
+	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
+	rightAxis = true;
+} else {
+	rightAxis = false;
+}
 
 var config = {
 	type: 'bar',
@@ -102,7 +107,7 @@ var config = {
 			},
 			{
 				id: 'right',
-				display: true,
+				display: rightAxis,
 				position: 'right',
 				type: 'linear',
 				scaleLabel: { display: true, labelString: 'Consumption (kWh)' }
