@@ -56,7 +56,7 @@ function do_login(account_no, apikey, storecreds) {
 	if (storecreds == true) {
 		setCookie("account_no", account_no, 365*24);
 		setCookie("apikey", apikey, 365*24);
-	} else {
+	} else if (storecreds == false) {
 		setCookie("account_no", account_no, 1);
 		setCookie("apikey", apikey, 1);
 	}
@@ -80,7 +80,7 @@ function check_login() {
 	var apikey = getCookie("apikey");
 	var to_return = {};
 	if (account_no != "" && apikey != "") {
-		to_return = do_login(account_no, apikey, true);
+		to_return = do_login(account_no, apikey);
 		to_return["account_no"] = account_no;
 		to_return["apikey"] = apikey;
 		to_return["gsp"] = get_gsp(to_return)
