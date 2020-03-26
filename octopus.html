@@ -58,9 +58,11 @@ for (i in agile_unit_rates) {
 agile_standing_charges = get_standing_charges(user_info, agile_code, startdate, enddate, agile_tariff_code);
 
 consumption = get_consumption(user_info, startdate, enddate);
+sortByKey(consumption, "interval_start");
 var consumptionDataPoints = [];
 for (i in consumption) {
-	consumptionDataPoints.push({x: consumption[i]["interval_start"], y: consumption[i]["consumption"]});
+	var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+	consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
 }
 
 go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges)
@@ -81,6 +83,25 @@ var config = {
 	data: { datasets: dataSets },
 	options: {
 		title: { display: false },
+		tooltips: {
+			mode: 'index',
+			position: 'nearest',
+			callbacks: {
+				footer: function(tooltipItems, data) {
+					var go_cost = 0;
+					var agile_cost = 0;
+					tooltipItems.forEach(function(tooltipItem) {
+						if (tooltipItem.datasetIndex == 0) {
+							go_cost = tooltipItem.value * data.datasets[2].data[tooltipItem.index].y;
+						} else if (tooltipItem.datasetIndex == 1) {
+							agile_cost = tooltipItem.value * data.datasets[2].data[tooltipItem.index].y;
+						}
+					});
+					return 'Go cost: ' + go_cost.toFixed(2) + 'p\nAgile cost: ' + agile_cost.toFixed(2) + 'p';
+				},
+			},
+			footerFontStyle: 'normal'
+		},
 		legend: {
 			display: true,
 			position: 'bottom',

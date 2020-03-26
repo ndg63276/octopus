@@ -6,6 +6,13 @@ function last_element(arr) {
 	return arr[arr.length-1]
 }
 
+function sortByKey(array, key) {
+    return array.sort(function(a, b) {
+        var x = a[key]; var y = b[key];
+        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+    });
+}
+
 function getCookie(cname) {
 	var name = cname + "=";
 	var ca = document.cookie.split(";");
