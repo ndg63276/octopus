@@ -255,7 +255,7 @@ function ajax_get(url, headers, data) {
 function future_prices() {
 	var pagelink = location.origin+location.pathname;
 	var end = new Date();
-	if (end.getHours() > 16) {
+	if (end.getHours() >= 16) {
 		end.setDate(end.getDate()+1);
 		end.setHours(23, 0, 0, 0);
 	} else {
