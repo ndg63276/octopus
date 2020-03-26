@@ -261,13 +261,13 @@ function parseDateParam(param) {
 		if (param.length > 12) { sec = param.substring(12, 14); }
 		to_return = new Date(year, month-1, day, hour, min, sec);
 	} else {
-		var pattern = /([+-])([0-9]+)(year|month|week|day|hour|min|sec).*/i;
+		var pattern = /([+ -])([0-9]+)(year|month|week|day|hour|min|sec).*/i;
 		var match = param.match(pattern);
 		if (match != null) {
-			if (match[1] == "+") {
-				plusminus = 1
-			} else {
+			if (match[1] == "-") {
 				plusminus = -1
+			} else {
+				plusminus = 1
 			}
 			if (match[3].includes("year")) {
 				to_return.setFullYear(to_return.getFullYear() + plusminus * match[2]);
