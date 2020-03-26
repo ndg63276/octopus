@@ -41,14 +41,6 @@ if (urlParams.has('end')) {
 // subtract 1 second so as not to get the next period of data
 enddate.setSeconds(enddate.getSeconds()-1)
 
-if (startdate.getFullYear() === enddate.getFullYear() &&
-	startdate.getMonth() === startdate.getMonth() &&
-	startdate.getDate() === enddate.getDate()) {
-		var tooltipFormat="HH:mm:ss";
-} else {
-		var tooltipFormat="DD-MM-YY HH:mm:ss";
-}
-
 go_tariff_code = get_tariff_code(user_info, go_code)
 go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
 var goDataPoints = [];
@@ -97,7 +89,7 @@ var config = {
 		scales: {
 			xAxes: [{
 				type: 'time',
-				time: { tooltipFormat: tooltipFormat },
+				time: { tooltipFormat: "DD-MM-YY HH:mm:ss" },
 				display: true,
 				scaleLabel: { display: false }
 			}],
@@ -128,23 +120,6 @@ window.onload = function() {
 	document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
 };
 
-</script>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-</head>
-<body>
-<table class="w3-table-all w3-centered"><thead><tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td></tr></thead>
-<tr><td>Go</td><td id="go_price"></td></tr>
-<tr><td>Agile</td><td id="agile_price"></td></tr></table>
-<br /><br />
-
-<canvas id="myChart" width="800" height="400"></canvas>
-
-<br /><br />
-<center>
-<input size=32 type="text" name="datetimes" />
-
-<script>
 $(function() {
 	$('input[name="datetimes"]').daterangepicker({
 		timePicker: true,
@@ -160,9 +135,26 @@ $(function() {
 		window.location.href = pagelink+"?start="+start.format('YYYY-MM-DDTHH:mm:ss')+"&end="+end.format('YYYY-MM-DDTHH:mm:ss');
 	});
 });
+
 </script>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+</head>
+<body>
+<br />
+<center>
+<input size=32 type="text" name="datetimes" />
+</center>
+<br />
+<table class="w3-table-all w3-centered"><thead><tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td></tr></thead>
+<tr><td>Go</td><td id="go_price"></td></tr>
+<tr><td>Agile</td><td id="agile_price"></td></tr></table>
+<br /><br />
+
+<canvas id="myChart" width="800" height="300"></canvas>
 
 <br /><br />
+<center>
 
 <input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:100px'>
 <input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:100px'>
