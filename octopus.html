@@ -5,16 +5,17 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>Octopus Comparison</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.24.0/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script src="functions.js"></script>
 <script>
 var pagelink = location.origin+location.pathname;
 user_info = check_login();
 var account_no = user_info["account_no"];
 var apikey = user_info["apikey"]
-if (account_no == "" || apikey == "") {
+if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
 	window.location.replace("index.html");
 };
 
@@ -26,16 +27,19 @@ if (urlParams.has('start')) {
 	var start = urlParams.get('start');
 	startdate = parseDateParam(start)
 } else {
-	startdate.setDate(startdate.getDate() - 1);
+	startdate.setDate(startdate.getDate() - 2);
+	startdate.setHours(0, 0, 0, 0);
 }
 
-var enddate = new Date();
+var enddate = new Date(startdate);
 if (urlParams.has('end')) {
 	var end = urlParams.get('end');
 	enddate = parseDateParam(end)
-	// subtract 1 second so as not to get the next period of data
-	enddate.setSeconds(enddate.getSeconds()-1)
+} else {
+	enddate.setDate(enddate.getDate() + 1);
 }
+// subtract 1 second so as not to get the next period of data
+enddate.setSeconds(enddate.getSeconds()-1)
 
 if (startdate.getFullYear() === enddate.getFullYear() &&
 	startdate.getMonth() === startdate.getMonth() &&
@@ -126,6 +130,7 @@ window.onload = function() {
 
 </script>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 </head>
 <body>
 <table class="w3-table-all w3-centered"><thead><tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td></tr></thead>
@@ -135,13 +140,34 @@ window.onload = function() {
 
 <canvas id="myChart" width="800" height="400"></canvas>
 
-<br /><br /><center><form>
-<input type='button' onClick='window.location.href=pagelink+"?start=-1hour&end=now";' value='Last 1 hour' style='font-size:20px;height:100px;width:200px'>
-<input type='button' onClick='window.location.href=pagelink+"?start=-12hours&end=now";' value='Last 12 hours' style='font-size:20px;height:100px;width:200px'>
-<input type='button' onClick='window.location.reload(true);' value='Refresh' style='font-size:20px;height:100px;width:200px'>
-<input type='button' onClick='window.location.href=pagelink+"?start=-24hours&end=now";' value='Last 24 hours' style='font-size:20px;height:100px;width:200px'>
-<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:20px;height:100px;width:200px'>
+<br /><br />
+<center>
+<input size=32 type="text" name="datetimes" />
 
-</form></center><br />
+<script>
+$(function() {
+	$('input[name="datetimes"]').daterangepicker({
+		timePicker: true,
+		timePicker24Hour: true,
+		timePickerSeconds: true,
+		startDate: moment(startdate),
+		endDate: moment(enddate),
+		maxDate: moment().endOf('day').add(2, 'day'),
+		locale: {
+			format: ' DD/MM/YYYY HH:mm:ss'
+		}
+	}, function(start, end, label) {
+		window.location.href = pagelink+"?start="+start.format('YYYY-MM-DDTHH:mm:ss')+"&end="+end.format('YYYY-MM-DDTHH:mm:ss');
+	});
+});
+</script>
+
+<br /><br />
+
+<input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:100px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:100px'>
+<input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:100px'>
+
+</center><br />
 </body>
 </html>

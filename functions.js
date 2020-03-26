@@ -246,19 +246,29 @@ function ajax_get(url, headers, data) {
 	return to_return;
 }
 
+function future_prices() {
+	var pagelink = location.origin+location.pathname;
+	var end = new Date();
+	if (end.getHours() > 16) {
+		end.setDate(end.getDate()+1);
+		end.setHours(23, 0, 0, 0);
+	} else {
+		end.setHours(23, 0, 0, 0);
+	}
+	window.location.href=pagelink+"?start=now&end="+end.toISOString();
+}
 
 function parseDateParam(param) {
 	var to_return = new Date();
 	if (param.startsWith("20")) {
-		year = param.substring(0, 4);
-		month = param.substring(4, 6);
-		day = param.substring(6, 8);
-		hour = 0;
-		min = 0;
-		sec = 0;
-		if (param.length > 8) { hour = param.substring(8, 10); }
-		if (param.length > 10) { min = param.substring(10, 12); }
-		if (param.length > 12) { sec = param.substring(12, 14); }
+		var pattern = /([0-9]{4})-?([0-9]{2})-?([0-9]{2})T?([0-9]{2})?:?([0-9]{2})?:?([0-9]{2})?.*/;
+		var match = param.match(pattern);
+		year = match[1];
+		month = match[2];
+		day = match[3];
+		if (match[4] == null) { hour = 0; } else { hour = match[4]; }
+		if (match[5] == null) { min = 0; } else { min = match[5]; }
+		if (match[6] == null) { sec = 0; } else { sec = match[6]; }
 		to_return = new Date(year, month-1, day, hour, min, sec);
 	} else {
 		var pattern = /([+ -])([0-9]+)(year|month|week|day|hour|min|sec).*/i;
