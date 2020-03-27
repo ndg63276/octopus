@@ -96,16 +96,22 @@ var config = {
 			position: 'nearest',
 			callbacks: {
 				footer: function(tooltipItems, data) {
-					var go_cost = 0;
-					var agile_cost = 0;
-					tooltipItems.forEach(function(tooltipItem) {
-						if (tooltipItem.datasetIndex == 0) {
-							go_cost = tooltipItem.value * data.datasets[2].data[tooltipItem.index].y;
-						} else if (tooltipItem.datasetIndex == 1) {
-							agile_cost = tooltipItem.value * data.datasets[2].data[tooltipItem.index].y;
-						}
-					});
-					return 'Go cost: ' + go_cost.toFixed(2) + 'p\nAgile cost: ' + agile_cost.toFixed(2) + 'p';
+					var index = tooltipItems[0].index;
+					if (data.datasets[2] != null && data.datasets[2].data[index] != null) {
+						var go_cost = 0;
+						var agile_cost = 0;
+						tooltipItems.forEach(function(tooltipItem) {
+							if (tooltipItem.datasetIndex == 0) {
+								go_cost = tooltipItem.value * data.datasets[2].data[index].y;
+							} else if (tooltipItem.datasetIndex == 1) {
+								agile_cost = tooltipItem.value * data.datasets[2].data[index].y;
+							}
+						});
+						to_return = '';
+						if (go_cost > 0) { to_return += 'Go cost: ' + go_cost.toFixed(2) + 'p\n'; }
+						if (agile_cost > 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p'; }
+						return to_return;
+					}
 				},
 			},
 			footerFontStyle: 'normal'
