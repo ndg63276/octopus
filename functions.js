@@ -101,7 +101,11 @@ function get_tariff_code(user_info, code) {
 	var headers = user_info["headers"];
 	var j = ajax_get(url, headers);
 	var gsp = user_info["gsp"];
-	return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
+	if ("single_register_electricity_tariffs" in j) {
+		return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
+	} else {
+		return null;
+	}
 }
 
 function get_costs(user_info, code, startdate, enddate, tariff_code) {
@@ -247,6 +251,9 @@ function ajax_get(url, headers, data) {
 		async: false,
 		success: function(json) {
 			to_return = json;
+		},
+		error: function() {
+			to_return = {};
 		}
 	})
 	return to_return;

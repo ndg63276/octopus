@@ -41,32 +41,40 @@ if (urlParams.has('end')) {
 // subtract 1 second so as not to get the next period of data
 enddate.setSeconds(enddate.getSeconds()-1)
 
-go_tariff_code = get_tariff_code(user_info, go_code)
-go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
 var goDataPoints = [];
-for (i in go_unit_rates) {
-	goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
-}
-go_standing_charges = get_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
-
-agile_tariff_code = get_tariff_code(user_info, agile_code)
-agile_unit_rates = get_30min_unit_rates(user_info, agile_code, startdate, enddate, agile_tariff_code);
 var agileDataPoints = [];
-for (i in agile_unit_rates) {
-	agileDataPoints.push({x: agile_unit_rates[i]["date"], y: agile_unit_rates[i]["rate"]});
-}
-agile_standing_charges = get_standing_charges(user_info, agile_code, startdate, enddate, agile_tariff_code);
+var consumptionDataPoints = [];
 
 consumption = get_consumption(user_info, startdate, enddate);
-sortByKey(consumption, "interval_start");
-var consumptionDataPoints = [];
-for (i in consumption) {
-	var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
-	consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+if (consumption.length > 0) {
+	sortByKey(consumption, "interval_start");
+	for (i in consumption) {
+		var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+		consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+	}
 }
 
-go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges)
-agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges)
+var go_costs = "null";
+go_tariff_code = get_tariff_code(user_info, go_code)
+if (go_tariff_code != null) {
+	go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
+	for (i in go_unit_rates) {
+		goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
+	}
+	go_standing_charges = get_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
+	go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
+}
+
+var agile_costs = "null";
+agile_tariff_code = get_tariff_code(user_info, agile_code)
+if (agile_tariff_code != null) {
+	agile_unit_rates = get_30min_unit_rates(user_info, agile_code, startdate, enddate, agile_tariff_code);
+	for (i in agile_unit_rates) {
+		agileDataPoints.push({x: agile_unit_rates[i]["date"], y: agile_unit_rates[i]["rate"]});
+	}
+	agile_standing_charges = get_standing_charges(user_info, agile_code, startdate, enddate, agile_tariff_code);
+	agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges);
+}
 
 var dataSets = [];
 dataSets.push({type: 'line', pointStyle:'line', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
