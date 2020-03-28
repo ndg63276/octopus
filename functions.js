@@ -104,7 +104,7 @@ function get_tariff_code(user_info, code) {
 	if ("single_register_electricity_tariffs" in j) {
 		return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
 	} else {
-		return null;
+		return "E-1R-" + code + "-" + user_info["gsp"].slice(1)
 	}
 }
 
@@ -316,5 +316,44 @@ function parseDateParam(param) {
 		}
 	}
 	return to_return;
+}
+
+function get_carbon_intensity(startdate, enddate) {
+	var to_return = [];
+	var url = 'https://api.carbonintensity.org.uk/intensity/';
+	var s = new Date(startdate);
+	s.setSeconds(s.getSeconds()+1)
+	var e = new Date(enddate)
+	e.setSeconds(e.getSeconds()+1)
+	url += s.toISOString() + '/' + e.toISOString();
+	var j = ajax_get(url);
+	for (i in j["data"]) {
+		var this_date = new Date(j["data"][i]["from"]);
+		if (this_date < startdate) { continue; }
+		if ("actual" in j["data"][i]["intensity"] && j["data"][i]["intensity"]["actual"] != null) {
+			var this_intensity = j["data"][i]["intensity"]["actual"];
+		} else {
+			var this_intensity = j["data"][i]["intensity"]["forecast"];
+		}
+		to_return.push({"date": this_date.toISOString(), "intensity": this_intensity})
+	}
+	return to_return;
+}
+
+function get_carbon_from_data(consumption, carbon_intensity) {
+	var carbon = 0;
+	for (period in consumption) {
+		period_start = Date.parse(consumption[period]["interval_start"]);
+		period_consumption = consumption[period]["consumption"];
+		for (rate in carbon_intensity) {
+			period_rate_start = Date.parse(carbon_intensity[rate]["date"])
+			if (period_rate_start == period_start) {
+				period_rate = carbon_intensity[rate]["intensity"];
+				period_carbon = period_rate * period_consumption;
+				carbon += period_carbon;
+			}
+		}
+	}
+	return carbon;
 }
 

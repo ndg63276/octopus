@@ -39,7 +39,9 @@ if (urlParams.has('end')) {
 	enddate.setDate(enddate.getDate() + 1);
 }
 // subtract 1 second so as not to get the next period of data
-enddate.setSeconds(enddate.getSeconds()-1)
+if (enddate.getSeconds() == 0) {
+	enddate.setSeconds(enddate.getSeconds()-1)
+}
 
 var goDataPoints = [];
 var agileDataPoints = [];
@@ -76,9 +78,17 @@ if (agile_tariff_code != null) {
 	agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges);
 }
 
+var carbon_intensity = get_carbon_intensity(startdate, enddate);
+var intensityDataPoints = [];
+for (i in carbon_intensity) {
+	intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
+}
+carbon = get_carbon_from_data(consumption, carbon_intensity);
+
 var dataSets = [];
-dataSets.push({type: 'line', pointStyle:'line', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
-dataSets.push({type: 'line', pointStyle:'line', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: true});
 if (consumptionDataPoints.length > 0) {
 	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
 	rightAxis = true;
@@ -97,14 +107,14 @@ var config = {
 			callbacks: {
 				footer: function(tooltipItems, data) {
 					var index = tooltipItems[0].index;
-					if (data.datasets[2] != null && data.datasets[2].data[index] != null) {
+					if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
 						var go_cost = 0;
 						var agile_cost = 0;
 						tooltipItems.forEach(function(tooltipItem) {
 							if (tooltipItem.datasetIndex == 0) {
-								go_cost = tooltipItem.value * data.datasets[2].data[index].y;
+								go_cost = tooltipItem.value * data.datasets[3].data[index].y;
 							} else if (tooltipItem.datasetIndex == 1) {
-								agile_cost = tooltipItem.value * data.datasets[2].data[index].y;
+								agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
 							}
 						});
 						to_return = '';
@@ -137,6 +147,13 @@ var config = {
 				scaleLabel: { display: true, labelString: 'Price (p/kWh)' }
 			},
 			{
+				id: 'right2',
+				display: true,
+				position: 'right',
+				type: 'linear',
+				scaleLabel: { display: true, labelString: 'Carbon Intensity (gCO2/kWh)' }
+			},
+			{
 				id: 'right',
 				display: rightAxis,
 				position: 'right',
@@ -153,6 +170,8 @@ window.onload = function() {
 	var myChart = new Chart(ctx, config);
 	document.getElementById('go_price').innerHTML = "£"+(go_costs/100).toFixed(2);
 	document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
+	document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
+	document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
 };
 
 $(function() {
@@ -178,12 +197,13 @@ $(function() {
 <body>
 <br />
 <center>
-<input size=32 type="text" name="datetimes" />
+<input style="text-align:center;" size=50 type="text" name="datetimes" />
 </center>
 <br />
-<table class="w3-table-all w3-centered"><thead><tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td></tr></thead>
-<tr><td>Go</td><td id="go_price"></td></tr>
-<tr><td>Agile</td><td id="agile_price"></td></tr></table>
+<table class="w3-table-all w3-centered"><thead>
+<tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td><td><b>Your Carbon Footprint</b></td></tr></thead>
+<tr><td>Go</td><td id="go_price"></td><td id="carbon1"></td></tr>
+<tr><td>Agile</td><td id="agile_price"></td><td id="carbon2"></td></tr></table>
 <br /><br />
 
 <canvas id="myChart" width="800" height="300"></canvas>
