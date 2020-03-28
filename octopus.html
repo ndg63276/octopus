@@ -110,16 +110,20 @@ var config = {
 					if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
 						var go_cost = 0;
 						var agile_cost = 0;
+						var footprint = 0;
 						tooltipItems.forEach(function(tooltipItem) {
 							if (tooltipItem.datasetIndex == 0) {
 								go_cost = tooltipItem.value * data.datasets[3].data[index].y;
 							} else if (tooltipItem.datasetIndex == 1) {
 								agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
+							} else if (tooltipItem.datasetIndex == 2) {
+								footprint = tooltipItem.value * data.datasets[3].data[index].y;
 							}
 						});
 						to_return = '';
 						if (go_cost > 0) { to_return += 'Go cost: ' + go_cost.toFixed(2) + 'p\n'; }
-						if (agile_cost > 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p'; }
+						if (agile_cost > 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p\n'; }
+						if (footprint > 0) { to_return += 'Carbon footprint: ' + footprint.toFixed(1) + 'g'; }
 						return to_return;
 					}
 				},
