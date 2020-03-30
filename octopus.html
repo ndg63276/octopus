@@ -60,12 +60,15 @@ var go_costs = "null";
 go_tariff_code = get_tariff_code(user_info, go_code)
 if (go_tariff_code != null) {
 	go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
-	for (i in go_unit_rates) {
-		goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
-	}
 	go_standing_charges = get_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
-	go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
+} else {
+	go_unit_rates = get_go_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
+	go_standing_charges = get_go_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
 }
+for (i in go_unit_rates) {
+	goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
+}
+go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
 
 var agile_costs = "null";
 agile_tariff_code = get_tariff_code(user_info, agile_code)
