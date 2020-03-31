@@ -124,9 +124,9 @@ var config = {
 							}
 						});
 						to_return = '';
-						if (go_cost > 0) { to_return += 'Go cost: ' + go_cost.toFixed(2) + 'p\n'; }
-						if (agile_cost > 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p\n'; }
-						if (footprint > 0) { to_return += 'Carbon footprint: ' + footprint.toFixed(1) + 'g'; }
+						if (go_cost != 0) { to_return += 'Go cost: ' + go_cost.toFixed(2) + 'p\n'; }
+						if (agile_cost != 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p\n'; }
+						if (footprint != 0) { to_return += 'Carbon footprint: ' + footprint.toFixed(1) + 'g'; }
 						return to_return;
 					}
 				},
