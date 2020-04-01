@@ -61,14 +61,11 @@ go_tariff_code = get_tariff_code(user_info, go_code)
 if (go_tariff_code != null) {
 	go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
 	go_standing_charges = get_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
-} else {
-	go_unit_rates = get_go_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
-	go_standing_charges = get_go_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
+	for (i in go_unit_rates) {
+		goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
+	}
+	go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
 }
-for (i in go_unit_rates) {
-	goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
-}
-go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
 
 var agile_costs = "null";
 agile_tariff_code = get_tariff_code(user_info, agile_code)
@@ -90,7 +87,7 @@ carbon = get_carbon_from_data(consumption, carbon_intensity);
 
 var dataSets = [];
 dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
-dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:true, yAxisID:'left', data:agileDataPoints});
+dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints});
 dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: true});
 if (consumptionDataPoints.length > 0) {
 	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
@@ -143,7 +140,8 @@ var config = {
 				type: 'time',
 				time: { tooltipFormat: "DD-MM-YY HH:mm:ss" },
 				display: true,
-				scaleLabel: { display: false }
+				scaleLabel: { display: false },
+				offset: true
 			}],
 			yAxes: [
 			{

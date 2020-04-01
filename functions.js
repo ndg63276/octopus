@@ -168,10 +168,6 @@ function get_consumption(user_info, startdate, enddate) {
 	return results;
 }
 
-function get_go_standing_charges(user_info, code, startdate, enddate, tariff_code) {
-	return [{"valid_from": "2020-01-01T00:00:00Z", "value_inc_vat": 25.0005}]
-}
-
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
 	if (tariff_code == null) {
 		tariff_code = get_tariff_code(user_info, code);
@@ -212,39 +208,6 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	}
 	return results;
 }
-
-function get_go_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
-	var to_return = [];
-	var d = new Date(startdate.getTime());
-	d.setHours(0, 0, 0, 0);
-	while (d < enddate) {
-		var d2 = new Date(d.getTime());
-		d2.setHours(0, 30, 0, 0);
-		var d3 = new Date(d.getTime());
-		d3.setHours(4, 30, 0, 0);
-		if (d > startdate) {
-			this_rate = {};
-			this_rate["date"] = d.toISOString();
-			if (d >= d2 && d < d3) {
-				this_rate["rate"] = 4.998;
-			} else {
-				this_rate["rate"] = 13.797;
-			}
-			to_return.push(this_rate);
-		} else {
-			to_return = [{}];
-			to_return[0]["date"] = d.toISOString();
-			if (d >= d2 && d < d3) {
-				to_return[0]["rate"] = 4.998;
-			} else {
-				to_return[0]["rate"] = 13.797;
-			}
-		}
-		d.setMinutes(d.getMinutes() + 30);
-	}
-	return to_return;
-}
-
 
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	var rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
@@ -301,9 +264,9 @@ function future_prices() {
 	var end = new Date();
 	if (end.getHours() >= 16) {
 		end.setDate(end.getDate()+1);
-		end.setHours(23, 0, 0, 0);
+		end.setUTCHours(23, 0, 0, 0);
 	} else {
-		end.setHours(23, 0, 0, 0);
+		end.setUTCHours(23, 0, 0, 0);
 	}
 	window.location.href=pagelink+"?start=now&end="+end.toISOString();
 }
