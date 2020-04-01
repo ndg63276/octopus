@@ -10,6 +10,9 @@ from pytz import timezone
 baseurl = 'https://api.octopus.energy/'
 qcurl = 'https://quickchart.io/chart'
 agile_code = 'AGILE-18-02-21'
+dir = os.path.dirname(os.path.realpath(__file__))+'/../images/'
+if not os.path.exists(dir):
+	os.mkdir(dir)
 
 def create_config(dataSets, startdate):
 	timeStr = startdate.strftime('%A %-d %B %Y')
@@ -120,9 +123,7 @@ if __name__ == '__main__':
 		datasets = create_datasets(gsp, agileDataPoints)
 		config = create_config(datasets, startdate)
 		r = do_post(config)
-		if not os.path.exists('images'):
-			os.mkdir('images')
-		with open('images/'+gsp+'.png', 'wb') as f:
+		with open(dir+gsp+'.png', 'wb') as f:
 			f.write(r.content)
 	av_rates = []
 	for dp in rates['P']:
@@ -138,6 +139,5 @@ if __name__ == '__main__':
 	datasets = create_datasets('average', agileDataPoints)
 	config = create_config(datasets, startdate)
 	r = do_post(config)
-	with open('images/average.png', 'wb') as f:
+	with open(dir+'average.png', 'wb') as f:
 		f.write(r.content)
-	
