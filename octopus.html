@@ -15,8 +15,10 @@ var pagelink = location.origin+location.pathname;
 user_info = check_login();
 var account_no = user_info["account_no"];
 var apikey = user_info["apikey"]
+var logged_in = true;
 if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
-	window.location.replace("index.html");
+	logged_in = false;
+	user_info['gsp'] = '_H';
 };
 
 const queryString = window.location.search;
@@ -47,12 +49,14 @@ var goDataPoints = [];
 var agileDataPoints = [];
 var consumptionDataPoints = [];
 
-consumption = get_consumption(user_info, startdate, enddate);
-if (consumption.length > 0) {
-	sortByKey(consumption, "interval_start");
-	for (i in consumption) {
-		var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
-		consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+if (logged_in) {
+	consumption = get_consumption(user_info, startdate, enddate);
+	if (consumption.length > 0) {
+		sortByKey(consumption, "interval_start");
+		for (i in consumption) {
+			var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+			consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+		}
 	}
 }
 
@@ -64,7 +68,9 @@ if (go_tariff_code != null) {
 	for (i in go_unit_rates) {
 		goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
 	}
-	go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
+	if (logged_in) {
+		go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
+	}
 }
 
 var agile_costs = "null";
@@ -75,7 +81,9 @@ if (agile_tariff_code != null) {
 		agileDataPoints.push({x: agile_unit_rates[i]["date"], y: agile_unit_rates[i]["rate"]});
 	}
 	agile_standing_charges = get_standing_charges(user_info, agile_code, startdate, enddate, agile_tariff_code);
-	agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges);
+	if (logged_in) {
+		agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges);
+	}
 }
 
 var carbon_intensity = get_carbon_intensity(startdate, enddate);
@@ -83,7 +91,11 @@ var intensityDataPoints = [];
 for (i in carbon_intensity) {
 	intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
 }
-carbon = get_carbon_from_data(consumption, carbon_intensity);
+
+carbon = 0;
+if (logged_in) {
+	carbon = get_carbon_from_data(consumption, carbon_intensity);
+}
 
 var dataSets = [];
 dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
@@ -173,10 +185,16 @@ var config = {
 window.onload = function() {
 	var ctx = document.getElementById('myChart').getContext('2d');
 	var myChart = new Chart(ctx, config);
-	document.getElementById('go_price').innerHTML = "£"+(go_costs/100).toFixed(2);
-	document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
-	document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
-	document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
+	if (logged_in) {
+		document.getElementById('go_price').innerHTML = "£"+(go_costs/100).toFixed(2);
+		document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
+		document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById("cost_table").style.visibility = "normal";
+	} else {
+		document.getElementById('cost_table').innerHTML = 'You are not logged in. <a href="index.html">Log in</a> to see your usage.<br /><br />';
+		document.getElementById("cost_table").style.visibility = "normal";
+	}
 };
 
 $(function() {
@@ -205,11 +223,13 @@ $(function() {
 <input style="text-align:center;" size=50 type="text" name="datetimes" />
 </center>
 <br />
+<div id='cost_table' style="visibility: none">
 <table class="w3-table-all w3-centered"><thead>
 <tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td><td><b>Your Carbon Footprint</b></td></tr></thead>
 <tr><td>Go</td><td id="go_price"></td><td id="carbon1"></td></tr>
 <tr><td>Agile</td><td id="agile_price"></td><td id="carbon2"></td></tr></table>
 <br /><br />
+</div>
 
 <canvas id="myChart" width="800" height="300"></canvas>
 
