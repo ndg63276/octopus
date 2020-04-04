@@ -18,7 +18,7 @@ var apikey = user_info["apikey"]
 var logged_in = true;
 if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
 	logged_in = false;
-	user_info['gsp'] = '_H';
+	user_info['gsp'] = '_J';
 };
 
 const queryString = window.location.search;
@@ -45,9 +45,8 @@ if (enddate.getSeconds() == 0) {
 	enddate.setSeconds(enddate.getSeconds()-1)
 }
 
-var goDataPoints = [];
-var agileDataPoints = [];
 var consumptionDataPoints = [];
+var consumption = null;
 
 if (logged_in) {
 	consumption = get_consumption(user_info, startdate, enddate);
@@ -60,31 +59,29 @@ if (logged_in) {
 	}
 }
 
-var go_costs = "null";
-go_tariff_code = get_tariff_code(user_info, go_code)
-if (go_tariff_code != null) {
-	go_unit_rates = get_30min_unit_rates(user_info, go_code, startdate, enddate, go_tariff_code);
-	go_standing_charges = get_standing_charges(user_info, go_code, startdate, enddate, go_tariff_code);
-	for (i in go_unit_rates) {
-		goDataPoints.push({x: go_unit_rates[i]["date"], y: go_unit_rates[i]["rate"]});
+function get_tariff_data(user_info, code, logged_in, consumption) {
+	var dataPoints = [];
+	var costs = "null";
+	tariff_code = get_tariff_code(user_info, code)
+	if (tariff_code != null) {
+		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
+		standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
+		for (i in unit_rates) {
+			dataPoints.push({x: unit_rates[i]["date"], y: unit_rates[i]["rate"]});
+		}
+		if (logged_in) {
+			costs = get_costs_from_data(consumption, unit_rates, standing_charges);
+		}
 	}
-	if (logged_in) {
-		go_costs = get_costs_from_data(consumption, go_unit_rates, go_standing_charges);
-	}
+	return { 'costs': costs, datapoints: dataPoints }
 }
 
-var agile_costs = "null";
-agile_tariff_code = get_tariff_code(user_info, agile_code)
-if (agile_tariff_code != null) {
-	agile_unit_rates = get_30min_unit_rates(user_info, agile_code, startdate, enddate, agile_tariff_code);
-	for (i in agile_unit_rates) {
-		agileDataPoints.push({x: agile_unit_rates[i]["date"], y: agile_unit_rates[i]["rate"]});
-	}
-	agile_standing_charges = get_standing_charges(user_info, agile_code, startdate, enddate, agile_tariff_code);
-	if (logged_in) {
-		agile_costs = get_costs_from_data(consumption, agile_unit_rates, agile_standing_charges);
-	}
-}
+var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+var goDataPoints = go_data['datapoints'];
+var go_costs = go_data['costs'];
+var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+var agileDataPoints = agile_data['datapoints'];
+var agile_costs = agile_data['costs'];
 
 var carbon_intensity = get_carbon_intensity(startdate, enddate);
 var intensityDataPoints = [];
@@ -182,18 +179,19 @@ var config = {
 	}
 };
 
+var myChart = '';
+
 window.onload = function() {
 	var ctx = document.getElementById('myChart').getContext('2d');
-	var myChart = new Chart(ctx, config);
+	myChart = new Chart(ctx, config);
 	if (logged_in) {
 		document.getElementById('go_price').innerHTML = "£"+(go_costs/100).toFixed(2);
 		document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
 		document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
-		document.getElementById("cost_table").style.visibility = "normal";
+		document.getElementById("cost_table").style.display = "";
 	} else {
-		document.getElementById('cost_table').innerHTML = 'You are not logged in. <a href="index.html">Log in</a> to see your usage.<br /><br />';
-		document.getElementById("cost_table").style.visibility = "normal";
+		document.getElementById("not_logged_in").style.display = "";
 	}
 };
 
@@ -213,6 +211,15 @@ $(function() {
 	});
 });
 
+function changeRegion(val) {
+	user_info['gsp'] = val;
+	go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+	config.data.datasets[0].data = go_data['datapoints'];
+	agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+	config.data.datasets[1].data = agile_data['datapoints'];
+	myChart.update();
+}
+
 </script>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
@@ -223,14 +230,33 @@ $(function() {
 <input style="text-align:center;" size=50 type="text" name="datetimes" />
 </center>
 <br />
-<div id='cost_table' style="visibility: none">
+<div id='cost_table' style="display: none;">
 <table class="w3-table-all w3-centered"><thead>
 <tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td><td><b>Your Carbon Footprint</b></td></tr></thead>
 <tr><td>Go</td><td id="go_price"></td><td id="carbon1"></td></tr>
 <tr><td>Agile</td><td id="agile_price"></td><td id="carbon2"></td></tr></table>
-<br /><br />
+</div>
+<div id='not_logged_in' style="display:none;">
+You are not logged in. <a href="index.html">Log in</a> to see your usage. 
+Showing prices for <select id="region" onchange="changeRegion(this.value)">
+<option value="_A">East England</option>
+<option value="_B">East Midlands</option>
+<option value="_C">London</option>
+<option value="_D">North Wales & Cheshire</option>
+<option value="_E">West Midlands</option>
+<option value="_F">North East England</option>
+<option value="_G">North West England</option>
+<option value="_H">Southern England</option>
+<option value="_J" selected="selected">South East England</option>
+<option value="_K">South Wales</option>
+<option value="_L">South West England</option>
+<option value="_M">Yorkshire</option>
+<option value="_N">South Scotland</option>
+<option value="_P">North Scotland</option>
+</select>
 </div>
 
+<br /><br />
 <canvas id="myChart" width="800" height="300"></canvas>
 
 <br /><br />
