@@ -92,7 +92,7 @@ function get_gsp(user_info) {
 	var url = baseurl + "/v1/industry/grid-supply-points/";
 	var headers = user_info["headers"];
 	var data = {"postcode": user_info["postcode"]};
-	var j = ajax_get(url, headers,data);
+	var j = ajax_get(url, headers, data);
 	return j["results"][0]["group_id"];
 }
 

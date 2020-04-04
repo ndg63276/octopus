@@ -192,7 +192,10 @@ window.onload = function() {
 		document.getElementById("cost_table").style.display = "";
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
-	}
+		document.getElementById('postcode').addEventListener("keyup", function(event) {
+			if (event.key === "Enter") { changePostcode(); }
+		});
+	};
 };
 
 $(function() {
@@ -210,6 +213,14 @@ $(function() {
 		window.location.href = pagelink+"?start="+start.format('YYYY-MM-DDTHH:mm:ss')+"&end="+end.format('YYYY-MM-DDTHH:mm:ss');
 	});
 });
+
+function changePostcode() {
+	var pc = document.getElementById("postcode");
+	user_info["postcode"] = pc.value;
+	var gsp = get_gsp(user_info);
+	document.getElementById("region").value = gsp;
+	changeRegion(gsp);
+}
 
 function changeRegion(val) {
 	user_info['gsp'] = val;
@@ -237,7 +248,8 @@ function changeRegion(val) {
 <tr><td>Agile</td><td id="agile_price"></td><td id="carbon2"></td></tr></table>
 </div>
 <div id='not_logged_in' style="display:none;">
-You are not logged in. <a href="index.html">Log in</a> to see your usage. 
+<center>
+You are not logged in. <a href="index.html">Log in</a> to see your usage and compare tariffs. 
 Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="_A">East England</option>
 <option value="_B">East Midlands</option>
@@ -254,7 +266,9 @@ Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="_N">South Scotland</option>
 <option value="_P">North Scotland</option>
 </select>
-</div>
+or enter your postcode:
+<input id="postcode" type="text"></input>
+</center></div>
 
 <br /><br />
 <canvas id="myChart" width="800" height="300"></canvas>
