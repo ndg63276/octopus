@@ -18,7 +18,16 @@ var apikey = user_info["apikey"]
 var logged_in = true;
 if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
 	logged_in = false;
-	user_info['gsp'] = '_J';
+	gsp = getCookie("gsp");
+	postcode = getCookie("postcode");
+	if (gsp != ""){
+		user_info["gsp"] = gsp
+	} else {
+		user_info["gsp"] = "_J";
+	}
+	if (postcode != "") {
+		user_info["postcode"] = postcode;
+	}
 };
 
 const queryString = window.location.search;
@@ -94,10 +103,11 @@ if (logged_in) {
 	carbon = get_carbon_from_data(consumption, carbon_intensity);
 }
 
-var dataSets = [];
-dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints});
-dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints});
-dataSets.push({type: 'line', pointStyle:'line', backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: true});
+var dataSets = [
+	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: true}
+];
 if (consumptionDataPoints.length > 0) {
 	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
 	rightAxis = true;
@@ -165,7 +175,8 @@ var config = {
 				display: true,
 				position: 'right',
 				type: 'linear',
-				scaleLabel: { display: true, labelString: 'Carbon Intensity (gCO2/kWh)' }
+				scaleLabel: { display: true, labelString: 'Carbon Intensity (gCO2/kWh)' },
+				ticks: { suggestedMin: 0, suggestedMax: 350 }
 			},
 			{
 				id: 'right',
@@ -192,6 +203,14 @@ window.onload = function() {
 		document.getElementById("cost_table").style.display = "";
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
+		var postcode = getCookie("postcode");
+		document.getElementById('postcode').value = postcode;
+		var gsp = getCookie("gsp");
+		if (gsp != "") {
+			document.getElementById("region").value = gsp;
+		} else if (postcode != "") {
+			changePostcode();
+		}
 		document.getElementById('postcode').addEventListener("keyup", function(event) {
 			if (event.key === "Enter") { changePostcode(); }
 		});
@@ -217,6 +236,7 @@ $(function() {
 function changePostcode() {
 	var pc = document.getElementById("postcode");
 	user_info["postcode"] = pc.value;
+	setCookie("postcode", pc.value, 365*24);
 	var gsp = get_gsp(user_info);
 	document.getElementById("region").value = gsp;
 	changeRegion(gsp);
@@ -224,6 +244,7 @@ function changePostcode() {
 
 function changeRegion(val) {
 	user_info['gsp'] = val;
+	setCookie("gsp", val, 365*24);
 	go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
 	config.data.datasets[0].data = go_data['datapoints'];
 	agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
