@@ -23,7 +23,7 @@ if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
 	if (gsp != ""){
 		user_info["gsp"] = gsp
 	} else {
-		user_info["gsp"] = "_J";
+		user_info["gsp"] = "average";
 	}
 	if (postcode != "") {
 		user_info["postcode"] = postcode;
@@ -74,11 +74,11 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 	tariff_code = get_tariff_code(user_info, code)
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
-		standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
 		for (i in unit_rates) {
 			dataPoints.push({x: unit_rates[i]["date"], y: unit_rates[i]["rate"]});
 		}
 		if (logged_in) {
+			standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
 			costs = get_costs_from_data(consumption, unit_rates, standing_charges);
 		}
 	}
@@ -234,9 +234,9 @@ $(function() {
 });
 
 function changePostcode() {
-	var pc = document.getElementById("postcode");
-	user_info["postcode"] = pc.value;
-	setCookie("postcode", pc.value, 365*24);
+	var pc = document.getElementById("postcode").value;
+	user_info["postcode"] = pc;
+	setCookie("postcode", pc, 365*24);
 	var gsp = get_gsp(user_info);
 	document.getElementById("region").value = gsp;
 	changeRegion(gsp);
@@ -255,6 +255,7 @@ function changeRegion(val) {
 </script>
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 </head>
 <body>
 <br />
@@ -272,6 +273,7 @@ function changeRegion(val) {
 <center>
 You are not logged in. <a href="index.html">Log in</a> to see your usage and compare tariffs. 
 Showing prices for <select id="region" onchange="changeRegion(this.value)">
+<option value="average" selected="selected">National Average</option>
 <option value="_A">East England</option>
 <option value="_B">East Midlands</option>
 <option value="_C">London</option>
@@ -280,7 +282,7 @@ Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="_F">North East England</option>
 <option value="_G">North West England</option>
 <option value="_H">Southern England</option>
-<option value="_J" selected="selected">South East England</option>
+<option value="_J">South East England</option>
 <option value="_K">South Wales</option>
 <option value="_L">South West England</option>
 <option value="_M">Yorkshire</option>

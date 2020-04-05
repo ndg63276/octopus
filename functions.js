@@ -96,11 +96,26 @@ function get_gsp(user_info) {
 	return j["results"][0]["group_id"];
 }
 
+function get_all_tariff_codes(code) {
+	var url = baseurl + "/v1/products/" + code;
+	var j = ajax_get(url);
+	var tariff_codes = [];
+	if ("single_register_electricity_tariffs" in j) {
+		for (gsp in j["single_register_electricity_tariffs"]) {
+			tariff_codes.push(j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"]);
+		}
+	}
+	return tariff_codes;
+}
+
 function get_tariff_code(user_info, code) {
+	var gsp = user_info["gsp"];
+	if (gsp == "average") {
+		return "average"
+	}
 	var url = baseurl + "/v1/products/" + code;
 	var headers = user_info["headers"];
 	var j = ajax_get(url, headers);
-	var gsp = user_info["gsp"];
 	if ("single_register_electricity_tariffs" in j) {
 		return j["single_register_electricity_tariffs"][gsp]["direct_debit_monthly"]["code"];
 	} else {
@@ -188,9 +203,14 @@ function get_standing_charges(user_info, code, startdate, enddate, tariff_code) 
 function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	if (tariff_code == null) {
 		tariff_code = get_tariff_code(user_info, code);
+		tariff_codes = [tariff_code];
+	} else if (tariff_code == "average") {
+		tariff_codes = get_all_tariff_codes(code);
+	} else {
+		tariff_codes = [tariff_code];
 	}
 	var headers = user_info["headers"];
-	var results = [];
+	var results = {};
 	var data = {};
 	if (startdate != null) {
 		data["period_from"] = startdate.toISOString();
@@ -198,19 +218,50 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 			data["period_to"] = enddate.toISOString();
 		}
 	}
-	var j = {};
-	j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
-	while (j["next"] != null) {
-		var j = ajax_get(j["next"], headers, data);
-		for (result in j["results"]) {
-			results.push(j["results"][result]);
+	for (index in tariff_codes) {
+		var this_result = []
+		var j = {};
+		tariff_code = tariff_codes[index];
+		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
+		while (j["next"] != null) {
+			var j = ajax_get(j["next"], headers, data);
+			for (result in j["results"]) {
+				this_result.push(j["results"][result]);
+			}
 		}
+		results[tariff_code] = this_result;
 	}
+	results["average"] = get_average_rates(results);
 	return results;
 }
 
+function get_average_rates(results) {
+	average = []
+	av_results = {};
+	for (tariff_code in results) {
+		for (index in results[tariff_code]) {
+			valid_from = results[tariff_code][index]["valid_from"];
+			valid_to = results[tariff_code][index]["valid_to"];
+			value_inc_vat = results[tariff_code][index]["value_inc_vat"];
+			if ( ! (valid_from in av_results)) {
+				av_results[valid_from] = {"valid_to": valid_to, "value_inc_vat": []}
+			}
+			av_results[valid_from]["value_inc_vat"].push(value_inc_vat);
+		}
+	}
+	for (av in av_results) {
+		vals = av_results[av]["value_inc_vat"];
+		sum = vals.reduce((previous, current) => current += previous);
+		avg = (sum / vals.length).toFixed(3);
+		average.push({"valid_from": av, "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
+	}
+	return average;
+}
+
+
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
-	var rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	var rates = all_rates[tariff_code];
 	var to_return = [];
 	var d = new Date(startdate.getTime());
 	d.setHours(0, 0, 0, 0);
