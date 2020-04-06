@@ -204,8 +204,10 @@ window.onload = function() {
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
 	if (logged_in) {
-		document.getElementById('go_price').innerHTML = "£"+(go_costs/100).toFixed(2);
-		document.getElementById('agile_price').innerHTML = "£"+(agile_costs/100).toFixed(2);
+		document.getElementById('go_unit_cost').innerHTML = "£"+(go_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('agile_unit_cost').innerHTML = "£"+(agile_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('go_charge').innerHTML = "£"+(go_costs["charge_cost"]/100).toFixed(2);
+		document.getElementById('agile_charge').innerHTML = "£"+(agile_costs["charge_cost"]/100).toFixed(2);
 		document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById("cost_table").style.display = "";
@@ -273,9 +275,9 @@ function changeRegion(val) {
 <br />
 <div id='cost_table' style="display: none;">
 <table class="w3-table-all w3-centered"><thead>
-<tr class="w3-light-grey"><td><b>Octopus Tariff</b></td><td><b>Cost for this period</b></td><td><b>Your Carbon Footprint</b></td></tr></thead>
-<tr><td>Go</td><td id="go_price"></td><td id="carbon1"></td></tr>
-<tr><td>Agile</td><td id="agile_price"></td><td id="carbon2"></td></tr></table>
+<tr class="w3-light-grey"><td width=25%><b>Octopus Tariff</b></td><td width=25%><b>Unit Cost for this period</b></td><td width=25%><b>Standing Charge for this period</b></td><td width=25%><b>Your Carbon Footprint</b></td></tr></thead>
+<tr><td>Go</td><td id="go_unit_cost"></td><td id="go_charge"></td><td id="carbon1"></td></tr>
+<tr><td>Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr></table>
 <br /></div>
 <div id='not_logged_in' style="display:none;">
 <center>

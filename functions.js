@@ -135,7 +135,7 @@ function get_costs(user_info, code, startdate, enddate, tariff_code) {
 }
 
 function get_costs_from_data(consumption, unit_rates, standing_charges) {
-	var rate_cost = 0;
+	var unit_cost = 0;
 	var charge_cost = 0;
 	for (period in consumption) {
 		period_start = Date.parse(consumption[period]["interval_start"]);
@@ -145,7 +145,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 			if (period_rate_start == period_start) {
 				period_rate = unit_rates[rate]["rate"];
 				period_cost = period_rate * period_consumption;
-				rate_cost += period_cost
+				unit_cost += period_cost
 			}
 		}
 		for (charge in standing_charges) {
@@ -158,7 +158,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 			}
 		}
 	}
-	return rate_cost + charge_cost;
+	return {"unit_cost": unit_cost, "charge_cost": charge_cost};
 }
 
 function get_consumption(user_info, startdate, enddate) {
