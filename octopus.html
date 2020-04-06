@@ -49,6 +49,13 @@ if (urlParams.has('end')) {
 } else {
 	enddate.setDate(enddate.getDate() + 1);
 }
+
+if (startdate > enddate) {
+	s2 = new Date(enddate);
+	enddate = new Date(startdate);
+	startdate = new Date(s2);
+}
+
 // subtract 1 second so as not to get the next period of data
 if (enddate.getSeconds() == 0) {
 	enddate.setSeconds(enddate.getSeconds()-1)
