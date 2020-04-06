@@ -113,7 +113,7 @@ if (logged_in) {
 var dataSets = [
 	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
 	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
-	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: true}
+	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
 ];
 if (consumptionDataPoints.length > 0) {
 	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
