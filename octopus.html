@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>Octopus Comparison</title>
+<title>SmartAtHome.co.uk - My Octopus Usage</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
@@ -193,6 +193,7 @@ var config = {
 var myChart = '';
 
 window.onload = function() {
+	document.getElementById("loginlink").setAttribute("href", "index.html"+window.location.search);
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
 	if (logged_in) {
@@ -271,7 +272,7 @@ function changeRegion(val) {
 <br /></div>
 <div id='not_logged_in' style="display:none;">
 <center>
-You are not logged in. <a href="index.html">Log in</a> to see your usage and compare tariffs. 
+<a id="loginlink" href="index.html">Log in</a> to see your usage and compare tariffs.
 Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
 <option value="_A">East England</option>

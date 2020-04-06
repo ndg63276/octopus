@@ -37,7 +37,8 @@ function setCookie(cname, cvalue, exhours) {
 
 function logged_in(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
-	document.getElementById("mainbody").innerHTML = "<a href='octopus.html'>Octopus Comparison</a><br />";
+	document.getElementById("mainbody").innerHTML = "Click <a href='octopus.html"+window.location.search+"'>here</a> if you are not redirected automatically.<br />";
+	setTimeout(function () {location.href = "octopus.html"+window.location.search}, 3000);
 }
 
 function do_login(account_no, apikey, storecreds) {

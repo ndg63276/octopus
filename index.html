@@ -4,7 +4,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
-<title>My Octopus Account</title>
+<title>SmartAtHome.co.uk - My Octopus Usage</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="functions.js"></script>
 <script>
@@ -20,6 +20,7 @@ window.onload = function() {
 		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>API Key: </label><input type='password' id='apikey'><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
+		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
 		document.getElementById('apikey').onkeydown = function(e){if(e.keyCode == 13){login();}};
 	};
 }
@@ -34,6 +35,11 @@ window.onload = function() {
 </head>
 <body>
 
-<div id="loginstate"></div><br /><br />
+<div id="loginstate"></div><br />
 <div id="mainbody"></div>
+<br />
+
+Don't know your account number? Click <a href="https://octopus.energy/dashboard/">here</a>, log in, and it will redirect you to a page with an address like octopus.energy/dashboard/accounts/A-XXXXXXXX/ - your account number is the A-XXXXXXXX part.<br /><br />
+Don't know your API key? Click <a href="https://octopus.energy/dashboard/developer/">here</a>, log in, and press "Generate API Key".<br /><br />
+<b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
 </body></html>
