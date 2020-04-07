@@ -1,5 +1,8 @@
 <html>
-<head>
+<head profile="http://www.w3.org/2005/10/profile">
+<link rel="icon"
+      type="image/png"
+      href="../short_logo_trans.png">
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -16,8 +19,8 @@ window.onload = function() {
 		logged_in(address);
 	} else {
 		document.getElementById("loginstate").innerHTML = "You are not logged in.";
-		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Account Number: </label><input id='account_no'><br />";
-		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>API Key: </label><input type='password' id='apikey'><br /><br />";
+		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Octopus Account Number: </label><input id='account_no'><br />";
+		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>Octopus API Key: </label><input type='password' id='apikey'><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
 		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
@@ -34,7 +37,7 @@ window.onload = function() {
 </style>
 </head>
 <body>
-
+<img src="../long_logo.png"><br /><br />
 <div id="loginstate"></div><br />
 <div id="mainbody"></div>
 <br />
