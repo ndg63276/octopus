@@ -313,19 +313,21 @@ function ajax_get(url, headers, data) {
 
 function future_prices() {
 	var pagelink = location.origin+location.pathname;
-	var end = new Date();
-	if (end.getHours() >= 16) {
-		end.setDate(end.getDate()+1);
-		end.setUTCHours(23, 0, 0, 0);
-	} else {
-		end.setUTCHours(23, 0, 0, 0);
-	}
-	window.location.href=pagelink+"?start=now&end="+end.toISOString();
+	window.location.href=pagelink+"?start=now&end=future_prices";
 }
 
 function parseDateParam(param) {
 	var to_return = new Date();
-	if (param.startsWith("20")) {
+	if (param == 'now') {
+		// do nothing
+	} else if (param == 'future_prices') {
+		if (to_return.getHours() >= 16) {
+			to_return.setDate(end.getDate()+1);
+			to_return.setUTCHours(23, 0, 0, 0);
+		} else {
+			to_return.setUTCHours(23, 0, 0, 0);
+		}
+	} else if (param.startsWith("20")) {
 		var pattern = /([0-9]{4})-?([0-9]{2})-?([0-9]{2})T?([0-9]{2})?:?([0-9]{2})?:?([0-9]{2})?.*/;
 		var match = param.match(pattern);
 		year = match[1];
