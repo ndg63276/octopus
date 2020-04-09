@@ -292,6 +292,23 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 	return to_return;
 }
 
+function get_tariff_data(user_info, code, logged_in, consumption) {
+	var dataPoints = [];
+	var costs = "null";
+	tariff_code = get_tariff_code(user_info, code)
+	if (tariff_code != null) {
+		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
+		for (i in unit_rates) {
+			dataPoints.push({x: unit_rates[i]["date"], y: unit_rates[i]["rate"]});
+		}
+		if (logged_in) {
+			standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
+			costs = get_costs_from_data(consumption, unit_rates, standing_charges);
+		}
+	}
+	return { 'costs': costs, datapoints: dataPoints }
+}
+
 function ajax_get(url, headers, data) {
 	var to_return = {};
 	$.ajax({
@@ -313,19 +330,21 @@ function ajax_get(url, headers, data) {
 
 function future_prices() {
 	var pagelink = location.origin+location.pathname;
-	var end = new Date();
-	if (end.getHours() >= 16) {
-		end.setDate(end.getDate()+1);
-		end.setUTCHours(23, 0, 0, 0);
-	} else {
-		end.setUTCHours(23, 0, 0, 0);
-	}
-	window.location.href=pagelink+"?start=now&end="+end.toISOString();
+	window.location.href=pagelink+"?start=now&end=future_prices";
 }
 
 function parseDateParam(param) {
 	var to_return = new Date();
-	if (param.startsWith("20")) {
+	if (param == 'now') {
+		// do nothing
+	} else if (param == 'future_prices') {
+		if (to_return.getHours() >= 16) {
+			to_return.setDate(end.getDate()+1);
+			to_return.setUTCHours(23, 0, 0, 0);
+		} else {
+			to_return.setUTCHours(23, 0, 0, 0);
+		}
+	} else if (param.startsWith("20")) {
 		var pattern = /([0-9]{4})-?([0-9]{2})-?([0-9]{2})T?([0-9]{2})?:?([0-9]{2})?:?([0-9]{2})?.*/;
 		var match = param.match(pattern);
 		year = match[1];
@@ -407,6 +426,102 @@ function get_carbon_from_data(consumption, carbon_intensity) {
 		}
 	}
 	return carbon;
+}
+
+function changePostcode() {
+	var pc = document.getElementById("postcode").value;
+	user_info["postcode"] = pc;
+	setCookie("postcode", pc, 365*24);
+	var gsp = get_gsp(user_info);
+	document.getElementById("region").value = gsp;
+	changeRegion(gsp);
+}
+
+function changeRegion(val) {
+	user_info['gsp'] = val;
+	setCookie("gsp", val, 365*24);
+	go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+	config.data.datasets[0].data = go_data['datapoints'];
+	agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+	config.data.datasets[1].data = agile_data['datapoints'];
+	myChart.update();
+}
+
+function get_config() {
+	return {
+		type: 'bar',
+		data: { datasets: dataSets },
+		options: {
+			title: { display: false },
+			tooltips: {
+				mode: 'index',
+				position: 'nearest',
+				callbacks: {
+					footer: function(tooltipItems, data) {
+						var index = tooltipItems[0].index;
+						if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
+							var go_cost = 0;
+							var agile_cost = 0;
+							var footprint = 0;
+							tooltipItems.forEach(function(tooltipItem) {
+								if (tooltipItem.datasetIndex == 0) {
+									go_cost = tooltipItem.value * data.datasets[3].data[index].y;
+								} else if (tooltipItem.datasetIndex == 1) {
+									agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
+								} else if (tooltipItem.datasetIndex == 2) {
+									footprint = tooltipItem.value * data.datasets[3].data[index].y;
+								}
+							});
+							to_return = '';
+							if (go_cost != 0) { to_return += 'Go cost: ' + go_cost.toFixed(2) + 'p\n'; }
+							if (agile_cost != 0) { to_return += 'Agile cost: ' + agile_cost.toFixed(2) + 'p\n'; }
+							if (footprint != 0) { to_return += 'Carbon footprint: ' + footprint.toFixed(1) + 'g'; }
+							return to_return;
+						}
+					},
+				},
+				footerFontStyle: 'normal'
+			},
+			legend: {
+				display: true,
+				position: 'bottom',
+				labels: { fontSize: 18, usePointStyle: true }
+			},
+			scales: {
+				xAxes: [{
+					type: 'time',
+					time: { tooltipFormat: "DD-MM-YY HH:mm:ss" },
+					display: true,
+					scaleLabel: { display: false },
+					offset: true
+				}],
+				yAxes: [
+				{
+					id: 'left',
+					display: true,
+					position: 'left',
+					type: 'linear',
+					scaleLabel: { display: true, labelString: 'Price (p/kWh)' }
+				},
+				{
+					id: 'right2',
+					display: true,
+					position: 'right',
+					type: 'linear',
+					scaleLabel: { display: true, labelString: 'Carbon Intensity (gCO2/kWh)' },
+					ticks: { suggestedMin: 0, suggestedMax: 350 }
+				},
+				{
+					id: 'right',
+					display: rightAxis,
+					position: 'right',
+					type: 'linear',
+					scaleLabel: { display: true, labelString: 'Consumption (kWh)' }
+				}
+				]
+			}
+		}
+	};
 }
 
 function get_json(jsonfile) {
