@@ -409,3 +409,20 @@ function get_carbon_from_data(consumption, carbon_intensity) {
 	return carbon;
 }
 
+function get_json(jsonfile) {
+	var to_return = {};
+	$.ajax({
+		url: jsonfile,
+		async: false,
+		dataType: 'json',
+		success: function (json) {
+			to_return = json;
+		}
+	});
+	return to_return;
+}
+
+function get_bulb_data() {
+	json = get_json('tariffs.json');
+	return json['bulb'];
+}
