@@ -7,10 +7,10 @@ function last_element(arr) {
 }
 
 function sortByKey(array, key) {
-    return array.sort(function(a, b) {
-        var x = a[key]; var y = b[key];
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-    });
+	return array.sort(function(a, b) {
+		var x = a[key]; var y = b[key];
+		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+	});
 }
 
 function getCookie(cname) {
@@ -110,6 +110,9 @@ function get_all_tariff_codes(code) {
 }
 
 function get_tariff_code(user_info, code) {
+	if (code == 'bulb') {
+		return 'bulb';
+	}
 	var gsp = user_info["gsp"];
 	if (gsp == "average") {
 		return "average"
@@ -141,7 +144,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 		period_start = Date.parse(consumption[period]["interval_start"]);
 		period_consumption = consumption[period]["consumption"];
 		for (rate in unit_rates) {
-			period_rate_start = Date.parse(unit_rates[rate]["date"])
+			period_rate_start = Date.parse(unit_rates[rate]["date"]);
 			if (period_rate_start == period_start) {
 				period_rate = unit_rates[rate]["rate"];
 				period_cost = period_rate * period_consumption;
@@ -185,6 +188,9 @@ function get_consumption(user_info, startdate, enddate) {
 }
 
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
+	if (code == 'bulb') {
+		return get_bulb_standing_charges(user_info);
+	}
 	if (tariff_code == null) {
 		tariff_code = get_tariff_code(user_info, code);
 	}
@@ -261,7 +267,11 @@ function get_average_rates(results) {
 
 
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
-	var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	if (code == 'bulb') {
+		var all_rates = get_bulb_rates(user_info);
+	} else {
+		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
+	}
 	var rates = all_rates[tariff_code];
 	var to_return = [];
 	var d = new Date(startdate.getTime());
@@ -537,7 +547,18 @@ function get_json(jsonfile) {
 	return to_return;
 }
 
-function get_bulb_data() {
+function get_bulb_rates(user_info) {
 	json = get_json('tariffs.json');
-	return json['bulb'];
+	data = json['bulb'];
+	region_data = data[user_info["gsp"]];
+	to_return = {'bulb': [{'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['unit_cost']}]};
+	return to_return;
+}
+
+function get_bulb_standing_charges(user_info) {
+	json = get_json('tariffs.json');
+	data = json['bulb'];
+	region_data = data[user_info["gsp"]];
+	to_return = [{'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['charge_cost']}];
+	return to_return;
 }
