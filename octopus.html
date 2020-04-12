@@ -43,9 +43,11 @@ var startdate = new Date();
 if (urlParams.has('start')) {
 	var start = urlParams.get('start');
 	startdate = parseDateParam(start)
-} else {
+} else if (logged_in) {
 	startdate.setDate(startdate.getDate() - 2);
 	startdate.setHours(0, 0, 0, 0);
+} else {
+	// startdate is now
 }
 
 var enddate = new Date(startdate);
