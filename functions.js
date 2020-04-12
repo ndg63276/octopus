@@ -349,7 +349,7 @@ function parseDateParam(param) {
 		// do nothing
 	} else if (param == 'future_prices') {
 		if (to_return.getHours() >= 16) {
-			to_return.setDate(end.getDate()+1);
+			to_return.setDate(to_return.getDate()+1);
 			to_return.setUTCHours(23, 0, 0, 0);
 		} else {
 			to_return.setUTCHours(23, 0, 0, 0);
