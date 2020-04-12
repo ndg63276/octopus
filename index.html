@@ -1,8 +1,7 @@
 <html>
 <head profile="http://www.w3.org/2005/10/profile">
-<link rel="icon"
-      type="image/png"
-      href="../short_logo_trans.png">
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="../styles.css">
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -10,9 +9,11 @@
 <title>SmartAtHome.co.uk - My Octopus Usage</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="functions.js"></script>
+<script src="../general_functions.js"></script>
 <script>
 
 window.onload = function() {
+        testFirstCookie();
 	user_info = check_login();
 	if ("apikey" in user_info && user_info["apikey"] != "" && user_info["apikey"] != null) {
 		var address = user_info["address"];
@@ -45,4 +46,10 @@ window.onload = function() {
 Don't know your account number? Click <a href="https://octopus.energy/dashboard/">here</a>, log in, and it will redirect you to a page with an address like octopus.energy/dashboard/accounts/A-XXXXXXXX/ - your account number is the A-XXXXXXXX part.<br /><br />
 Don't know your API key? Click <a href="https://octopus.energy/dashboard/developer/">here</a>, log in, and press "Generate API Key".<br /><br />
 <b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
+
+<div id="myCookieConsent">
+<a id="cookieButton" onClick="acceptCookies()">Understood</a>
+<div>This website is using cookies. <a href="../cookies.html">More details</a></div>
+</div>
+
 </body></html>

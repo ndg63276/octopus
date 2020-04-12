@@ -1,5 +1,15 @@
 <html>
-<head><title>SmartAtHome.co.uk - My Octopus Usage</title>
+<head profile="http://www.w3.org/2005/10/profile">
+<title>SmartAtHome.co.uk - My Octopus Usage</title>
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script src="../general_functions.js"></script>
+<script>
+window.onload = function() {
+        testFirstCookie();
+}
+</script>
 </head><body>
 <h2>Who is SmartAtHome.co.uk?</h2>
 SmartAtHome.co.uk is just a hobby site ran by me, Mark. I'm nice, I promise. You can email me at mark<code>@</code>smartathome.co.uk.
@@ -13,5 +23,11 @@ I store a small file, called a cookie, on your computer, with your account numbe
 The code for this website is open sourced on <a href='https://github.com/ndg63276/octopus'>GitHub</a>, so anyone can check what I'm doing any time.
 <h2>I'm not with Octopus Energy.</h2>
 I highly recommend them, they're excellent. And they're not paying me to say that (although I do get referral fees). They are especially good for people with electric cars, or people willing to move their electricity usage to outside the 4-7pm window. You can join them and get &pound;50 credit by clicking <a href="https://share.octopus.energy/tidy-jay-1000">here</a>.
+
+<div id="myCookieConsent">
+<a id="cookieButton" onClick="acceptCookies()">Understood</a>
+<div>This website is using cookies. <a href="../cookies.html">More details</a></div>
+</div>
+
 </body>
 </html>

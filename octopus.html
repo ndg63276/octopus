@@ -1,8 +1,10 @@
 <html>
 <head profile="http://www.w3.org/2005/10/profile">
-<link rel="icon"
-      type="image/png"
-      href="../short_logo_trans.png">
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -12,6 +14,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="../general_functions.js"></script>
 <script src="functions.js"></script>
 <script>
 var pagelink = location.origin+location.pathname;
@@ -113,6 +116,7 @@ var config = get_config()
 var myChart = '';
 
 window.onload = function() {
+	testFirstCookie();
 	document.getElementById("loginlink").setAttribute("href", "index.html"+window.location.search);
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
@@ -173,8 +177,6 @@ function changeTariff(val) {
 }
 
 </script>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 </head>
 <body>
@@ -238,5 +240,11 @@ or enter your postcode:
 Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
 Bulb tariffs are the current rates.
 </small>
+
+<div id="myCookieConsent">
+<a id="cookieButton" onClick="acceptCookies()">Understood</a>
+<div>This website is using cookies. <a href="../cookies.html">More details</a></div>
+</div>
+
 </body>
 </html>
