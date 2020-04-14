@@ -2,6 +2,7 @@
 
 import requests
 import json
+from datetime import datetime
 
 postcodes = {
 "_A": "NR11BD",
@@ -50,8 +51,15 @@ def get_bulb_tariffs(tariffs):
 		tariffs['bulb'][gsp] = {'charge_cost': charge_cost, 'unit_cost': unit_cost}
 	return tariffs
 
+
+def get_meta_data(tariffs):
+	tariffs['meta'] = { 'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
+	return tariffs
+
+
 if __name__ == "__main__":
 	tariffs = {}
 	tariffs = get_bulb_tariffs(tariffs)
+	tariffs = get_meta_data(tariffs)
 	with open('tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
