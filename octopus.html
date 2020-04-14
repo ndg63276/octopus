@@ -119,6 +119,7 @@ var myChart = '';
 
 window.onload = function() {
 	testFirstCookie();
+	update_tariff_date();
 	document.getElementById("loginlink").setAttribute("href", "index.html"+window.location.search);
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
@@ -240,7 +241,7 @@ or enter your postcode:
 </center><br />
 <small>
 Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
-Bulb tariffs are the current rates.
+Tariffs last updated on <span id='tariffdate'></span>.
 </small>
 
 <div id="myCookieConsent">

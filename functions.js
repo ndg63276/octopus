@@ -473,3 +473,9 @@ function get_bulb_standing_charges(user_info) {
 	to_return = [{'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['charge_cost']}];
 	return to_return;
 }
+
+function update_tariff_date() {
+	json = get_json('tariffs.json');
+	date_str = json['meta']['updated'];
+	document.getElementById('tariffdate').innerHTML = date_str;
+}
