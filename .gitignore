@@ -2,3 +2,5 @@ __pycache__/*
 *pyc
 *~
 tariffs.json
+images/*
+scripts/end_of_data.txt

@@ -10,9 +10,11 @@ from pytz import timezone
 baseurl = 'https://api.octopus.energy/'
 qcurl = 'https://quickchart.io/chart'
 agile_code = 'AGILE-18-02-21'
-dir = os.path.dirname(os.path.realpath(__file__))+'/../images/'
-if not os.path.exists(dir):
-	os.mkdir(dir)
+script_dir = os.path.dirname(os.path.realpath(__file__))
+images_dir = script_dir + '/../images/'
+if not os.path.exists(images_dir):
+	os.mkdir(images_dir)
+end_of_data_file = script_dir + '/end_of_data.txt'
 
 def create_config(dataSets, startdate):
 	timeStr = startdate.strftime('%A %-d %B %Y')
@@ -83,7 +85,8 @@ def get_unit_rates(code, gsp, startdate, enddate):
 	while r.json()['next'] is not None:
 		r = requests.get(r.json()['next'], params=params)
 		results += r.json()['results']
-	return results
+	sorted_results = sorted(results, key=lambda k: k['valid_from'])
+	return sorted_results
 
 
 def get_tariff_code(code, gsp):
@@ -95,9 +98,8 @@ def get_gsps():
 	return ['_P', '_E', '_M', '_G', '_L', '_C', '_K', '_D', '_J', '_A', '_H', '_N', '_B', '_F']
 
 
-def create_datapoints(unsorted_rates, add_extra_point_at_end=True):
+def create_datapoints(sorted_rates, add_extra_point_at_end=True):
 	datapoints = []
-	sorted_rates = sorted(unsorted_rates, key=lambda k: k['valid_from'])
 	for i in sorted_rates:
 		valid_from = datetime.strptime(i['valid_from'], '%Y-%m-%dT%H:%M:%SZ')
 		utc_from = valid_from.replace(tzinfo=pytz.utc)
@@ -112,32 +114,42 @@ def create_datapoints(unsorted_rates, add_extra_point_at_end=True):
 
 
 if __name__ == '__main__':
-	startdate = datetime.now() + timedelta(days=1)
-	startdate = startdate.replace(hour=0, minute=0, second=0, microsecond=0)
-	enddate = startdate.replace(hour=23, minute=0, second=0, microsecond=0)
+	startdate = datetime.now()
+	startdate = startdate.replace(minute=0, second=0, microsecond=0)
+	if startdate.hour < 16:
+		enddate = datetime.now()
+	else:
+		enddate = datetime.now() + timedelta(days=1)
+	enddate = enddate.replace(hour=23, minute=0, second=0, microsecond=0)
 	rates = {}
 	for gsp in get_gsps():
 		rates[gsp[1]] = get_unit_rates(agile_code, gsp, startdate, enddate)
-	for gsp in rates:
-		agileDataPoints = create_datapoints(rates[gsp])
-		datasets = create_datasets(gsp, agileDataPoints)
+	end_of_data = rates['P'][-1]['valid_to']
+	with open(end_of_data_file, 'r',) as f:
+		prev_end_of_data = f.read().strip()
+	if end_of_data != prev_end_of_data:
+		with open(end_of_data_file, 'w') as f:
+			f.write(end_of_data)		
+		for gsp in rates:
+			agileDataPoints = create_datapoints(rates[gsp])
+			datasets = create_datasets(gsp, agileDataPoints)
+			config = create_config(datasets, startdate)
+			r = do_post(config)
+			with open(images_dir+gsp+'.png', 'wb') as f:
+				f.write(r.content)
+		av_rates = []
+		for dp in rates['P']:
+			all_rates = []
+			dpt = dp['valid_from']
+			for gsp in rates:
+				for i in rates[gsp]:
+					if i['valid_from'] == dpt:
+						all_rates.append(i['value_inc_vat'])
+			av_rate = sum(all_rates) / len(all_rates)
+			av_rates.append({'valid_from': dpt, 'value_inc_vat': av_rate})
+		agileDataPoints = create_datapoints(av_rates)
+		datasets = create_datasets('average', agileDataPoints)
 		config = create_config(datasets, startdate)
 		r = do_post(config)
-		with open(dir+gsp+'.png', 'wb') as f:
+		with open(images_dir+'average.png', 'wb') as f:
 			f.write(r.content)
-	av_rates = []
-	for dp in rates['P']:
-		all_rates = []
-		dpt = dp['valid_from']
-		for gsp in rates:
-			for i in rates[gsp]:
-				if i['valid_from'] == dpt:
-					all_rates.append(i['value_inc_vat'])
-		av_rate = sum(all_rates) / len(all_rates)
-		av_rates.append({'valid_from': dpt, 'value_inc_vat': av_rate})
-	agileDataPoints = create_datapoints(av_rates)
-	datasets = create_datasets('average', agileDataPoints)
-	config = create_config(datasets, startdate)
-	r = do_post(config)
-	with open(dir+'average.png', 'wb') as f:
-		f.write(r.content)
