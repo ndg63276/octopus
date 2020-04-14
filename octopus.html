@@ -1,8 +1,10 @@
 <html>
 <head profile="http://www.w3.org/2005/10/profile">
-<link rel="icon"
-      type="image/png"
-      href="../short_logo_trans.png">
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="stylesheet" type="text/css" href="../styles.css">
+
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
@@ -12,6 +14,7 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="../general_functions.js"></script>
 <script src="functions.js"></script>
 <script>
 var pagelink = location.origin+location.pathname;
@@ -40,9 +43,11 @@ var startdate = new Date();
 if (urlParams.has('start')) {
 	var start = urlParams.get('start');
 	startdate = parseDateParam(start)
-} else {
+} else if (logged_in) {
 	startdate.setDate(startdate.getDate() - 2);
 	startdate.setHours(0, 0, 0, 0);
+} else {
+	// startdate is now
 }
 
 var enddate = new Date(startdate);
@@ -97,8 +102,8 @@ if (logged_in) {
 }
 
 var dataSets = [
-	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Go Price', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
-	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Agile Price', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Octopus Agile', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
 	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
 ];
 if (consumptionDataPoints.length > 0) {
@@ -113,6 +118,7 @@ var config = get_config()
 var myChart = '';
 
 window.onload = function() {
+	testFirstCookie();
 	document.getElementById("loginlink").setAttribute("href", "index.html"+window.location.search);
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
@@ -156,9 +162,23 @@ $(function() {
 	});
 });
 
+function changeTariff(val) {
+	document.getElementById('tariff').innerHTML = val + " &#9660";
+	if (val == 'Octopus Go') {
+		var code = go_code;
+	} else if (val == 'Bulb Vari-Fair') {
+		var code = 'bulb';
+	}
+	new_data = get_tariff_data(user_info, code, logged_in, consumption);
+	new_costs = new_data['costs'];
+	document.getElementById('go_unit_cost').innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
+	document.getElementById('go_charge').innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
+	config.data.datasets[0].data = new_data['datapoints'];
+	config.data.datasets[0].label = val;
+	myChart.update();
+}
+
 </script>
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
 </head>
 <body>
@@ -169,9 +189,18 @@ $(function() {
 <br />
 <div id='cost_table' style="display: none;">
 <table class="w3-table-all w3-centered"><thead>
-<tr class="w3-light-grey"><td width=25%><b>Octopus Tariff</b></td><td width=25%><b>Unit Cost for this period</b></td><td width=25%><b>Standing Charge for this period</b></td><td width=25%><b>Your Carbon Footprint</b></td></tr></thead>
-<tr><td>Go</td><td id="go_unit_cost"></td><td id="go_charge"></td><td id="carbon1"></td></tr>
-<tr><td>Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr></table>
+<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost for this period</b></td><td width=25%><b>Standing Charge for this period</b></td><td width=25%><b>Your Carbon Footprint</b></td></tr></thead>
+<tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
+<tr><td>
+<div class="w3-dropdown-hover">
+<button id='tariff' class="w3-light-grey w3-button">Octopus Go &#9660;</button>
+<div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="javascript:changeTariff('Octopus Go')" class="w3-bar-item w3-button">Octopus Go</a>
+<a href="javascript:changeTariff('Bulb Vari-Fair')" class="w3-bar-item w3-button">Bulb Vari-Fair</a>
+</div>
+</div>
+</td><td style="vertical-align:middle" id="go_unit_cost"></td><td style="vertical-align:middle" id="go_charge"></td><td style="vertical-align:middle" id="carbon1"></td></tr>
+</table>
 <br /></div>
 <div id='not_logged_in' style="display:none;">
 <center>
@@ -209,5 +238,15 @@ or enter your postcode:
 <input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:100px'>
 
 </center><br />
+<small>
+Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
+Bulb tariffs are the current rates.
+</small>
+
+<div id="myCookieConsent">
+<a id="cookieButton" onClick="acceptCookies()">Understood</a>
+<div>This website is using cookies. <a href="../cookies.html">More details</a></div>
+</div>
+
 </body>
 </html>
