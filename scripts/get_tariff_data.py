@@ -61,5 +61,5 @@ if __name__ == "__main__":
 	tariffs = {}
 	tariffs = get_bulb_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
-	with open('tariffs.json', 'w') as f:
+	with open('../tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
