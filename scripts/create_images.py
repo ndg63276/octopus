@@ -17,15 +17,18 @@ if not os.path.exists(images_dir):
 	os.mkdir(images_dir)
 end_of_data_file = script_dir + '/end_of_data.txt'
 
-def create_config(dataSets, startdate):
-	timeStr = startdate.strftime('%A %-d %B %Y')
+def create_config(dataSets, startdate, enddate):
+	startTimeStr = startdate.strftime('%A %-d %B %Y')
+	endTimeStr = enddate.strftime('%A %-d %B %Y')
+	if startTimeStr != endTimeStr:
+		startTimeStr = startdate.strftime('%a %-d') + ' - ' + enddate.strftime('%a %-d %B %Y')
 	config = {
 		'type': 'bar',
 		'data': { 'datasets': dataSets },
 		'options': {
 			'title': {
 				'display': True,
-				'text': 'Agile Prices for '+timeStr
+				'text': 'Agile Prices for '+startTimeStr
 			},
 			'legend': {
 				'position': 'bottom',
@@ -134,7 +137,7 @@ if __name__ == '__main__':
 		for gsp in rates:
 			agileDataPoints = create_datapoints(rates[gsp])
 			datasets = create_datasets(gsp, agileDataPoints)
-			config = create_config(datasets, startdate)
+			config = create_config(datasets, startdate, enddate)
 			r = do_post(config)
 			with open(images_dir+gsp+'.png', 'wb') as f:
 				f.write(r.content)
@@ -150,7 +153,7 @@ if __name__ == '__main__':
 			av_rates.append({'valid_from': dpt, 'value_inc_vat': av_rate})
 		agileDataPoints = create_datapoints(av_rates)
 		datasets = create_datasets('average', agileDataPoints)
-		config = create_config(datasets, startdate)
+		config = create_config(datasets, startdate, enddate)
 		r = do_post(config)
 		with open(images_dir+'average.png', 'wb') as f:
 			f.write(r.content)
