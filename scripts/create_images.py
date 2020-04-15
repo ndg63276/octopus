@@ -6,6 +6,7 @@ import requests
 import os
 import pytz
 from pytz import timezone
+import subprocess
 
 baseurl = 'https://api.octopus.energy/'
 qcurl = 'https://quickchart.io/chart'
@@ -153,3 +154,4 @@ if __name__ == '__main__':
 		r = do_post(config)
 		with open(images_dir+'average.png', 'wb') as f:
 			f.write(r.content)
+		subprocess.call(script_dir + '/images_upload.sh', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
