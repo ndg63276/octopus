@@ -40,6 +40,31 @@ bulb_query="""query Tariffs($postcode: String!) {
 }
 """
 
+tonik_data = {
+	"estimatedUsage": {
+		"homeType": "detached",
+		"numberOfBedrooms": 1,
+		"numberOfPeople": 1
+	},
+	"channel": "quoteweb",
+	"saleType": "registration",
+	"extras": {
+		"electricVehicle": True
+	},
+	"fuels": {
+		"electricity": True,
+		"gas": False
+	},
+	"meterPoints": {
+		"electricity":{
+			"isE7": True
+		}
+	},
+	"paymentType": "directDebit",
+	"partner": "evclub"
+}
+
+
 def get_bulb_tariffs(tariffs):
 	tariffs['bulb'] = {}
 	url='https://gr.bulb.co.uk/graphql'
@@ -52,6 +77,19 @@ def get_bulb_tariffs(tariffs):
 	return tariffs
 
 
+def get_tonik_tariffs(tariffs):
+	tariffs['tonik'] = {}
+	url = 'https://api.tonik.tech/v1/quotes/energy'
+	for gsp in postcodes:
+		tonik_data["postcode"] = postcodes[gsp]
+		r = requests.post(url, json=tonik_data)
+		charge_cost = r.json()['data']['products'][0]['details']['standingCharges']['electricity']
+		unit_cost_day = r.json()['data']['products'][0]['details']['unitRates']['electricity']['day']
+		unit_cost_night = r.json()['data']['products'][0]['details']['unitRates']['electricity']['night']
+		tariffs['tonik'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
+	return tariffs
+
+
 def get_meta_data(tariffs):
 	tariffs['meta'] = { 'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
 	return tariffs
@@ -60,6 +98,7 @@ def get_meta_data(tariffs):
 if __name__ == "__main__":
 	tariffs = {}
 	tariffs = get_bulb_tariffs(tariffs)
+	tariffs = get_tonik_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('../tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
