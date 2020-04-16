@@ -169,6 +169,8 @@ function changeTariff(val) {
 		var code = go_code;
 	} else if (val == 'Bulb Vari-Fair') {
 		var code = 'bulb';
+	}else if (val == 'Tonik Charge EV') {
+		var code = 'tonik';
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data['costs'];
@@ -198,6 +200,7 @@ function changeTariff(val) {
 <div class="w3-dropdown-content w3-bar-block w3-card-4">
 <a href="javascript:changeTariff('Octopus Go')" class="w3-bar-item w3-button">Octopus Go</a>
 <a href="javascript:changeTariff('Bulb Vari-Fair')" class="w3-bar-item w3-button">Bulb Vari-Fair</a>
+<a href="javascript:changeTariff('Tonik Charge EV')" class="w3-bar-item w3-button">Tonik Charge EV</a>
 </div>
 </div>
 </td><td style="vertical-align:middle" id="go_unit_cost"></td><td style="vertical-align:middle" id="go_charge"></td><td style="vertical-align:middle" id="carbon1"></td></tr>

@@ -77,8 +77,8 @@ function get_all_tariff_codes(code) {
 }
 
 function get_tariff_code(user_info, code) {
-	if (code == 'bulb') {
-		return 'bulb';
+	if (! code.startsWith('GO') && ! code.startsWith('AGILE')) {
+		return code;
 	}
 	var gsp = user_info["gsp"];
 	if (gsp == "average") {
@@ -155,8 +155,8 @@ function get_consumption(user_info, startdate, enddate) {
 }
 
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
-	if (code == 'bulb') {
-		return get_bulb_standing_charges(user_info);
+	if (! code.startsWith('GO') && ! code.startsWith('AGILE')) {
+		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
 	if (tariff_code == null) {
 		tariff_code = get_tariff_code(user_info, code);
@@ -235,7 +235,9 @@ function get_average_rates(results) {
 
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	if (code == 'bulb') {
-		var all_rates = get_bulb_rates(user_info);
+		var all_rates = get_single_rate(user_info, code);
+	} else if (code == 'tonik') {
+		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	}
@@ -458,19 +460,42 @@ function get_json(jsonfile) {
 	return to_return;
 }
 
-function get_bulb_rates(user_info) {
+function get_single_rate(user_info, code) {
 	json = get_json('tariffs.json');
-	data = json['bulb'];
+	data = json[code];
 	region_data = data[user_info["gsp"]];
-	to_return = {'bulb': [{'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['unit_cost']}]};
+	var to_return = {};
+	to_return[code] = [];
+	to_return[code].push({'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['unit_cost']});
 	return to_return;
 }
 
-function get_bulb_standing_charges(user_info) {
+function get_e7_rates(user_info, code, startdate, enddate) {
 	json = get_json('tariffs.json');
-	data = json['bulb'];
+	data = json[code];
 	region_data = data[user_info["gsp"]];
-	to_return = [{'valid_from': '2000-01-01T00:00:00Z', 'valid_to': '2100-01-01T00:00:00Z', 'value_inc_vat': region_data['charge_cost']}];
+	var to_return = {};
+	to_return[code] = [];
+	var d = new Date(startdate);
+	var d2 = new Date(startdate);
+	while (d < enddate) {
+		d.setHours(0, 0, 0, 0);
+		d2.setHours(7, 0, 0, 0);
+		to_return[code].push({'valid_from': d.toISOString(), 'valid_to': d2.toISOString(), 'value_inc_vat': region_data['unit_cost_night']});
+		d.setHours(7, 0, 0, 0);
+		d2.setDate(d2.getDate()+1);
+		d2.setHours(0, 0, 0, 0);
+		to_return[code].push({'valid_from': d.toISOString(), 'valid_to': d2.toISOString(), 'value_inc_vat': region_data['unit_cost_day']});
+		d.setDate(d.getDate()+1);
+	}
+	return to_return;
+}
+
+function get_other_standing_charges(user_info, code, startdate, enddate) {
+	json = get_json('tariffs.json');
+	data = json[code];
+	region_data = data[user_info["gsp"]];
+	to_return = [{'valid_from': startdate.toISOString(), 'valid_to': enddate.toISOString(), 'value_inc_vat': region_data['charge_cost']}];
 	return to_return;
 }
 
@@ -479,3 +504,4 @@ function update_tariff_date() {
 	date_str = json['meta']['updated'];
 	document.getElementById('tariffdate').innerHTML = date_str;
 }
+
