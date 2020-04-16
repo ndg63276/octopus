@@ -121,6 +121,7 @@ if __name__ == '__main__':
 	startdate = datetime.now()
 	startdate = startdate.replace(minute=0, second=0, microsecond=0)
 	if startdate.hour < 16:
+		startdate = startdate.replace(hour=0)
 		enddate = datetime.now()
 	else:
 		enddate = datetime.now() + timedelta(days=1)
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 	end_of_data = rates['P'][-1]['valid_to']
 	with open(end_of_data_file, 'r',) as f:
 		prev_end_of_data = f.read().strip()
-	if end_of_data != prev_end_of_data:
+	if end_of_data != prev_end_of_data or datetime.now().strftime('%H%M') == '0000':
 		with open(end_of_data_file, 'w') as f:
 			f.write(end_of_data)		
 		for gsp in rates:
