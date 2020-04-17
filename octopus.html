@@ -163,24 +163,6 @@ $(function() {
 	});
 });
 
-function changeTariff(val) {
-	document.getElementById('tariff').innerHTML = val + " &#9660";
-	if (val == 'Octopus Go') {
-		var code = go_code;
-	} else if (val == 'Bulb Vari-Fair') {
-		var code = 'bulb';
-	}else if (val == 'Tonik Charge EV') {
-		var code = 'tonik';
-	}
-	new_data = get_tariff_data(user_info, code, logged_in, consumption);
-	new_costs = new_data['costs'];
-	document.getElementById('go_unit_cost').innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
-	document.getElementById('go_charge').innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
-	config.data.datasets[0].data = new_data['datapoints'];
-	config.data.datasets[0].label = val;
-	myChart.update();
-}
-
 </script>
 
 </head>
@@ -237,11 +219,12 @@ or enter your postcode:
 <br /><br />
 <center>
 
-<input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:100px'>
-<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:100px'>
-<input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:100px'>
-
+<input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:150px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:150px'>
+<input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:150px'>
+<br /><br /><input type="button" id="dwn-btn" value="Save consumption to CSV file" onclick='download(consumption);'/><br /><br />
 </center><br />
+
 <small>
 Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
 Tariffs last updated on <span id='tariffdate'></span>.

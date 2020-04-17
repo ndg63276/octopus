@@ -278,7 +278,7 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
 		for (i in unit_rates) {
-			dataPoints.push({x: unit_rates[i]["date"], y: unit_rates[i]["rate"]});
+			dataPoints.push({x: moment(unit_rates[i]["date"]), y: unit_rates[i]["rate"]});
 		}
 		if (logged_in) {
 			standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
@@ -505,3 +505,43 @@ function update_tariff_date() {
 	document.getElementById('tariffdate').innerHTML = date_str;
 }
 
+function changeTariff(val) {
+	document.getElementById('tariff').innerHTML = val + " &#9660";
+	if (val == 'Octopus Go') {
+		var code = go_code;
+	} else if (val == 'Bulb Vari-Fair') {
+		var code = 'bulb';
+	}else if (val == 'Tonik Charge EV') {
+		var code = 'tonik';
+	}
+	new_data = get_tariff_data(user_info, code, logged_in, consumption);
+	new_costs = new_data['costs'];
+	document.getElementById('go_unit_cost').innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
+	document.getElementById('go_charge').innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
+	config.data.datasets[0].data = new_data['datapoints'];
+	config.data.datasets[0].label = val;
+	myChart.update();
+}
+
+function download(consumption) {
+	var csv = createCsvFromConsumption(consumption);
+	var filename = "octopus_consumption_"+moment(startdate).format('YYYYMMDDTHHmmss')+"-"+moment(enddate).format('YYYYMMDDTHHmmss')+".csv";
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
+
+function createCsvFromConsumption(consumption) {
+	var to_return = 'interval_start,interval_end,consumption\n';
+	for (i in consumption) {
+		to_return += consumption[i]['interval_start']+',';
+		to_return += consumption[i]['interval_end']+',';
+		to_return += consumption[i]['consumption']+',';
+		to_return += '\n';
+	}
+	return to_return;
+}
