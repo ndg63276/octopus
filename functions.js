@@ -148,7 +148,12 @@ function get_consumption(user_info, startdate, enddate) {
 	while (j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
 		for (result in j["results"]) {
-			results.push(j["results"][result]);
+			con = j["results"][result]['consumption'];
+			ints = moment(j["results"][result]['interval_start'])
+			inte = moment(j["results"][result]['interval_end'])
+			if (ints < enddate) {
+				results.push({'consumption':con, 'interval_start': ints, 'interval_end': inte});
+			}
 		}
 	}
 	return results;
@@ -329,7 +334,7 @@ function get_carbon_intensity(startdate, enddate) {
 		} else {
 			var this_intensity = j["data"][i]["intensity"]["forecast"];
 		}
-		to_return.push({"date": this_date.toISOString(), "intensity": this_intensity})
+		to_return.push({"date": moment(this_date), "intensity": this_intensity})
 	}
 	return to_return;
 }
@@ -536,11 +541,31 @@ function download(consumption) {
 }
 
 function createCsvFromConsumption(consumption) {
-	var to_return = 'interval_start,interval_end,consumption\n';
-	for (i in consumption) {
-		to_return += consumption[i]['interval_start']+',';
-		to_return += consumption[i]['interval_end']+',';
-		to_return += consumption[i]['consumption']+',';
+	var to_return = 'interval_start,agile_price,consumption,agile_cost,carbon_intensity,carbon_footprint\n';
+	for (j in agileDataPoints) {
+		to_return += agileDataPoints[j]['x'].format()+',';
+		to_return += agileDataPoints[j]['y']+',';
+		var consumption_found = false;
+		for (i in consumption) {
+			if (agileDataPoints[j]['x'].format() == consumption[i]["interval_start"].format()) {
+				to_return += consumption[i]['consumption']+',';
+				to_return += agileDataPoints[j]['y']*consumption[i]['consumption']+',';
+				consumption_found = true;
+				break;
+			}
+		}
+		if (! consumption_found) {
+			to_return += ',,';
+		}
+		for (k in carbon_intensity) {
+			if (carbon_intensity[k]['date'].format() == agileDataPoints[j]['x'].format()) {
+				to_return += carbon_intensity[k]['intensity']+',';
+				if (consumption_found) {
+					to_return += carbon_intensity[k]['intensity']*consumption[i]['consumption']+',';
+				}
+				break;
+			}
+		}
 		to_return += '\n';
 	}
 	return to_return;
