@@ -148,7 +148,12 @@ function get_consumption(user_info, startdate, enddate) {
 	while (j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
 		for (result in j["results"]) {
-			results.push(j["results"][result]);
+			con = j["results"][result]['consumption'];
+			ints = moment(j["results"][result]['interval_start'])
+			inte = moment(j["results"][result]['interval_end'])
+			if (ints < enddate) {
+				results.push({'consumption':con, 'interval_start': ints, 'interval_end': inte});
+			}
 		}
 	}
 	return results;
@@ -278,7 +283,7 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
 		for (i in unit_rates) {
-			dataPoints.push({x: unit_rates[i]["date"], y: unit_rates[i]["rate"]});
+			dataPoints.push({x: moment(unit_rates[i]["date"]), y: unit_rates[i]["rate"]});
 		}
 		if (logged_in) {
 			standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
@@ -329,7 +334,7 @@ function get_carbon_intensity(startdate, enddate) {
 		} else {
 			var this_intensity = j["data"][i]["intensity"]["forecast"];
 		}
-		to_return.push({"date": this_date.toISOString(), "intensity": this_intensity})
+		to_return.push({"date": moment(this_date), "intensity": this_intensity})
 	}
 	return to_return;
 }
@@ -505,3 +510,71 @@ function update_tariff_date() {
 	document.getElementById('tariffdate').innerHTML = date_str;
 }
 
+function changeTariff(val) {
+	document.getElementById('tariff').innerHTML = val + " &#9660";
+	if (val == 'Octopus Go') {
+		var code = go_code;
+	} else if (val == 'Bulb Vari-Fair') {
+		var code = 'bulb';
+	}else if (val == 'Tonik Charge EV') {
+		var code = 'tonik';
+	}
+	new_data = get_tariff_data(user_info, code, logged_in, consumption);
+	new_costs = new_data['costs'];
+	document.getElementById('go_unit_cost').innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
+	document.getElementById('go_charge').innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
+	config.data.datasets[0].data = new_data['datapoints'];
+	config.data.datasets[0].label = val;
+	myChart.update();
+}
+
+function download(consumption) {
+	var csv = createCsv();
+	var filename = "octopus_consumption_"+moment(startdate).format('YYYYMMDDTHHmmss')+"-"+moment(enddate).format('YYYYMMDDTHHmmss')+".csv";
+	var element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
+	element.setAttribute('download', filename);
+	element.style.display = 'none';
+	document.body.appendChild(element);
+	element.click();
+	document.body.removeChild(element);
+}
+
+function createCsv() {
+	var to_return = 'Interval Start,Octopus Agile Price (p/kWh),';
+	var tariff = document.getElementById('tariff').innerHTML;
+	to_return += tariff.substr(0, tariff.length-2) + ' Price (p/kWh),';
+	to_return += 'Consumption,Agile Cost (p),';
+	to_return += tariff.substr(0, tariff.length-2) + ' Cost (p),';
+	to_return += 'Carbon Intensity (gCO2/kWh),Carbon Footprint(gCO2)\n';
+	for (j in agileDataPoints) {
+		to_return += agileDataPoints[j]['x'].format()+',';
+		to_return += agileDataPoints[j]['y']+',';
+		// add other tariff price
+		to_return += config.data.datasets[0].data[j]['y']+',';
+		var consumption_found = false;
+		for (i in consumption) {
+			if (agileDataPoints[j]['x'].format() == consumption[i]["interval_start"].format()) {
+				to_return += consumption[i]['consumption']+',';
+				to_return += agileDataPoints[j]['y']*consumption[i]['consumption']+',';
+				to_return += config.data.datasets[0].data[j]['y']*consumption[i]['consumption']+',';
+				consumption_found = true;
+				break;
+			}
+		}
+		if (! consumption_found) {
+			to_return += ',,,';
+		}
+		for (k in carbon_intensity) {
+			if (carbon_intensity[k]['date'].format() == agileDataPoints[j]['x'].format()) {
+				to_return += carbon_intensity[k]['intensity']+',';
+				if (consumption_found) {
+					to_return += carbon_intensity[k]['intensity']*consumption[i]['consumption']+',';
+				}
+				break;
+			}
+		}
+		to_return += '\n';
+	}
+	return to_return;
+}
