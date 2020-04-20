@@ -529,7 +529,7 @@ function changeTariff(val) {
 }
 
 function download(consumption) {
-	var csv = createCsvFromConsumption(consumption);
+	var csv = createCsv();
 	var filename = "octopus_consumption_"+moment(startdate).format('YYYYMMDDTHHmmss')+"-"+moment(enddate).format('YYYYMMDDTHHmmss')+".csv";
 	var element = document.createElement('a');
 	element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(csv));
@@ -540,22 +540,30 @@ function download(consumption) {
 	document.body.removeChild(element);
 }
 
-function createCsvFromConsumption(consumption) {
-	var to_return = 'interval_start,agile_price,consumption,agile_cost,carbon_intensity,carbon_footprint\n';
+function createCsv() {
+	var to_return = 'Interval Start,Octopus Agile Price (p/kWh),';
+	var tariff = document.getElementById('tariff').innerHTML;
+	to_return += tariff.substr(0, tariff.length-2) + ' Price (p/kWh),';
+	to_return += 'Consumption,Agile Cost (p),';
+	to_return += tariff.substr(0, tariff.length-2) + ' Cost (p),';
+	to_return += 'Carbon Intensity (gCO2/kWh),Carbon Footprint(gCO2)\n';
 	for (j in agileDataPoints) {
 		to_return += agileDataPoints[j]['x'].format()+',';
 		to_return += agileDataPoints[j]['y']+',';
+		// add other tariff price
+		to_return += config.data.datasets[0].data[j]['y']+',';
 		var consumption_found = false;
 		for (i in consumption) {
 			if (agileDataPoints[j]['x'].format() == consumption[i]["interval_start"].format()) {
 				to_return += consumption[i]['consumption']+',';
 				to_return += agileDataPoints[j]['y']*consumption[i]['consumption']+',';
+				to_return += config.data.datasets[0].data[j]['y']*consumption[i]['consumption']+',';
 				consumption_found = true;
 				break;
 			}
 		}
 		if (! consumption_found) {
-			to_return += ',,';
+			to_return += ',,,';
 		}
 		for (k in carbon_intensity) {
 			if (carbon_intensity[k]['date'].format() == agileDataPoints[j]['x'].format()) {
