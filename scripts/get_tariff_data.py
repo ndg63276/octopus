@@ -115,11 +115,32 @@ def get_ovo_tariffs(tariffs):
 	for gsp in postcodes:
 		params['postcode'] = postcodes[gsp]
 		r = requests.get(url, headers=headers, params=params)
-		print(gsp)
 		charge_cost = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['standingCharge']
 		unit_cost_day = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['unitRate']
 		unit_cost_night = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['nightUnitRate']
 		tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
+	return tariffs
+
+
+def get_edf_tariffs(tariffs):
+	# https://www.edfenergy.com/electric-cars/tariffs ->
+	# edfenergy.com/sites/default/files/ev_rate_card_go_electric_may_21.pdf
+	tariffs['edf'] = {
+		'_A': {'charge_cost': 29.03, 'unit_cost_day': 16.54, 'unit_cost_night': 8.00},
+		'_B': {'charge_cost': 27.14, 'unit_cost_day': 17.22, 'unit_cost_night': 8.00},
+		'_C': {'charge_cost': 28.18, 'unit_cost_day': 16.07, 'unit_cost_night': 8.00},
+		'_D': {'charge_cost': 27.75, 'unit_cost_day': 18.21, 'unit_cost_night': 8.00},
+		'_E': {'charge_cost': 28.33, 'unit_cost_day': 17.68, 'unit_cost_night': 8.00},
+		'_F': {'charge_cost': 29.78, 'unit_cost_day': 17.09, 'unit_cost_night': 8.00},
+		'_G': {'charge_cost': 27.67, 'unit_cost_day': 16.94, 'unit_cost_night': 8.00},
+		'_P': {'charge_cost': 30.98, 'unit_cost_day': 18.36, 'unit_cost_night': 8.00},
+		'_N': {'charge_cost': 28.77, 'unit_cost_day': 17.13, 'unit_cost_night': 8.00},
+		'_J': {'charge_cost': 28.80, 'unit_cost_day': 17.18, 'unit_cost_night': 8.00},
+		'_H': {'charge_cost': 27.13, 'unit_cost_day': 16.84, 'unit_cost_night': 8.00},
+		'_K': {'charge_cost': 28.49, 'unit_cost_day': 18.60, 'unit_cost_night': 8.00},
+		'_L': {'charge_cost': 29.28, 'unit_cost_day': 19.04, 'unit_cost_night': 8.00},
+		'_M': {'charge_cost': 30.01, 'unit_cost_day': 16.94, 'unit_cost_night': 8.00}
+	}
 	return tariffs
 
 
@@ -133,6 +154,7 @@ def lambda_handler(event, context):
 	tariffs = get_bulb_tariffs(tariffs)
 	tariffs = get_tonik_tariffs(tariffs)
 	tariffs = get_ovo_tariffs(tariffs)
+	tariffs = get_edf_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
 		json.dump(tariffs, f)

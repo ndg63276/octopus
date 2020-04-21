@@ -243,6 +243,8 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		var all_rates = get_single_rate(user_info, code);
 	} else if (code == 'tonik' || code == 'ovo') {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
+	} else if (code == 'edf') {
+		var all_rates = get_edf_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	}
@@ -496,6 +498,28 @@ function get_e7_rates(user_info, code, startdate, enddate) {
 	return to_return;
 }
 
+function get_edf_rates(user_info, code, startdate, enddate) {
+	json = get_json('tariffs.json');
+	data = json[code];
+	region_data = data[user_info["gsp"]];
+	var to_return = {};
+	to_return[code] = [];
+	var d = new Date(startdate);
+	d.setHours(0, 0, 0, 0);
+	var d2 = new Date(startdate);
+	while (d < enddate) {
+		while (d2.getDay() == 0 || d2.getDay() == 6) { d2.setDate(d2.getDate()+1) };
+		d2.setHours(7, 0, 0, 0);
+		to_return[code].push({'valid_from': d.toISOString(), 'valid_to': d2.toISOString(), 'value_inc_vat': region_data['unit_cost_night']});
+		d = new Date(d2);
+		d2.setHours(21, 0, 0, 0);
+		to_return[code].push({'valid_from': d.toISOString(), 'valid_to': d2.toISOString(), 'value_inc_vat': region_data['unit_cost_day']});
+		d = new Date(d2);
+		d2.setDate(d2.getDate()+1);
+	}
+	return to_return;
+}
+
 function get_other_standing_charges(user_info, code, startdate, enddate) {
 	json = get_json('tariffs.json');
 	data = json[code];
@@ -520,6 +544,8 @@ function changeTariff(val) {
 		var code = 'tonik';
 	} else if (val == 'Ovo Energy 2 Year Fixed') {
 		var code = 'ovo';
+	} else if (val == 'EDF GoElectric May21') {
+		var code = 'edf';
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data['costs'];
