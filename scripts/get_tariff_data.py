@@ -3,6 +3,9 @@
 import requests
 import json
 from datetime import datetime
+import boto3
+s3_client = boto3.client('s3')
+
 
 postcodes = {
 "_A": "NR11BD",
@@ -10,7 +13,7 @@ postcodes = {
 "_C": "E16AN",
 "_D": "L10AF",
 "_E": "ST11DB",
-"_F": "YO10AT",
+"_F": "YO17JA",
 "_G": "M11AG",
 "_P": "AB101AG",
 "_N": "G11BX",
@@ -81,7 +84,7 @@ def get_tonik_tariffs(tariffs):
 	tariffs['tonik'] = {}
 	url = 'https://api.tonik.tech/v1/quotes/energy'
 	for gsp in postcodes:
-		tonik_data["postcode"] = postcodes[gsp]
+		tonik_data['postcode'] = postcodes[gsp]
 		r = requests.post(url, json=tonik_data)
 		charge_cost = r.json()['data']['products'][0]['details']['standingCharges']['electricity']
 		unit_cost_day = r.json()['data']['products'][0]['details']['unitRates']['electricity']['day']
@@ -90,15 +93,51 @@ def get_tonik_tariffs(tariffs):
 	return tariffs
 
 
-def get_meta_data(tariffs):
-	tariffs['meta'] = { 'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
+def get_ovo_tariffs(tariffs):
+	tariffs['ovo'] = {}
+	config_url = 'https://switch.ovoenergy.com/ev/config.json'
+	r = requests.get(config_url)
+	if 'API_TOKEN' not in r.json():
+		return tariffs
+	api_token = r.json()['API_TOKEN']
+	headers = {'x-ovo-api-key': api_token}
+	url = 'https://quote.ovoenergy.com/v3/quick-quote'
+	params = {
+		'economy7': True,
+		'forceFullService': False,
+		'fuel': 'Electricity',
+		'includeSSR': True,
+		'paymentMethod': 'Paym',
+		'retailer': 'OVO',
+		'serviceType': 'FullService',
+		'usage': 'High'
+	}
+	for gsp in postcodes:
+		params['postcode'] = postcodes[gsp]
+		r = requests.get(url, headers=headers, params=params)
+		print(gsp)
+		charge_cost = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['standingCharge']
+		unit_cost_day = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['unitRate']
+		unit_cost_night = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['nightUnitRate']
+		tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
 	return tariffs
 
 
-if __name__ == "__main__":
+def get_meta_data(tariffs):
+	tariffs['meta'] = {'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
+	return tariffs
+
+
+def lambda_handler(event, context):
 	tariffs = {}
 	tariffs = get_bulb_tariffs(tariffs)
 	tariffs = get_tonik_tariffs(tariffs)
+	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
-	with open('../tariffs.json', 'w') as f:
+	with open('/tmp/tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
+	s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json')
+
+
+if __name__ =='__main__':
+	lambda_handler(None, None)
