@@ -4,18 +4,31 @@ from datetime import datetime, timedelta
 import urllib.parse
 import requests
 import os
-import pytz
-from pytz import timezone
-import subprocess
+from pytz import timezone, utc
+import boto3
+s3_client = boto3.client('s3')
 
 baseurl = 'https://api.octopus.energy/'
 qcurl = 'https://quickchart.io/chart'
 agile_code = 'AGILE-18-02-21'
-script_dir = os.path.dirname(os.path.realpath(__file__))
-images_dir = script_dir + '/../images/'
+images_dir = '/tmp/images/'
 if not os.path.exists(images_dir):
 	os.mkdir(images_dir)
-end_of_data_file = script_dir + '/end_of_data.txt'
+end_of_data_file = '/tmp/end_of_data.txt'
+
+
+def get_end_of_data_file():
+	s3_client.download_file('smartathome.co.uk', 'octopus/scripts/end_of_data.txt', end_of_data_file)
+
+
+def put_end_of_data_file():
+	s3_client.upload_file(end_of_data_file, 'smartathome.co.uk', 'octopus/scripts/end_of_data.txt')
+
+
+def upload_images():
+	for i in os.listdir(images_dir):
+		s3_client.upload_file(images_dir+'/'+i, 'smartathome.co.uk', 'octopus/images/'+i)
+
 
 def create_config(dataSets, startdate, enddate):
 	startTimeStr = startdate.strftime('%A %-d %B %Y')
@@ -106,7 +119,7 @@ def create_datapoints(sorted_rates, add_extra_point_at_end=True):
 	datapoints = []
 	for i in sorted_rates:
 		valid_from = datetime.strptime(i['valid_from'], '%Y-%m-%dT%H:%M:%SZ')
-		utc_from = valid_from.replace(tzinfo=pytz.utc)
+		utc_from = valid_from.replace(tzinfo=utc)
 		london_from = utc_from.astimezone(timezone('Europe/London'))
 		london_strf = london_from.strftime('%Y-%m-%dT%H:%M:%S')
 		datapoints.append({'x':london_strf, 'y':i['value_inc_vat']})
@@ -117,24 +130,26 @@ def create_datapoints(sorted_rates, add_extra_point_at_end=True):
 	return datapoints
 
 
-if __name__ == '__main__':
-	startdate = datetime.now()
+def lambda_handler(event, context):
+	startdate = datetime.now().astimezone(timezone('Europe/London'))
 	startdate = startdate.replace(minute=0, second=0, microsecond=0)
 	if startdate.hour < 16:
 		startdate = startdate.replace(hour=0)
-		enddate = datetime.now()
+		enddate = datetime.now().astimezone(timezone('Europe/London'))
 	else:
-		enddate = datetime.now() + timedelta(days=1)
+		enddate = datetime.now().astimezone(timezone('Europe/London')) + timedelta(days=1)
 	enddate = enddate.replace(hour=23, minute=0, second=0, microsecond=0)
 	rates = {}
 	for gsp in get_gsps():
 		rates[gsp[1]] = get_unit_rates(agile_code, gsp, startdate, enddate)
 	end_of_data = rates['P'][-1]['valid_to']
+	get_end_of_data_file()
 	with open(end_of_data_file, 'r',) as f:
 		prev_end_of_data = f.read().strip()
-	if end_of_data != prev_end_of_data or datetime.now().strftime('%H%M') == '0000':
+	if end_of_data != prev_end_of_data or datetime.now().astimezone(timezone('Europe/London')).strftime('%H%M') == '0000':
 		with open(end_of_data_file, 'w') as f:
-			f.write(end_of_data)		
+			f.write(end_of_data)
+		put_end_of_data_file()
 		for gsp in rates:
 			agileDataPoints = create_datapoints(rates[gsp])
 			datasets = create_datasets(gsp, agileDataPoints)
@@ -158,4 +173,8 @@ if __name__ == '__main__':
 		r = do_post(config)
 		with open(images_dir+'average.png', 'wb') as f:
 			f.write(r.content)
-		subprocess.call(script_dir + '/images_upload.sh', stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+		upload_images()
+
+
+if __name__ =='__main__':
+	lambda_handler(None, None)
