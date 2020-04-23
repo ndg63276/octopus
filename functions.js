@@ -1,4 +1,4 @@
-var baseurl = "https://api.octopus.energy/"
+var baseurl = "https://api.octopus.energy"
 var go_code = "GO-4H-0030";
 var agile_code = "AGILE-18-02-21";
 
@@ -10,7 +10,7 @@ function logged_in(address) {
 
 function do_login(account_no, apikey, storecreds) {
 	to_return = {};
-	var url = baseurl + "/v1/accounts/" + account_no;
+	var url = baseurl + "/v1/accounts/" + account_no + "/";
 	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
 	var j = ajax_get(url, headers)
 	var last_property = last_element(j["properties"])
@@ -65,7 +65,7 @@ function get_gsp(user_info) {
 }
 
 function get_all_tariff_codes(code) {
-	var url = baseurl + "/v1/products/" + code;
+	var url = baseurl + "/v1/products/" + code + "/";
 	var j = ajax_get(url);
 	var tariff_codes = [];
 	if ("single_register_electricity_tariffs" in j) {
@@ -84,7 +84,7 @@ function get_tariff_code(user_info, code) {
 	if (gsp == "average") {
 		return "average"
 	}
-	var url = baseurl + "/v1/products/" + code;
+	var url = baseurl + "/v1/products/" + code + "/";
 	var headers = user_info["headers"];
 	var j = ajax_get(url, headers);
 	if ("single_register_electricity_tariffs" in j) {
