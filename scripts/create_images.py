@@ -27,7 +27,7 @@ def put_end_of_data_file():
 
 def upload_images():
 	for i in os.listdir(images_dir):
-		s3_client.upload_file(images_dir+'/'+i, 'smartathome.co.uk', 'octopus/images/'+i)
+		s3_client.upload_file(images_dir+'/'+i, 'smartathome.co.uk', 'octopus/images/'+i, ExtraArgs={'ContentType': 'image/png'})
 
 
 def create_config(dataSets, startdate, enddate):
@@ -130,6 +130,20 @@ def create_datapoints(sorted_rates, add_extra_point_at_end=True):
 	return datapoints
 
 
+def save_image(content, filename):
+	with open(filename, 'wb') as f:
+		f.write(content)
+
+
+def send_tweet():
+	url = os.environ['IFTTT_URL']
+	body = {
+		'value1': 'Octopus Agile prices for the next day have been released! See your usage and costs at https://smartathome.co.uk/octopus #smartathome',
+		'value2': 'https://s3-eu-west-1.amazonaws.com/smartathome.co.uk/octopus/images/average.png'
+	}
+	r = requests.post(url, json=body)
+
+
 def lambda_handler(event, context):
 	startdate = datetime.now().astimezone(timezone('Europe/London'))
 	startdate = startdate.replace(minute=0, second=0, microsecond=0)
@@ -155,8 +169,7 @@ def lambda_handler(event, context):
 			datasets = create_datasets(gsp, agileDataPoints)
 			config = create_config(datasets, startdate, enddate)
 			r = do_post(config)
-			with open(images_dir+gsp+'.png', 'wb') as f:
-				f.write(r.content)
+			save_image(r.content, images_dir+gsp+'.png')
 		av_rates = []
 		for dp in rates['P']:
 			all_rates = []
@@ -171,10 +184,12 @@ def lambda_handler(event, context):
 		datasets = create_datasets('average', agileDataPoints)
 		config = create_config(datasets, startdate, enddate)
 		r = do_post(config)
-		with open(images_dir+'average.png', 'wb') as f:
-			f.write(r.content)
+		save_image(r.content, images_dir+'average.png')
 		upload_images()
+		if end_of_data != prev_end_of_data:
+			send_tweet()
 
 
 if __name__ =='__main__':
 	lambda_handler(None, None)
+
