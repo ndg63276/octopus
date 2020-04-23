@@ -1,0 +1,55 @@
+<html>
+<head profile="http://www.w3.org/2005/10/profile">
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>SmartAtHome.co.uk - My Octopus Usage</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="functions.js"></script>
+<script src="../general_functions.js"></script>
+<script>
+
+window.onload = function() {
+        testFirstCookie();
+	user_info = check_login();
+	if ("apikey" in user_info && user_info["apikey"] != "" && user_info["apikey"] != null) {
+		var address = user_info["address"];
+		logged_in(address);
+	} else {
+		document.getElementById("loginstate").innerHTML = "You are not logged in.";
+		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Octopus Account Number: </label><input id='account_no'><br />";
+		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>Octopus API Key: </label><input type='password' id='apikey'><br /><br />";
+		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
+		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
+		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
+		document.getElementById('apikey').onkeydown = function(e){if(e.keyCode == 13){login();}};
+	};
+}
+
+</script>
+<style>
+.l1 {
+	width: 200px;
+	display: inline-block;
+}
+</style>
+</head>
+<body>
+<a href='../index.html'><img src="../long_logo.png"></a><br /><br />
+<div id="loginstate"></div><br />
+<div id="mainbody"></div>
+<br />
+
+Don't know your account number? Click <a href="https://octopus.energy/dashboard/">here</a>, log in, and it will redirect you to a page with an address like octopus.energy/dashboard/accounts/A-XXXXXXXX/ - your account number is the A-XXXXXXXX part.<br /><br />
+Don't know your API key? Click <a href="https://octopus.energy/dashboard/developer/">here</a>, log in, and press "Generate API Key".<br /><br />
+<b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
+
+<div id="myCookieConsent">
+<a id="cookieButton" onClick="acceptCookies()">Understood</a>
+<div>This website is using cookies. <a href="../cookies.html">More details</a></div>
+</div>
+
+</body></html>

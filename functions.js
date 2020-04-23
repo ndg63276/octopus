@@ -4,8 +4,8 @@ var agile_code = "AGILE-18-02-21";
 
 function logged_in(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
-	document.getElementById("mainbody").innerHTML = "Click <a href='octopus.html"+window.location.search+"'>here</a> if you are not redirected automatically.<br />";
-	setTimeout(function () {location.href = "octopus.html"+window.location.search}, 3000);
+	document.getElementById("mainbody").innerHTML = "Click <a href='index.html"+window.location.search+"'>here</a> if you are not redirected automatically.<br />";
+	setTimeout(function () {location.href = "index.html"+window.location.search}, 3000);
 }
 
 function do_login(account_no, apikey, storecreds) {

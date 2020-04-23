@@ -1,55 +1,242 @@
 <html>
 <head profile="http://www.w3.org/2005/10/profile">
 <link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <link rel="stylesheet" type="text/css" href="../styles.css">
+
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 <title>SmartAtHome.co.uk - My Octopus Usage</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script src="functions.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script src="../general_functions.js"></script>
+<script src="functions.js"></script>
 <script>
+var pagelink = location.origin+location.pathname;
+user_info = check_login();
+var account_no = user_info["account_no"];
+var apikey = user_info["apikey"]
+var logged_in = true;
+if (account_no == "" || apikey == "" || account_no == null || apikey == null) {
+	logged_in = false;
+	gsp = getCookie("gsp");
+	postcode = getCookie("postcode");
+	if (gsp != ""){
+		user_info["gsp"] = gsp
+	} else {
+		user_info["gsp"] = "average";
+	}
+	if (postcode != "") {
+		user_info["postcode"] = postcode;
+	}
+};
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+
+var startdate = new Date();
+if (urlParams.has('start')) {
+	var start = urlParams.get('start');
+	startdate = parseDateParam(start)
+} else if (logged_in) {
+	startdate.setDate(startdate.getDate() - 2);
+	startdate.setHours(0, 0, 0, 0);
+} else {
+	// startdate is now
+}
+
+if (startdate.getMinutes() > 30) {
+	startdate.setMinutes(30,0,0)
+} else {
+	startdate.setMinutes(0,0,0)
+}
+
+var enddate = new Date(startdate);
+if (urlParams.has('end')) {
+	var end = urlParams.get('end');
+	enddate = parseDateParam(end)
+} else {
+	enddate.setDate(enddate.getDate() + 1);
+}
+
+if (startdate > enddate) {
+	s2 = new Date(enddate);
+	enddate = new Date(startdate);
+	startdate = new Date(s2);
+}
+
+var consumptionDataPoints = [];
+var consumption = null;
+
+if (logged_in) {
+	consumption = get_consumption(user_info, startdate, enddate);
+	if (consumption.length > 0) {
+		sortByKey(consumption, "interval_start");
+		for (i in consumption) {
+			var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+			consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+		}
+	}
+}
+
+var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+var goDataPoints = go_data['datapoints'];
+var go_costs = go_data['costs'];
+var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+var agileDataPoints = agile_data['datapoints'];
+var agile_costs = agile_data['costs'];
+
+var carbon_intensity = get_carbon_intensity(startdate, enddate);
+var intensityDataPoints = [];
+for (i in carbon_intensity) {
+	intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
+}
+
+carbon = 0;
+if (logged_in) {
+	carbon = get_carbon_from_data(consumption, carbon_intensity);
+}
+
+var dataSets = [
+	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Octopus Agile', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
+	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
+];
+if (consumptionDataPoints.length > 0) {
+	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
+	rightAxis = true;
+} else {
+	rightAxis = false;
+}
+
+var config = get_config()
+
+var myChart = '';
 
 window.onload = function() {
-        testFirstCookie();
-	user_info = check_login();
-	if ("apikey" in user_info && user_info["apikey"] != "" && user_info["apikey"] != null) {
-		var address = user_info["address"];
-		logged_in(address);
+	testFirstCookie();
+	update_tariff_date();
+	document.getElementById("loginlink").setAttribute("href", "login.html"+window.location.search);
+	var ctx = document.getElementById('myChart').getContext('2d');
+	myChart = new Chart(ctx, config);
+	if (logged_in) {
+		document.getElementById('go_unit_cost').innerHTML = "£"+(go_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('agile_unit_cost').innerHTML = "£"+(agile_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('go_charge').innerHTML = "£"+(go_costs["charge_cost"]/100).toFixed(2);
+		document.getElementById('agile_charge').innerHTML = "£"+(agile_costs["charge_cost"]/100).toFixed(2);
+		document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById("cost_table").style.display = "";
 	} else {
-		document.getElementById("loginstate").innerHTML = "You are not logged in.";
-		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Octopus Account Number: </label><input id='account_no'><br />";
-		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>Octopus API Key: </label><input type='password' id='apikey'><br /><br />";
-		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
-		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
-		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
-		document.getElementById('apikey').onkeydown = function(e){if(e.keyCode == 13){login();}};
+		document.getElementById("not_logged_in").style.display = "";
+		var postcode = getCookie("postcode");
+		document.getElementById('postcode').value = postcode;
+		var gsp = getCookie("gsp");
+		if (gsp != "") {
+			document.getElementById("region").value = gsp;
+		} else if (postcode != "") {
+			changePostcode();
+		}
+		document.getElementById('postcode').addEventListener("keyup", function(event) {
+			if (event.key === "Enter") { changePostcode(); }
+		});
 	};
-}
+};
+
+$(function() {
+	$('input[name="datetimes"]').daterangepicker({
+		timePicker: true,
+		timePicker24Hour: true,
+		timePickerSeconds: true,
+		startDate: moment(startdate),
+		endDate: moment(enddate),
+		maxDate: moment().endOf('day').add(2, 'day'),
+		locale: {
+			format: ' DD/MM/YYYY HH:mm:ss'
+		}
+	}, function(start, end, label) {
+		window.location.href = pagelink+"?start="+start.format('YYYY-MM-DDTHH:mm:ss')+"&end="+end.format('YYYY-MM-DDTHH:mm:ss');
+	});
+});
 
 </script>
-<style>
-.l1 {
-	width: 200px;
-	display: inline-block;
-}
-</style>
+
 </head>
 <body>
+<center>
 <a href='../index.html'><img src="../long_logo.png"></a><br /><br />
-<div id="loginstate"></div><br />
-<div id="mainbody"></div>
+<input style="text-align:center;" size=50 type="text" name="datetimes" />
+</center>
 <br />
+<div id='cost_table' style="display: none;">
+<table class="w3-table-all w3-centered"><thead>
+<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost for this period</b></td><td width=25%><b>Standing Charge for this period</b></td><td width=25%><b>Your Carbon Footprint</b></td></tr></thead>
+<tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
+<tr><td>
+<div class="w3-dropdown-hover">
+<button id='tariff' class="w3-light-grey w3-button">Octopus Go &#9660;</button>
+<div class="w3-dropdown-content w3-bar-block w3-card-4">
+<a href="javascript:changeTariff('Octopus Go')" class="w3-bar-item w3-button">Octopus Go</a>
+<a href="javascript:changeTariff('Bulb Vari-Fair')" class="w3-bar-item w3-button">Bulb Vari-Fair</a>
+<a href="javascript:changeTariff('Tonik Charge EV')" class="w3-bar-item w3-button">Tonik Charge EV</a>
+<a href="javascript:changeTariff('Ovo Energy 2 Year Fixed')" class="w3-bar-item w3-button">Ovo Energy 2 Year Fixed</a>
+<a href="javascript:changeTariff('EDF GoElectric May21')" class="w3-bar-item w3-button">EDF GoElectric May21</a>
+</div>
+</div>
+</td><td style="vertical-align:middle" id="go_unit_cost"></td><td style="vertical-align:middle" id="go_charge"></td><td style="vertical-align:middle" id="carbon1"></td></tr>
+</table>
+<br /></div>
+<div id='not_logged_in' style="display:none;">
+<center>
+<a id="loginlink" href="login.html">Log in</a> to see your usage and compare tariffs.
+Showing prices for <select id="region" onchange="changeRegion(this.value)">
+<option value="average" selected="selected">National Average</option>
+<option value="_A">East England</option>
+<option value="_B">East Midlands</option>
+<option value="_C">London</option>
+<option value="_D">North Wales & Cheshire</option>
+<option value="_E">West Midlands</option>
+<option value="_F">North East England</option>
+<option value="_G">North West England</option>
+<option value="_H">Southern England</option>
+<option value="_J">South East England</option>
+<option value="_K">South Wales</option>
+<option value="_L">South West England</option>
+<option value="_M">Yorkshire</option>
+<option value="_N">South Scotland</option>
+<option value="_P">North Scotland</option>
+</select>
+or enter your postcode:
+<input id="postcode" type="text"></input>
+<br /><br /><b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
+</center></div>
 
-Don't know your account number? Click <a href="https://octopus.energy/dashboard/">here</a>, log in, and it will redirect you to a page with an address like octopus.energy/dashboard/accounts/A-XXXXXXXX/ - your account number is the A-XXXXXXXX part.<br /><br />
-Don't know your API key? Click <a href="https://octopus.energy/dashboard/developer/">here</a>, log in, and press "Generate API Key".<br /><br />
-<b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
+<br />
+<canvas id="myChart" width="800" height="300"></canvas>
+
+<br /><br />
+<center>
+
+<input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:150px'>
+<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:150px'>
+<input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:150px'>
+<br /><br /><input type="button" id="dwn-btn" value="Save data to CSV file" onclick='download(consumption);'/><br /><br />
+</center><br />
+
+<small>
+Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
+Tariffs last updated on <span id='tariffdate'></span>.
+</small>
 
 <div id="myCookieConsent">
 <a id="cookieButton" onClick="acceptCookies()">Understood</a>
 <div>This website is using cookies. <a href="../cookies.html">More details</a></div>
 </div>
 
-</body></html>
+</body>
+</html>
