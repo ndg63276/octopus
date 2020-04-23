@@ -377,7 +377,7 @@ function changeRegion(val) {
 	myChart.update();
 }
 
-function get_config() {
+function get_config(dataSets) {
 	return {
 		type: 'bar',
 		data: { datasets: dataSets },

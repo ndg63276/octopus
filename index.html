@@ -17,6 +17,7 @@
 <script src="../general_functions.js"></script>
 <script src="functions.js"></script>
 <script>
+
 var pagelink = location.origin+location.pathname;
 user_info = check_login();
 var account_no = user_info["account_no"];
@@ -70,58 +71,62 @@ if (startdate > enddate) {
 	startdate = new Date(s2);
 }
 
-var consumptionDataPoints = [];
-var consumption = null;
+window.onload = function() {
+	var consumptionDataPoints = [];
+	var consumption = null;
 
-if (logged_in) {
-	consumption = get_consumption(user_info, startdate, enddate);
-	if (consumption.length > 0) {
-		sortByKey(consumption, "interval_start");
-		for (i in consumption) {
-			var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
-			consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+	if (logged_in) {
+		consumption = get_consumption(user_info, startdate, enddate);
+		if (consumption.length > 0) {
+			sortByKey(consumption, "interval_start");
+			for (i in consumption) {
+				var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+			}
 		}
 	}
-}
 
-var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
-var goDataPoints = go_data['datapoints'];
-var go_costs = go_data['costs'];
-var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
-var agileDataPoints = agile_data['datapoints'];
-var agile_costs = agile_data['costs'];
+	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+	var goDataPoints = go_data['datapoints'];
+	var go_costs = go_data['costs'];
+	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+	var agileDataPoints = agile_data['datapoints'];
+	var agile_costs = agile_data['costs'];
 
-var carbon_intensity = get_carbon_intensity(startdate, enddate);
-var intensityDataPoints = [];
-for (i in carbon_intensity) {
-	intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
-}
+	var carbon_intensity = get_carbon_intensity(startdate, enddate);
+	var intensityDataPoints = [];
+	for (i in carbon_intensity) {
+		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
+	}
 
-carbon = 0;
-if (logged_in) {
-	carbon = get_carbon_from_data(consumption, carbon_intensity);
-}
+	carbon = 0;
+	if (logged_in) {
+		carbon = get_carbon_from_data(consumption, carbon_intensity);
+	}
 
-var dataSets = [
-	{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
-	{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Octopus Agile', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
-	{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
-];
-if (consumptionDataPoints.length > 0) {
-	dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
-	rightAxis = true;
-} else {
-	rightAxis = false;
-}
+	var dataSets = [
+		{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
+		{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Octopus Agile', fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
+		{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity', fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
+	];
+	if (consumptionDataPoints.length > 0) {
+		dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
+		rightAxis = true;
+	} else {
+		rightAxis = false;
+	}
 
-var config = get_config()
+	var config = get_config(dataSets)
 
-var myChart = '';
+	var myChart = '';
 
-window.onload = function() {
+
 	testFirstCookie();
 	update_tariff_date();
 	document.getElementById("loginlink").setAttribute("href", "login.html"+window.location.search);
+	var chartSpace = document.getElementById("chartSpace");
+	chartSpace.classList.remove("loader");
+	chartSpace.innerHTML = '<canvas id="myChart" width="800" height="300"></canvas>';
 	var ctx = document.getElementById('myChart').getContext('2d');
 	myChart = new Chart(ctx, config);
 	if (logged_in) {
@@ -216,11 +221,10 @@ or enter your postcode:
 <br /><br /><b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
 </center></div>
 
-<br />
-<canvas id="myChart" width="800" height="300"></canvas>
-
-<br /><br />
 <center>
+<div class="loader" id="chartSpace"></div>
+
+<br />
 
 <input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:150px'>
 <input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:150px'>
