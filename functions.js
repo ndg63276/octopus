@@ -326,8 +326,11 @@ function get_carbon_intensity(startdate, enddate) {
 	var url = 'https://api.carbonintensity.org.uk/intensity/';
 	var s = new Date(startdate);
 	s.setSeconds(s.getSeconds()+1)
-	var e = new Date(enddate)
-	e.setSeconds(e.getSeconds()+1)
+	var e = new Date(enddate);
+	if (e-s > 1000*60*60*24*31) {
+		e = new Date(startdate);
+		e.setDate(s.getDate()+31);
+	}
 	url += s.toISOString() + '/' + e.toISOString();
 	var j = ajax_get(url);
 	for (i in j["data"]) {
