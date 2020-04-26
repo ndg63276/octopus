@@ -147,6 +147,7 @@ function get_consumption(user_info, startdate, enddate) {
 	j["next"] = baseurl+"/v1/electricity-meter-points/"+mpan+"/meters/"+serial+"/consumption/";
 	while (j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
+		data = {}; // params not needed after first get
 		for (result in j["results"]) {
 			con = j["results"][result]['consumption'];
 			ints = moment(j["results"][result]['interval_start'])
@@ -204,6 +205,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 		while (j["next"] != null) {
 			var j = ajax_get(j["next"], headers, data);
+			data = {}; // params not needed after first get
 			for (result in j["results"]) {
 				this_result.push(j["results"][result]);
 			}
