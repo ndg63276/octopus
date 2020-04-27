@@ -81,9 +81,20 @@ if (startdate > enddate) {
 	startdate = new Date(s2);
 }
 
+var consumption = null;
+var consumptionDataPoints = [];
+var config = {};
+var myChart = '';
+var carbon_intensity = null;
+var carbon = 0;
+var intensityDataPoints = [];
+
 window.onload = function() {
-	var consumptionDataPoints = [];
-	var consumption = null;
+
+	carbon_intensity = get_carbon_intensity(startdate, enddate);
+	for (i in carbon_intensity) {
+		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
+	}
 
 	if (logged_in) {
 		consumption = get_consumption(user_info, startdate, enddate);
@@ -94,6 +105,7 @@ window.onload = function() {
 				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
 			}
 		}
+		carbon = get_carbon_from_data(consumption, carbon_intensity);
 	}
 
 	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
@@ -102,17 +114,6 @@ window.onload = function() {
 	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
 	var agileDataPoints = agile_data['datapoints'];
 	var agile_costs = agile_data['costs'];
-
-	var carbon_intensity = get_carbon_intensity(startdate, enddate);
-	var intensityDataPoints = [];
-	for (i in carbon_intensity) {
-		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
-	}
-
-	carbon = 0;
-	if (logged_in) {
-		carbon = get_carbon_from_data(consumption, carbon_intensity);
-	}
 
 	var dataSets = [
 		{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
@@ -126,10 +127,7 @@ window.onload = function() {
 		rightAxis = false;
 	}
 
-	var config = get_config(dataSets)
-
-	var myChart = '';
-
+	config = get_config(dataSets)
 
 	testFirstCookie();
 	update_tariff_date();
