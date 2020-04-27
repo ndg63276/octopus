@@ -243,7 +243,7 @@ function get_average_rates(results) {
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	if (code == 'bulb') {
 		var all_rates = get_single_rate(user_info, code);
-	} else if (code == 'tonik' || code == 'ovo') {
+	} else if (code == 'tonik' || code == 'ovo' || code == 'goodenergy' ) {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else if (code == 'edf') {
 		var all_rates = get_edf_rates(user_info, code, startdate, enddate);
@@ -551,6 +551,8 @@ function changeTariff(val) {
 		var code = 'ovo';
 	} else if (val == 'EDF GoElectric May21') {
 		var code = 'edf';
+	} else if (val == 'Good Energy EV 3') {
+		var code = 'goodenergy';
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data['costs'];

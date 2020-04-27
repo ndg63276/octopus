@@ -144,6 +144,20 @@ def get_edf_tariffs(tariffs):
 	return tariffs
 
 
+def get_goodenergy_tariffs(tariffs):
+	tariffs['goodenergy'] = {}
+	for gsp in postcodes:
+		url = 'https://ge-shared-apim-prod.azure-api.net/Tariff?businessType=Domestic&gspGroup='+gsp
+		r = requests.get(url)
+		for tariff in r.json():
+			if tariff['name'] == 'Electric Vehicle Driver 3 E7':
+				charge_cost = 100 * tariff['standingCharge']
+				unit_cost_day = 100 * tariff['dayUnitRate']
+				unit_cost_night = 100 * tariff['nightUnitRate']
+				tariffs['goodenergy'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
+	return tariffs
+
+
 def get_meta_data(tariffs):
 	tariffs['meta'] = {'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
 	return tariffs
@@ -155,10 +169,11 @@ def lambda_handler(event, context):
 	tariffs = get_tonik_tariffs(tariffs)
 	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
+	tariffs = get_goodenergy_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
-	s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json')
+	s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json', ExtraArgs={'ContentType': 'text/json'})
 
 
 if __name__ =='__main__':
