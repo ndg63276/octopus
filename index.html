@@ -62,9 +62,9 @@ if (urlParams.has('start')) {
 }
 
 if (startdate.getMinutes() > 30) {
-	startdate.setMinutes(30,0,0)
+	startdate.setMinutes(30,0,0);
 } else {
-	startdate.setMinutes(0,0,0)
+	startdate.setMinutes(0,0,0);
 }
 
 var enddate = new Date(startdate);

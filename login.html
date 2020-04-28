@@ -27,7 +27,7 @@ window.onload = function() {
 	user_info = check_login();
 	if ("apikey" in user_info && user_info["apikey"] != "" && user_info["apikey"] != null) {
 		var address = user_info["address"];
-		logged_in(address);
+		on_login(address);
 	} else {
 		document.getElementById("loginstate").innerHTML = "You are not logged in.";
 		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Octopus Account Number: </label><input id='account_no'><br />";

@@ -2,7 +2,7 @@ var baseurl = "https://api.octopus.energy"
 var go_code = "GO-4H-0030";
 var agile_code = "AGILE-18-02-21";
 
-function logged_in(address) {
+function on_login(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
 	document.getElementById("mainbody").innerHTML = "Click <a href='index.html"+window.location.search+"'>here</a> if you are not redirected automatically.<br />";
 	setTimeout(function () {location.href = "index.html"+window.location.search}, 3000);
@@ -37,7 +37,7 @@ function login() {
 	var storecreds = document.getElementById("storecreds").checked;
 	var user_info = do_login(account_no, apikey, storecreds);
 	if ("address" in user_info) {
-		logged_in(user_info["address"]);
+		on_login(user_info["address"]);
 	} else {
 		document.getElementById("loginstate").innerHTML = "Login failed";
 	}
@@ -192,13 +192,13 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	var headers = user_info["headers"];
 	var results = {};
 	var data = {};
-	if (startdate != null) {
-		data["period_from"] = startdate.toISOString();
-		if (enddate != null) {
-			data["period_to"] = enddate.toISOString();
-		}
-	}
 	for (index in tariff_codes) {
+		if (startdate != null) {
+			data["period_from"] = startdate.toISOString();
+			if (enddate != null) {
+				data["period_to"] = enddate.toISOString();
+			}
+		}
 		var this_result = []
 		var j = {};
 		tariff_code = tariff_codes[index];
