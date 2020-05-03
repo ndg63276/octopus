@@ -1,4 +1,4 @@
-<html>
+<html xmlns="http://www.w3.org/1999/xhtml" >
 <head profile="http://www.w3.org/2005/10/profile">
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-164510568-1"></script>
@@ -27,6 +27,7 @@
 <link rel="stylesheet" media="(min-width:801px)" href="../largescreens.css">
 
 <title>SmartAtHome.co.uk - My Octopus Usage</title>
+
 <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
@@ -68,9 +69,9 @@ if (urlParams.has('start')) {
 }
 
 if (startdate.getMinutes() > 30) {
-	startdate.setMinutes(30,0,0)
+	startdate.setMinutes(30,0,0);
 } else {
-	startdate.setMinutes(0,0,0)
+	startdate.setMinutes(0,0,0);
 }
 
 var enddate = new Date(startdate);
@@ -87,14 +88,22 @@ if (startdate > enddate) {
 	startdate = new Date(s2);
 }
 
-var consumptionDataPoints = [];
-var consumption = null;
 var agileDataPoints = null;
-var config = '';
-var carbon_intensity = null;
+var consumption = null;
+var consumptionDataPoints = [];
+var config = {};
 var myChart = '';
+var carbon_intensity = null;
+var carbon = 0;
+var intensityDataPoints = [];
 
 window.onload = function() {
+
+	carbon_intensity = get_carbon_intensity(startdate, enddate);
+	for (i in carbon_intensity) {
+		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
+	}
+
 	if (logged_in) {
 		consumption = get_consumption(user_info, startdate, enddate);
 		if (consumption.length > 0) {
@@ -104,6 +113,7 @@ window.onload = function() {
 				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
 			}
 		}
+		carbon = get_carbon_from_data(consumption, carbon_intensity);
 	}
 
 	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
@@ -112,17 +122,6 @@ window.onload = function() {
 	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
 	agileDataPoints = agile_data['datapoints'];
 	var agile_costs = agile_data['costs'];
-
-	carbon_intensity = get_carbon_intensity(startdate, enddate);
-	var intensityDataPoints = [];
-	for (i in carbon_intensity) {
-		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
-	}
-
-	carbon = 0;
-	if (logged_in) {
-		carbon = get_carbon_from_data(consumption, carbon_intensity);
-	}
 
 	var dataSets = [
 		{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go', fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
@@ -221,7 +220,7 @@ $(function() {
 <br /></div>
 <div id='not_logged_in' style="display:none;">
 <center>
-<a id="loginlink" href="login.html">Log in</a> to see your usage and compare tariffs.
+<a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.
 Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
 <option value="_A">East England</option>
