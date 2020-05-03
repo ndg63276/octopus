@@ -387,6 +387,8 @@ function get_config(dataSets) {
 		type: 'bar',
 		data: { datasets: dataSets },
 		options: {
+			responsive: true,
+			maintainAspectRatio: false,
 			title: { display: false },
 			tooltips: {
 				mode: 'index',
@@ -539,8 +541,8 @@ function update_tariff_date() {
 	document.getElementById('tariffdate').innerHTML = date_str;
 }
 
-function changeTariff(val) {
-	document.getElementById('tariff').innerHTML = val + " &#9660";
+function changeTariff() {
+	var val = document.getElementById('changeTariffSelect').value;
 	if (val == 'Octopus Go') {
 		var code = go_code;
 	} else if (val == 'Bulb Vari-Fair') {

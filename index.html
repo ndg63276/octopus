@@ -9,21 +9,27 @@
 
   gtag('config', 'UA-164510568-1');
 </script>
-
-<link rel="icon" type="image/png" href="../short_logo_trans.png">
-<link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-<link rel="stylesheet" type="text/css" href="../styles.css">
-
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
+
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+<link rel="stylesheet" type="text/css" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<link rel="icon" type="image/png" href="../short_logo_trans.png">
+<link rel="stylesheet" type="text/css" href="../styles.css">
+<link rel="stylesheet" media="(max-width:800px)" href="../smallscreens.css">
+<link rel="stylesheet" media="(min-width:801px)" href="../largescreens.css">
+
 <title>SmartAtHome.co.uk - My Octopus Usage</title>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script src="../general_functions.js"></script>
 <script src="functions.js"></script>
 <script>
@@ -81,10 +87,14 @@ if (startdate > enddate) {
 	startdate = new Date(s2);
 }
 
-window.onload = function() {
-	var consumptionDataPoints = [];
-	var consumption = null;
+var consumptionDataPoints = [];
+var consumption = null;
+var agileDataPoints = null;
+var config = '';
+var carbon_intensity = null;
+var myChart = '';
 
+window.onload = function() {
 	if (logged_in) {
 		consumption = get_consumption(user_info, startdate, enddate);
 		if (consumption.length > 0) {
@@ -100,10 +110,10 @@ window.onload = function() {
 	var goDataPoints = go_data['datapoints'];
 	var go_costs = go_data['costs'];
 	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
-	var agileDataPoints = agile_data['datapoints'];
+	agileDataPoints = agile_data['datapoints'];
 	var agile_costs = agile_data['costs'];
 
-	var carbon_intensity = get_carbon_intensity(startdate, enddate);
+	carbon_intensity = get_carbon_intensity(startdate, enddate);
 	var intensityDataPoints = [];
 	for (i in carbon_intensity) {
 		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
@@ -126,18 +136,15 @@ window.onload = function() {
 		rightAxis = false;
 	}
 
-	var config = get_config(dataSets)
-
-	var myChart = '';
-
+	config = get_config(dataSets)
 
 	testFirstCookie();
 	update_tariff_date();
 	document.getElementById("loginlink").setAttribute("href", "login.html"+window.location.search);
 	var chartSpace = document.getElementById("chartSpace");
 	chartSpace.classList.remove("loader");
-	chartSpace.innerHTML = '<canvas id="myChart" width="800" height="300"></canvas>';
-	var ctx = document.getElementById('myChart').getContext('2d');
+	chartSpace.innerHTML = '<div class="chart-container"><canvas id="octopus-chart" height=500></canvas></div>';
+	var ctx = document.getElementById('octopus-chart').getContext('2d');
 	myChart = new Chart(ctx, config);
 	if (logged_in) {
 		document.getElementById('go_unit_cost').innerHTML = "£"+(go_costs["unit_cost"]/100).toFixed(2);
@@ -183,25 +190,31 @@ $(function() {
 
 </head>
 <body>
+<div data-role="page">
+
 <center>
 <a href='../index.html'><img src="../long_logo.png"></a><br /><br />
-<input style="text-align:center;" size=50 type="text" name="datetimes" />
+<div class="date-input"><input class="small-input" type="text" name="datetimes" /></div>
 </center>
 <br />
 <div id='cost_table' style="display: none;">
 <table class="w3-table-all w3-centered"><thead>
-<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost for this period</b></td><td width=25%><b>Standing Charge for this period</b></td><td width=25%><b>Your Carbon Footprint</b></td></tr></thead>
+<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost<span class='refresh-btn'> for this period</span></b></td>
+<td width=25%><b>Standing Charge<span class='refresh-btn'> for this period</span></b></td><td width=25%><b><span class='refresh-btn'>Your </span>Carbon Footprint</b></td></tr></thead>
 <tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
 <tr><td>
-<div class="w3-dropdown-hover">
-<button id='tariff' class="w3-light-grey w3-button">Octopus Go &#9660;</button>
-<div class="w3-dropdown-content w3-bar-block w3-card-4">
-<a href="javascript:changeTariff('Octopus Go')" class="w3-bar-item w3-button">Octopus Go</a>
-<a href="javascript:changeTariff('Bulb Vari-Fair')" class="w3-bar-item w3-button">Bulb Vari-Fair</a>
-<a href="javascript:changeTariff('Tonik Charge EV')" class="w3-bar-item w3-button">Tonik Charge EV</a>
-<a href="javascript:changeTariff('Ovo Energy 2 Year Fixed')" class="w3-bar-item w3-button">Ovo Energy 2 Year Fixed</a>
-<a href="javascript:changeTariff('EDF GoElectric May21')" class="w3-bar-item w3-button">EDF GoElectric May21</a>
+<div class="cost-table-row"
+<form>
+<div class="ui-field-contain cost-table-dropdown">
+<select onchange="changeTariff()" id="changeTariffSelect">
+<option value="Octopus Go">Octopus Go</option>
+<option value="Bulb Vari-Fair">Bulb Vari-Fair</option>
+<option value="Tonik Charge EV">Tonik Charge EV</option>
+<option value="Ovo Energy 2 Year Fixed">Ovo Energy 2 Year Fixed</option>
+<option value="EDF GoElectric May21">EDF GoElectric May21</option>
+</select>
 </div>
+</form>
 </div>
 </td><td style="vertical-align:middle" id="go_unit_cost"></td><td style="vertical-align:middle" id="go_charge"></td><td style="vertical-align:middle" id="carbon1"></td></tr>
 </table>
@@ -235,11 +248,11 @@ or enter your postcode:
 <div class="loader" id="chartSpace"></div>
 
 <br />
-
-<input type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days' style='font-size:15px;height:50px;width:150px'>
-<input type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days' style='font-size:15px;height:50px;width:150px'>
-<input type='button' onClick='future_prices();' value='Future prices' style='font-size:15px;height:50px;width:150px'>
-<br /><br /><input type="button" id="dwn-btn" value="Save data to CSV file" onclick='download(consumption);'/><br /><br />
+<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days'>
+<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days'>
+<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='future_prices();' value='Future prices'>
+<br /><br />
+<input class='big-btn' data-role="button" data-inline="true" type="button" id="dwn-btn" value="Save data to CSV file" onclick='download(consumption);'/><br /><br />
 </center><br />
 
 <small>
@@ -251,6 +264,6 @@ Tariffs last updated on <span id='tariffdate'></span>.
 <a id="cookieButton" onClick="acceptCookies()">Understood</a>
 <div>This website is using cookies. <a href="../cookies.html">More details</a></div>
 </div>
-
+</div><!-- /page -->
 </body>
 </html>
