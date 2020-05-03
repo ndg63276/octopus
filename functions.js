@@ -369,6 +369,7 @@ function changePostcode() {
 	setCookie("postcode", pc, 365*24);
 	var gsp = get_gsp(user_info);
 	document.getElementById("region").value = gsp;
+	$("#region").selectmenu('refresh')
 	changeRegion(gsp);
 }
 

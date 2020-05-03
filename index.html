@@ -220,8 +220,9 @@ $(function() {
 <br /></div>
 <div id='not_logged_in' style="display:none;">
 <center>
+<div class="in-line-div" data-inline="true">
 <a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.
-Showing prices for <select id="region" onchange="changeRegion(this.value)">
+Showing prices for <select id="region" data-inline="true" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
 <option value="_A">East England</option>
 <option value="_B">East Midlands</option>
@@ -239,9 +240,9 @@ Showing prices for <select id="region" onchange="changeRegion(this.value)">
 <option value="_P">North Scotland</option>
 </select>
 or enter your postcode:
-<input id="postcode" type="text"></input>
+<div class="in-line-div"><input id="postcode" type="text"></input></div>
 <br /><br /><b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
-</center></div>
+</div></center></div>
 
 <center>
 <div class="loader" id="chartSpace"></div>
