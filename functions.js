@@ -8,6 +8,65 @@ function on_login(address) {
 	setTimeout(function () {location.href = "index.html"+window.location.search}, 3000);
 }
 
+function on_consumption_change() {
+	if (logged_in) {
+		consumptionDataPoints = [];
+		consumption = get_consumption(user_info, startdate, enddate);
+		if (consumption.length > 0) {
+			sortByKey(consumption, "interval_start");
+			for (i in consumption) {
+				var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
+				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+			}
+		}
+		carbon = get_carbon_from_data(consumption, carbon_intensity);
+	}
+
+	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+	var goDataPoints = go_data['datapoints'];
+	go_costs = go_data['costs'];
+	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+	agileDataPoints = agile_data['datapoints'];
+	agile_costs = agile_data['costs'];
+
+	var dataSets = [
+		{type: 'line', pointHitRadius:20, backgroundColor:'#ff0000', borderColor:'#ff0000', label:'Octopus Go',
+			fill:false, steppedLine:true, yAxisID:'left', data:goDataPoints},
+		{type: 'line', pointHitRadius:20, backgroundColor:'#00ff00', borderColor:'#00ff00', label:'Octopus Agile',
+			fill:false, steppedLine:false, yAxisID:'left', data:agileDataPoints},
+		{type: 'line', pointHitRadius:20, backgroundColor:'#800080', borderColor:'#800080', label:'Carbon Intensity',
+			fill:false, yAxisID:'right2', data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
+	];
+
+	if (consumptionDataPoints.length > 0) {
+		dataSets.push({type: 'bar', backgroundColor:'#0000ff', label:'Consumption', fill:true, yAxisID:'right', data:consumptionDataPoints});
+		rightAxis = true;
+	} else {
+		rightAxis = false;
+	}
+
+	config = get_config(dataSets)
+
+	var loaderDiv = document.getElementById("loader");
+	loaderDiv.classList.add("hidden");
+	var chartSpace = document.getElementById("chartSpace");
+	chartSpace.classList.remove("hidden");
+	chartSpace.innerHTML = '<div class="chart-container"><canvas id="octopus-chart" height=500></canvas></div>';
+	var ctx = document.getElementById('octopus-chart').getContext('2d');
+	myChart = new Chart(ctx, config);
+
+	if (logged_in) {
+		document.getElementById('go_unit_cost').innerHTML = "£"+(go_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('agile_unit_cost').innerHTML = "£"+(agile_costs["unit_cost"]/100).toFixed(2);
+		document.getElementById('go_charge').innerHTML = "£"+(go_costs["charge_cost"]/100).toFixed(2);
+		document.getElementById('agile_charge').innerHTML = "£"+(agile_costs["charge_cost"]/100).toFixed(2);
+		document.getElementById('carbon1').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById('carbon2').innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById("cost_table").style.display = ""
+	}
+
+}
+
 function do_login(account_no, apikey, storecreds) {
 	to_return = {};
 	var url = baseurl + "/v1/accounts/" + account_no + "/";
@@ -20,6 +79,10 @@ function do_login(account_no, apikey, storecreds) {
 	to_return["mpan"] = last_meter_point["mpan"]
 	var last_meter = last_element(last_meter_point["meters"])
 	to_return["serial"] = last_meter["serial_number"]
+	to_return["serial_nos"] = [];
+	for (meter in last_meter_point["meters"]) {
+		to_return["serial_nos"].push(last_meter_point["meters"][meter]["serial_number"]);
+	}
 	to_return["headers"] = headers;
 	if (storecreds == true) {
 		setCookie("account_no", account_no, 365*24);
@@ -381,6 +444,19 @@ function changeRegion(val) {
 	agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
 	config.data.datasets[1].data = agile_data['datapoints'];
 	myChart.update();
+}
+
+function changeMeter() {
+	var loaderDiv = document.getElementById("loader");
+	loaderDiv.classList.remove("hidden");
+	var chartSpace = document.getElementById("chartSpace");
+	chartSpace.classList.add("hidden");
+	var val = document.getElementById("changeMeterSelect").value;
+	user_info["serial"] = val;
+	setTimeout(function(){
+		on_consumption_change();
+		myChart.update();
+	}, 1);
 }
 
 function get_config(dataSets) {
