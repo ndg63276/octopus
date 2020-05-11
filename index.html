@@ -123,7 +123,7 @@ window.onload = function() {
 		if (user_info["serial_nos"].length > 1) {
 			for (serial_no in user_info["serial_nos"]) {
 				var option = document.createElement("option");
-				option.text = user_info["serial_nos"][serial_no];
+				option.text = "Meter: "+user_info["serial_nos"][serial_no];
 				option.value = user_info["serial_nos"][serial_no];
 				changeMeterSelect.add(option);
 				option.selected = true;
