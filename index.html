@@ -6,9 +6,9 @@
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  gtag("js", new Date());
 
-  gtag('config', 'UA-164510568-1');
+  gtag("config", "UA-164510568-1");
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description"
@@ -63,8 +63,8 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 
 var startdate = new Date();
-if (urlParams.has('start')) {
-	var start = urlParams.get('start');
+if (urlParams.has("start")) {
+	var start = urlParams.get("start");
 	startdate = parseDateParam(start)
 } else if (logged_in) {
 	startdate.setDate(startdate.getDate() - 2);
@@ -80,8 +80,8 @@ if (startdate.getMinutes() > 30) {
 }
 
 var enddate = new Date(startdate);
-if (urlParams.has('end')) {
-	var end = urlParams.get('end');
+if (urlParams.has("end")) {
+	var end = urlParams.get("end");
 	enddate = parseDateParam(end)
 } else {
 	enddate.setDate(enddate.getDate() + 1);
@@ -100,7 +100,7 @@ var go_costs = 0;
 var consumption = null;
 var consumptionDataPoints = [];
 var config = {};
-var myChart = '';
+var myChart = "";
 var carbon_intensity = null;
 var carbon = 0;
 var intensityDataPoints = [];
@@ -126,19 +126,19 @@ window.onload = function() {
 			changeMPANSelect.add(option);
 			option.selected = true;
 		}
-		$("#changeMPANSelect").selectmenu('refresh');
+		$("#changeMPANSelect").selectmenu("refresh");
 		updateMeters();
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
 		var postcode = getCookie("postcode");
-		document.getElementById('postcode').value = postcode;
+		document.getElementById("postcode").value = postcode;
 		var gsp = getCookie("gsp");
 		if (gsp != "") {
 			document.getElementById("region").value = gsp;
 		} else if (postcode != "") {
 			changePostcode();
 		}
-		document.getElementById('postcode').addEventListener("keyup", function(event) {
+		document.getElementById("postcode").addEventListener("keyup", function(event) {
 			if (event.key === "Enter") { changePostcode(); }
 		});
 	};
@@ -151,12 +151,12 @@ $(function() {
 		timePickerSeconds: true,
 		startDate: moment(startdate),
 		endDate: moment(enddate),
-		maxDate: moment().endOf('day').add(2, 'day'),
+		maxDate: moment().endOf("day").add(2, "day"),
 		locale: {
-			format: ' DD/MM/YYYY HH:mm:ss'
+			format: " DD/MM/YYYY HH:mm:ss"
 		}
 	}, function(start, end, label) {
-		window.location.href = pagelink+"?start="+start.format('YYYY-MM-DDTHH:mm:ss')+"&end="+end.format('YYYY-MM-DDTHH:mm:ss');
+		window.location.href = pagelink+"?start="+start.format("YYYY-MM-DDTHH:mm:ss")+"&end="+end.format("YYYY-MM-DDTHH:mm:ss");
 	});
 });
 
@@ -167,7 +167,7 @@ $(function() {
 <div data-role="page">
 
 <center>
-<a href='../index.html'><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br />
+<a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br />
 <div id="changeMPANDiv" class="in-line-div align-bottom">
 <select onchange="changeMPAN()" id="changeMPANSelect">
 </select>
@@ -179,10 +179,10 @@ $(function() {
 <div class="date-input"><input class="small-input" type="text" name="datetimes" /></div>
 </center>
 <br />
-<div id='cost_table' style="display: none;">
+<div id="cost_table" style="display: none;">
 <table class="w3-table-all w3-centered"><thead>
-<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost<span class='refresh-btn'> for this period</span></b></td>
-<td width=25%><b>Standing Charge<span class='refresh-btn'> for this period</span></b></td><td width=25%><b><span class='refresh-btn'>Your </span>Carbon Footprint</b></td></tr></thead>
+<tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost<span class="refresh-btn"> for this period</span></b></td>
+<td width=25%><b>Standing Charge<span class="refresh-btn"> for this period</span></b></td><td width=25%><b><span class="refresh-btn">Your </span>Carbon Footprint</b></td></tr></thead>
 <tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
 <tr><td>
 <div class="cost-table-row"
@@ -201,7 +201,7 @@ $(function() {
 </td><td style="vertical-align:middle" id="go_unit_cost"></td><td style="vertical-align:middle" id="go_charge"></td><td style="vertical-align:middle" id="carbon1"></td></tr>
 </table>
 <br /></div>
-<div id='not_logged_in' style="display:none;">
+<div id="not_logged_in" style="display:none;">
 <center>
 <div class="in-line-div" data-inline="true">
 <a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.
@@ -233,16 +233,16 @@ or enter your postcode:
 <div class="hidden" id="chartSpace"></div>
 
 <br />
-<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='window.location.href=pagelink+"?start=-30days&end=now";' value='Last 30 days'>
-<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='window.location.href=pagelink+"?start=-7days&end=now";' value='Last 7 days'>
-<input class='big-btn' data-role="button" data-inline="true" type='button' onClick='future_prices();' value='Future prices'>
+<input class="big-btn" data-role="button" data-inline="true" type="button" onClick='window.location.href=pagelink+"?start=-30days&end=now";' value="Last 30 days">
+<input class="big-btn" data-role="button" data-inline="true" type="button" onClick='window.location.href=pagelink+"?start=-7days&end=now";' value="Last 7 days">
+<input class="big-btn" data-role="button" data-inline="true" type="button" onClick="future_prices();" value="Future prices">
 <br /><br />
-<input class='big-btn' data-role="button" data-inline="true" type="button" id="dwn-btn" value="Save data to CSV file" onclick='download(consumption);'/><br /><br />
+<input class="big-btn" data-role="button" data-inline="true" type="button" id="dwn-btn" value="Save data to CSV file" onclick="download(consumption);"/><br /><br />
 </center><br />
 
 <small>
 Tariff data assumes you pay by direct debit and are not on a pre-pay meter.<br />
-Tariffs last updated on <span id='tariffdate'></span>.
+Tariffs last updated on <span id="tariffdate"></span>.
 </small>
 
 <div id="myCookieConsent">

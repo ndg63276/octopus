@@ -489,7 +489,7 @@ function updateMeters() {
 		option.selected = true;
 		user_info["serial"] = this_serial_no;
 	}
-	$("#changeMeterSelect").selectmenu('refresh');
+	$("#changeMeterSelect").selectmenu("refresh");
 }
 
 function get_config(dataSets) {

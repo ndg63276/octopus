@@ -6,9 +6,9 @@
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  gtag("js", new Date());
 
-  gtag('config', 'UA-164510568-1');
+  gtag("config", "UA-164510568-1");
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description"
@@ -40,7 +40,7 @@ window.onload = function() {
 		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
 		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
 		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
-		document.getElementById('apikey').onkeydown = function(e){if(e.keyCode == 13){login();}};
+		document.getElementById("apikey").onkeydown = function(e){if(e.keyCode == 13){login();}};
 	};
 }
 
@@ -53,7 +53,7 @@ window.onload = function() {
 </style>
 </head>
 <body>
-<center><a href='../index.html'><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br /></center>
+<center><a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br /></center>
 <div id="loginstate"></div><br />
 <div id="mainbody"></div>
 <br />
