@@ -77,12 +77,16 @@ function do_login(account_no, apikey, storecreds) {
 	to_return["postcode"] = last_property["postcode"];
 	var last_meter_point = last_element(last_property["electricity_meter_points"])
 	to_return["mpan"] = last_meter_point["mpan"]
+	to_return["mpans"] = {};
+	for (meter_point in last_property["electricity_meter_points"]) {
+		this_meter_point = last_property["electricity_meter_points"][meter_point];
+		to_return["mpans"][this_meter_point["mpan"]] = [];
+		for (meter in this_meter_point["meters"]) {
+			to_return["mpans"][this_meter_point["mpan"]].push(this_meter_point["meters"][meter]["serial_number"]);
+		}
+	}
 	var last_meter = last_element(last_meter_point["meters"])
 	to_return["serial"] = last_meter["serial_number"]
-	to_return["serial_nos"] = [];
-	for (meter in last_meter_point["meters"]) {
-		to_return["serial_nos"].push(last_meter_point["meters"][meter]["serial_number"]);
-	}
 	to_return["headers"] = headers;
 	if (storecreds == true) {
 		setCookie("account_no", account_no, 365*24);
@@ -457,6 +461,35 @@ function changeMeter() {
 		on_consumption_change();
 		myChart.update();
 	}, 1);
+}
+
+function changeMPAN() {
+	var loaderDiv = document.getElementById("loader");
+	loaderDiv.classList.remove("hidden");
+	var chartSpace = document.getElementById("chartSpace");
+	chartSpace.classList.add("hidden");
+	var val = document.getElementById("changeMPANSelect").value;
+	user_info["mpan"] = val;
+	updateMeters();
+	setTimeout(function(){
+		on_consumption_change();
+		myChart.update();
+	}, 1);
+}
+
+function updateMeters() {
+	$("#changeMeterSelect").empty();
+	var changeMeterSelect = document.getElementById("changeMeterSelect");
+	for (serial_no in user_info["mpans"][user_info["mpan"]]) {
+		var option = document.createElement("option");
+		var this_serial_no = user_info["mpans"][user_info["mpan"]][serial_no];
+		option.text = "Meter: "+this_serial_no;
+		option.value = this_serial_no;
+		changeMeterSelect.add(option);
+		option.selected = true;
+		user_info["serial"] = this_serial_no;
+	}
+	$("#changeMeterSelect").selectmenu('refresh');
 }
 
 function get_config(dataSets) {

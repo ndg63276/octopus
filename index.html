@@ -118,18 +118,16 @@ window.onload = function() {
 	on_consumption_change();
 
 	if (logged_in) {
-		document.getElementById('changeMeterDiv').classList.remove('hidden');
-		var changeMeterSelect = document.getElementById("changeMeterSelect");
-		if (user_info["serial_nos"].length > 1) {
-			for (serial_no in user_info["serial_nos"]) {
-				var option = document.createElement("option");
-				option.text = "Meter: "+user_info["serial_nos"][serial_no];
-				option.value = user_info["serial_nos"][serial_no];
-				changeMeterSelect.add(option);
-				option.selected = true;
-			}
-			$("#changeMeterSelect").selectmenu('refresh');
+		var changeMPANSelect = document.getElementById("changeMPANSelect");
+		for (mpan in user_info["mpans"]) {
+			var option = document.createElement("option");
+			option.text = "MPAN: "+mpan;
+			option.value = mpan;
+			changeMPANSelect.add(option);
+			option.selected = true;
 		}
+		$("#changeMPANSelect").selectmenu('refresh');
+		updateMeters();
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
 		var postcode = getCookie("postcode");
@@ -170,7 +168,11 @@ $(function() {
 
 <center>
 <a href='../index.html'><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br />
-<div id="changeMeterDiv" class="hidden in-line-div align-bottom">
+<div id="changeMPANDiv" class="in-line-div align-bottom">
+<select onchange="changeMPAN()" id="changeMPANSelect">
+</select>
+</div>
+<div id="changeMeterDiv" class="in-line-div align-bottom">
 <select onchange="changeMeter()" id="changeMeterSelect">
 </select>
 </div>
