@@ -34,27 +34,23 @@ window.onload = function() {
 		var address = user_info["address"];
 		on_login(address);
 	} else {
-		document.getElementById("loginstate").innerHTML = "You are not logged in.";
-		document.getElementById("mainbody").innerHTML = "<label class='l1' for='account_no'>Octopus Account Number: </label><input id='account_no'><br />";
-		document.getElementById("mainbody").innerHTML += "<label class='l1' for='apikey'>Octopus API Key: </label><input type='password' id='apikey'><br /><br />";
-		document.getElementById("mainbody").innerHTML += "<input type='checkbox' id='storecreds'><label for='storecreds'> Keep me logged in</label><br /><br />";
-		document.getElementById("mainbody").innerHTML += "<input type='submit' value='Submit' onclick='return login();'>";
-		document.getElementById("mainbody").innerHTML += " <a href='safe.html'>Is this safe?</a>";
+		document.getElementById("loginform").classList.remove("hidden");
 		document.getElementById("apikey").onkeydown = function(e){if(e.keyCode == 13){login();}};
 	};
 }
 
 </script>
-<style>
-.l1 {
-	width: 200px;
-	display: inline-block;
-}
-</style>
 </head>
 <body>
 <center><a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br /></center>
-<div id="loginstate"></div><br />
+<div id="loginstate">You are not logged in.</div><br />
+<div class="hidden" id="loginform">
+<label class="l2" for="account_no">Octopus Account Number: </label><input id="account_no"><br />
+<label class="l2" for="apikey">Octopus API Key: </label><input type="password" id="apikey"><br /><br />
+<input type="checkbox" id="storecreds"><label for="storecreds"> Keep me logged in</label><br /><br />
+<input type="submit" value="Submit" onclick="return login();">
+ <a href="safe.html">Is this safe?</a>
+</div><br />
 <div id="mainbody"></div>
 <br />
 

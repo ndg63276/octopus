@@ -4,6 +4,7 @@ var agile_code = "AGILE-18-02-21";
 
 function on_login(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
+	document.getElementById("loginform").classList.add("hidden");
 	document.getElementById("mainbody").innerHTML = "Click <a href='index.html"+window.location.search+"'>here</a> if you are not redirected automatically.<br />";
 	setTimeout(function () {location.href = "index.html"+window.location.search}, 3000);
 }
@@ -72,28 +73,30 @@ function do_login(account_no, apikey, storecreds) {
 	var url = baseurl + "/v1/accounts/" + account_no + "/";
 	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
 	var j = ajax_get(url, headers)
-	var last_property = last_element(j["properties"])
-	to_return["address"] = last_property["address_line_1"];
-	to_return["postcode"] = last_property["postcode"];
-	var last_meter_point = last_element(last_property["electricity_meter_points"])
-	to_return["mpan"] = last_meter_point["mpan"]
-	to_return["mpans"] = {};
-	for (meter_point in last_property["electricity_meter_points"]) {
-		this_meter_point = last_property["electricity_meter_points"][meter_point];
-		to_return["mpans"][this_meter_point["mpan"]] = [];
-		for (meter in this_meter_point["meters"]) {
-			to_return["mpans"][this_meter_point["mpan"]].push(this_meter_point["meters"][meter]["serial_number"]);
+	if ("properties" in j) {
+		var last_property = last_element(j["properties"])
+		to_return["address"] = last_property["address_line_1"];
+		to_return["postcode"] = last_property["postcode"];
+		var last_meter_point = last_element(last_property["electricity_meter_points"])
+		to_return["mpan"] = last_meter_point["mpan"]
+		to_return["mpans"] = {};
+		for (meter_point in last_property["electricity_meter_points"]) {
+			this_meter_point = last_property["electricity_meter_points"][meter_point];
+			to_return["mpans"][this_meter_point["mpan"]] = [];
+			for (meter in this_meter_point["meters"]) {
+				to_return["mpans"][this_meter_point["mpan"]].push(this_meter_point["meters"][meter]["serial_number"]);
+			}
 		}
-	}
-	var last_meter = last_element(last_meter_point["meters"])
-	to_return["serial"] = last_meter["serial_number"]
-	to_return["headers"] = headers;
-	if (storecreds == true) {
-		setCookie("account_no", account_no, 365*24);
-		setCookie("apikey", apikey, 365*24);
-	} else if (storecreds == false) {
-		setCookie("account_no", account_no, 1);
-		setCookie("apikey", apikey, 1);
+		var last_meter = last_element(last_meter_point["meters"])
+		to_return["serial"] = last_meter["serial_number"]
+		to_return["headers"] = headers;
+		if (storecreds == true) {
+			setCookie("account_no", account_no, 365*24);
+			setCookie("apikey", apikey, 365*24);
+		} else if (storecreds == false) {
+			setCookie("account_no", account_no, 1);
+			setCookie("apikey", apikey, 1);
+		}
 	}
 	return to_return;
 }
