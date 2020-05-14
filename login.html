@@ -10,6 +10,11 @@
 
   gtag("config", "UA-164510568-1");
 </script>
+
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description"
         content="Log in to compare Octopus Agile and Go tariffs with those from           
@@ -22,7 +27,6 @@
 <link rel="icon" type="image/png" href="../short_logo_trans.png">
 <link rel="stylesheet" type="text/css" href="../styles.css">
 <title>SmartAtHome.co.uk - My Octopus Usage</title>
-<script src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
 <script src="functions.js"></script>
 <script src="../general_functions.js"></script>
 <script>
@@ -42,17 +46,19 @@ window.onload = function() {
 </script>
 </head>
 <body>
-<center><a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br /></center>
+<div data-role="page">
+<center><a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br />
 <div id="loginstate">You are not logged in.</div><br />
 <div class="hidden" id="loginform">
-<label class="l2" for="account_no">Octopus Account Number: </label><input id="account_no"><br />
-<label class="l2" for="apikey">Octopus API Key: </label><input type="password" id="apikey"><br /><br />
-<input type="checkbox" id="storecreds"><label for="storecreds"> Keep me logged in</label><br /><br />
-<input type="submit" value="Submit" onclick="return login();">
- <a href="safe.html">Is this safe?</a>
+<label class="l2" for="account_no">Octopus Account Number: </label><div class="in-line-div"><input id="account_no"></div><br />
+<label class="l2" for="apikey">Octopus API Key: </label><div class="in-line-div"><input type="password" id="apikey"></div><br /><br />
+<div class="in-line-div"><input type="checkbox" id="storecreds"></div><label for="storecreds"> Keep me logged in</label><br /><br />
+<div class="in-line-div"><input type="submit" value="Submit" onclick="return login();"></div><br />
+<a href="safe.html">Is this safe?</a>
 </div><br />
 <div id="mainbody"></div>
 <br />
+</center>
 
 Don't know your account number? Click <a href="https://octopus.energy/dashboard/">here</a>, log in, and it will redirect you to a page with an address like octopus.energy/dashboard/accounts/A-XXXXXXXX/ - your account number is the A-XXXXXXXX part.<br /><br />
 Don't know your API key? Click <a href="https://octopus.energy/dashboard/developer/">here</a>, log in, and press "Generate API Key".<br /><br />
@@ -62,5 +68,5 @@ Don't know your API key? Click <a href="https://octopus.energy/dashboard/develop
 <a id="cookieButton" onClick="acceptCookies()">Understood</a>
 <div>This website is using cookies. <a href="../cookies.html">More details</a></div>
 </div>
-
+</div><!-- /page -->
 </body></html>
