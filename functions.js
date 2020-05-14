@@ -574,19 +574,6 @@ function get_config(dataSets) {
 	};
 }
 
-function get_json(jsonfile) {
-	var to_return = {};
-	$.ajax({
-		url: jsonfile,
-		async: false,
-		dataType: "json",
-		success: function (json) {
-			to_return = json;
-		}
-	});
-	return to_return;
-}
-
 function get_single_rate(user_info, code) {
 	json = get_json("tariffs.json");
 	data = json[code];
