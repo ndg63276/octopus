@@ -551,7 +551,8 @@ function get_config(dataSets) {
 					display: true,
 					position: "left",
 					type: "linear",
-					scaleLabel: { display: true, labelString: "Price (p/kWh)" }
+					scaleLabel: { display: true, labelString: "Price (p/kWh)" },
+					ticks: { suggestedMin: 0 }
 				},
 				{
 					id: "right2",
