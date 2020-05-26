@@ -52,7 +52,8 @@ def create_config(dataSets, startdate, enddate):
 					'type': 'time',
 				}],
 				'yAxes': [{
-					'scaleLabel': { 'display': True, 'labelString': 'Price (p/kWh)' }
+					'scaleLabel': { 'display': True, 'labelString': 'Price (p/kWh)' },
+					'ticks': { 'suggestedMin': 0 }
 				}]
 			}
 		}
