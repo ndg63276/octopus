@@ -65,10 +65,10 @@ const urlParams = new URLSearchParams(queryString);
 var startdate = new Date();
 if (urlParams.has("start")) {
 	var start = urlParams.get("start");
-	startdate = parseDateParam(start)
-} else if (logged_in) {
-	startdate.setDate(startdate.getDate() - 2);
-	startdate.setHours(0, 0, 0, 0);
+	startdate = parseDateParam(start);
+//} else if (logged_in) {
+//	startdate.setDate(startdate.getDate() - 2);
+//	startdate.setHours(0, 0, 0, 0);
 } else {
 	// startdate is now
 }
@@ -118,6 +118,10 @@ window.onload = function() {
 	on_consumption_change();
 
 	if (logged_in) {
+		document.getElementById("changeMPANDiv").classList.remove("hidden");
+		document.getElementById("changeMeterDiv").classList.remove("hidden");
+		document.getElementById("changeMPANDiv").classList.add("in-line-div");
+		document.getElementById("changeMeterDiv").classList.add("in-line-div");
 		var changeMPANSelect = document.getElementById("changeMPANSelect");
 		for (mpan in user_info["mpans"]) {
 			var option = document.createElement("option");
@@ -168,11 +172,11 @@ $(function() {
 
 <center>
 <a href="../index.html"><img src="../long_logo.png" alt="smartathome.co.uk logo"></a><br /><br />
-<div id="changeMPANDiv" class="in-line-div align-bottom">
+<div id="changeMPANDiv" class="align-bottom hidden">
 <select onchange="changeMPAN()" id="changeMPANSelect">
 </select>
 </div>
-<div id="changeMeterDiv" class="in-line-div align-bottom">
+<div id="changeMeterDiv" class="align-bottom hidden">
 <select onchange="changeMeter()" id="changeMeterSelect">
 </select>
 </div>
