@@ -648,7 +648,7 @@ function changeTariff() {
 		var code = go_code;
 	} else if (val == "Bulb Vari-Fair") {
 		var code = "bulb";
-	} else if (val == "Tonik Charge EV") {
+	} else if (val == "Tonik Smart EV") {
 		var code = "tonik";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
 		var code = "ovo";
