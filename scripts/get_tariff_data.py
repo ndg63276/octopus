@@ -3,8 +3,6 @@
 import requests
 import json
 from datetime import datetime
-import boto3
-s3_client = boto3.client('s3')
 
 
 postcodes = {
@@ -43,30 +41,6 @@ bulb_query="""query Tariffs($postcode: String!) {
 }
 """
 
-tonik_data = {
-	"estimatedUsage": {
-		"homeType": "detached",
-		"numberOfBedrooms": 1,
-		"numberOfPeople": 1
-	},
-	"channel": "quoteweb",
-	"saleType": "registration",
-	"extras": {
-		"electricVehicle": True
-	},
-	"fuels": {
-		"electricity": True,
-		"gas": False
-	},
-	"meterPoints": {
-		"electricity":{
-			"isE7": True
-		}
-	},
-	"paymentType": "directDebit",
-	"partner": "evclub"
-}
-
 
 def get_bulb_tariffs(tariffs):
 	tariffs['bulb'] = {}
@@ -82,13 +56,10 @@ def get_bulb_tariffs(tariffs):
 
 def get_tonik_tariffs(tariffs):
 	tariffs['tonik'] = {}
-	url = 'https://api.tonik.tech/v1/quotes/energy'
 	for gsp in postcodes:
-		tonik_data['postcode'] = postcodes[gsp]
-		r = requests.post(url, json=tonik_data)
-		charge_cost = r.json()['data']['products'][0]['details']['standingCharges']['electricity']
-		unit_cost_day = r.json()['data']['products'][0]['details']['unitRates']['electricity']['day']
-		unit_cost_night = r.json()['data']['products'][0]['details']['unitRates']['electricity']['night']
+		charge_cost = 0
+		unit_cost_day = 10
+		unit_cost_night = 4.17
 		tariffs['tonik'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
 	return tariffs
 
@@ -144,20 +115,6 @@ def get_edf_tariffs(tariffs):
 	return tariffs
 
 
-def get_goodenergy_tariffs(tariffs):
-	tariffs['goodenergy'] = {}
-	for gsp in postcodes:
-		url = 'https://ge-shared-apim-prod.azure-api.net/Tariff?businessType=Domestic&gspGroup='+gsp
-		r = requests.get(url)
-		for tariff in r.json():
-			if tariff['name'] == 'Electric Vehicle Driver 3 E7':
-				charge_cost = 100 * tariff['standingCharge']
-				unit_cost_day = 100 * tariff['dayUnitRate']
-				unit_cost_night = 100 * tariff['nightUnitRate']
-				tariffs['goodenergy'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
-	return tariffs
-
-
 def get_meta_data(tariffs):
 	tariffs['meta'] = {'updated': datetime.strftime(datetime.now(), '%Y-%m-%d')}
 	return tariffs
@@ -169,12 +126,14 @@ def lambda_handler(event, context):
 	tariffs = get_tonik_tariffs(tariffs)
 	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
-	tariffs = get_goodenergy_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
-	s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json', ExtraArgs={'ContentType': 'text/json'})
+	if event is not None:
+		import boto3
+		s3_client = boto3.client('s3')
+		s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json', ExtraArgs={'ContentType': 'text/json'})
 
 
-if __name__ =='__main__':
+if __name__ == '__main__':
 	lambda_handler(None, None)
