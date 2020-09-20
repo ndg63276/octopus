@@ -21,6 +21,7 @@
 <meta http-equiv="Expires" content="0" />
 
 <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+
 <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
 <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 
@@ -104,6 +105,13 @@ var myChart = "";
 var carbon_intensity = null;
 var carbon = 0;
 var intensityDataPoints = [];
+var tariffsForDropdown = [
+	["Octopus Go","Octopus Go"],
+	["Bulb Vari-Fair","Bulb Vari-Fair"],
+	["Tonik Smart EV","Tonik Smart (EV only)"],
+	["Ovo Energy 2 Year Fixed","Ovo Energy 2 Year Fixed"],
+	["EDF GoElectric May21","EDF GoElectric May21"],
+];
 
 window.onload = function() {
 	testFirstCookie();
@@ -131,6 +139,15 @@ window.onload = function() {
 			option.selected = true;
 		}
 		$("#changeMPANSelect").selectmenu("refresh");
+		var sel = document.getElementById("changeTariffSelect");
+		for (var i=0; i<tariffsForDropdown.length; i++) {
+			var option = document.createElement("option");
+			option.text = tariffsForDropdown[i][1];
+			option.value = tariffsForDropdown[i][0];
+			sel.add(option);
+			if (i=0) {option.selected = true};
+		}
+		$("#changeTariffSelect").selectmenu("refresh");
 		updateMeters();
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
@@ -145,6 +162,16 @@ window.onload = function() {
 		document.getElementById("postcode").addEventListener("keyup", function(event) {
 			if (event.key === "Enter") { changePostcode(); }
 		});
+		$("#dwn-btn").parent().hide(); // hide CSV button
+		var sel = document.getElementById("changeTariffSelectLoggedOut");
+		for (var i=0; i<tariffsForDropdown.length; i++) {
+			var option = document.createElement("option");
+			option.text = tariffsForDropdown[i][1];
+			option.value = tariffsForDropdown[i][0];
+			sel.add(option);
+			if (i=0) {option.selected = true};
+		}
+		$("#changeTariffSelectLoggedOut").selectmenu("refresh");
 	};
 };
 
@@ -189,15 +216,10 @@ $(function() {
 <td width=25%><b>Standing Charge<span class="refresh-btn"> for this period</span></b></td><td width=25%><b><span class="refresh-btn">Your </span>Carbon Footprint</b></td></tr></thead>
 <tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
 <tr><td>
-<div class="cost-table-row"
+<div class="cost-table-row">
 <form>
 <div class="ui-field-contain cost-table-dropdown">
-<select onchange="changeTariff()" id="changeTariffSelect">
-<option value="Octopus Go">Octopus Go</option>
-<option value="Bulb Vari-Fair">Bulb Vari-Fair</option>
-<option value="Tonik Smart EV">Tonik Smart (EV only)</option>
-<option value="Ovo Energy 2 Year Fixed">Ovo Energy 2 Year Fixed</option>
-<option value="EDF GoElectric May21">EDF GoElectric May21</option>
+<select onchange="changeTariff(this)" id="changeTariffSelect">
 </select>
 </div>
 </form>
@@ -208,7 +230,12 @@ $(function() {
 <div id="not_logged_in" style="display:none;">
 <center>
 <div class="in-line-div" data-inline="true">
-<a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.
+<a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.<br />
+<div class="in-line-div">
+Compare with 
+<select data-inline="true" onchange="changeTariff(this)" id="changeTariffSelectLoggedOut">
+</select>
+</div>
 Showing prices for <select id="region" data-inline="true" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
 <option value="_A">East England</option>

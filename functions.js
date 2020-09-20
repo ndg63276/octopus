@@ -642,8 +642,8 @@ function update_tariff_date() {
 	document.getElementById("tariffdate").innerHTML = date_str;
 }
 
-function changeTariff() {
-	var val = document.getElementById("changeTariffSelect").value;
+function changeTariff(element) {
+	var val = element.value;
 	if (val == "Octopus Go") {
 		var code = go_code;
 	} else if (val == "Bulb Vari-Fair") {
