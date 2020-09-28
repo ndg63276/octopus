@@ -578,6 +578,7 @@ function get_config(dataSets) {
 function get_single_rate(user_info, code) {
 	json = get_json("tariffs.json");
 	data = json[code];
+	data = get_other_average_rates(data);
 	region_data = data[user_info["gsp"]];
 	var to_return = {};
 	to_return[code] = [];
@@ -585,9 +586,34 @@ function get_single_rate(user_info, code) {
 	return to_return;
 }
 
+function get_other_average_rates(data) {
+	var day_sum = 0;
+	var night_sum = 0;
+	var unit_sum = 0;
+	var charge_sum = 0;
+	var length_sum = 0;
+	for (region in data) {
+		if ("unit_cost_day" in data[region]) {
+			day_sum += data[region]["unit_cost_day"];
+			night_sum += data[region]["unit_cost_night"];
+		} else {
+			unit_sum += data[region]["unit_cost"];
+		}
+		charge_sum += data[region]["charge_cost"];
+		length_sum += 1;
+	}
+	data["average"] = {};
+	data["average"]["unit_cost_day"] = day_sum / length_sum;
+	data["average"]["unit_cost_night"] = night_sum / length_sum;
+	data["average"]["unit_cost"] = unit_sum / length_sum;
+	data["average"]["charge_cost"] = charge_sum / length_sum;
+	return data;
+}
+
 function get_e7_rates(user_info, code, startdate, enddate) {
 	json = get_json("tariffs.json");
 	data = json[code];
+	data = get_other_average_rates(data);
 	region_data = data[user_info["gsp"]];
 	var to_return = {};
 	to_return[code] = [];
@@ -609,6 +635,7 @@ function get_e7_rates(user_info, code, startdate, enddate) {
 function get_edf_rates(user_info, code, startdate, enddate) {
 	json = get_json("tariffs.json");
 	data = json[code];
+	data = get_other_average_rates(data);
 	region_data = data[user_info["gsp"]];
 	var to_return = {};
 	to_return[code] = [];
@@ -631,6 +658,7 @@ function get_edf_rates(user_info, code, startdate, enddate) {
 function get_other_standing_charges(user_info, code, startdate, enddate) {
 	json = get_json("tariffs.json");
 	data = json[code];
+	data = get_other_average_rates(data);
 	region_data = data[user_info["gsp"]];
 	to_return = [{"valid_from": startdate.toISOString(), "valid_to": enddate.toISOString(), "value_inc_vat": region_data["charge_cost"]}];
 	return to_return;
