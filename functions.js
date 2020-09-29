@@ -445,12 +445,13 @@ function changePostcode() {
 
 function changeRegion(val) {
 	user_info["gsp"] = val;
+	document.getElementById("postcode").value = "";
+	if ("postcode" in user_info) {
+		delete user_info["postcode"];
+	}
 	setCookie("gsp", val, 365*24);
-	go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
-	config.data.datasets[0].data = go_data["datapoints"];
-	agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
-	config.data.datasets[1].data = agile_data["datapoints"];
-	myChart.update();
+	tariffSelect = document.getElementById("changeTariffSelectLoggedOut")
+	changeTariff(tariffSelect.value);
 }
 
 function changeMeter() {
@@ -670,8 +671,7 @@ function update_tariff_date() {
 	document.getElementById("tariffdate").innerHTML = date_str;
 }
 
-function changeTariff(element) {
-	var val = element.value;
+function changeTariff(val) {
 	if (val == "Octopus Go") {
 		var code = go_code;
 	} else if (val == "Bulb Vari-Fair") {

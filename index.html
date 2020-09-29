@@ -219,7 +219,7 @@ $(function() {
 <div class="cost-table-row">
 <form>
 <div class="ui-field-contain cost-table-dropdown">
-<select onchange="changeTariff(this)" id="changeTariffSelect">
+<select onchange="changeTariff(this.value)" id="changeTariffSelect">
 </select>
 </div>
 </form>
@@ -233,7 +233,7 @@ $(function() {
 <a id="loginlink" href="login.html" data-ajax="false">Log in</a> to see your usage and compare tariffs.<br />
 <div class="in-line-div">
 Compare with 
-<select data-inline="true" onchange="changeTariff(this)" id="changeTariffSelectLoggedOut">
+<select data-inline="true" onchange="changeTariff(this.value)" id="changeTariffSelectLoggedOut">
 </select>
 </div>
 Showing prices for <select id="region" data-inline="true" onchange="changeRegion(this.value)">
