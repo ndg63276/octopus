@@ -145,7 +145,7 @@ window.onload = function() {
 			option.text = tariffsForDropdown[i][1];
 			option.value = tariffsForDropdown[i][0];
 			sel.add(option);
-			if (i=0) {option.selected = true};
+			if (i==0) {option.selected = true};
 		}
 		$("#changeTariffSelect").selectmenu("refresh");
 		updateMeters();
