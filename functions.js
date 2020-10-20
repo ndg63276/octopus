@@ -313,7 +313,7 @@ function get_average_rates(results) {
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	if (code == "bulb") {
 		var all_rates = get_single_rate(user_info, code);
-	} else if (code == "tonik" || code == "ovo" || code == "goodenergy" ) {
+	} else if (code == "ovo" || code == "goodenergy") {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else if (code == "edf") {
 		var all_rates = get_edf_rates(user_info, code, startdate, enddate);
@@ -676,8 +676,6 @@ function changeTariff(val) {
 		var code = go_code;
 	} else if (val == "Bulb Vari-Fair") {
 		var code = "bulb";
-	} else if (val == "Tonik Smart EV") {
-		var code = "tonik";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
 		var code = "ovo";
 	} else if (val.includes("EDF GoElectric")) {

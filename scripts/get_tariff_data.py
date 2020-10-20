@@ -54,16 +54,6 @@ def get_bulb_tariffs(tariffs):
 	return tariffs
 
 
-def get_tonik_tariffs(tariffs):
-	tariffs['tonik'] = {}
-	for gsp in postcodes:
-		charge_cost = 0
-		unit_cost_day = 10
-		unit_cost_night = 4.17
-		tariffs['tonik'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
-	return tariffs
-
-
 def get_ovo_tariffs(tariffs):
 	tariffs['ovo'] = {}
 	config_url = 'https://switch.ovoenergy.com/ev/config.json'
@@ -123,7 +113,6 @@ def get_meta_data(tariffs):
 def lambda_handler(event, context):
 	tariffs = {}
 	tariffs = get_bulb_tariffs(tariffs)
-	tariffs = get_tonik_tariffs(tariffs)
 	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
