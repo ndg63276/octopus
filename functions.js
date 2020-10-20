@@ -680,7 +680,7 @@ function changeTariff(val) {
 		var code = "tonik";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
 		var code = "ovo";
-	} else if (val == "EDF GoElectric May21") {
+	} else if (val.includes("EDF GoElectric")) {
 		var code = "edf";
 	} else if (val == "Good Energy EV 3") {
 		var code = "goodenergy";
