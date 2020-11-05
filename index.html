@@ -106,10 +106,31 @@ var carbon_intensity = null;
 var carbon = 0;
 var intensityDataPoints = [];
 var tariffsForDropdown = [
-	["Octopus Go","Octopus Go"],
-	["Bulb Vari-Fair","Bulb Vari-Fair"],
-	["Ovo Energy 2 Year Fixed","Ovo Energy 2 Year Fixed"],
-	["EDF GoElectric Nov21","EDF GoElectric Nov21"],
+	"Octopus Go",
+	"Bulb Vari-Fair",
+	"Ovo Energy 2 Year Fixed",
+	"EDF GoElectric Nov21",
+	"Octopus Go Faster 3H 2030",
+	"Octopus Go Faster 3H 2130",
+	"Octopus Go Faster 3H 2230",
+	"Octopus Go Faster 3H 2330",
+	"Octopus Go Faster 3H 0030",
+	"Octopus Go Faster 3H 0130",
+	"Octopus Go Faster 3H 0230",
+	"Octopus Go Faster 3H 0330",
+	"Octopus Go Faster 4H 2030",
+	"Octopus Go Faster 4H 2130",
+	"Octopus Go Faster 4H 2230",
+	"Octopus Go Faster 4H 2330",
+	"Octopus Go Faster 4H 0030",
+	"Octopus Go Faster 4H 0130",
+	"Octopus Go Faster 4H 0230",
+	"Octopus Go Faster 5H 2030",
+	"Octopus Go Faster 5H 2130",
+	"Octopus Go Faster 5H 2230",
+	"Octopus Go Faster 5H 2330",
+	"Octopus Go Faster 5H 0030",
+	"Octopus Go Faster 5H 0130",
 ];
 
 window.onload = function() {
@@ -141,8 +162,8 @@ window.onload = function() {
 		var sel = document.getElementById("changeTariffSelect");
 		for (var i=0; i<tariffsForDropdown.length; i++) {
 			var option = document.createElement("option");
-			option.text = tariffsForDropdown[i][1];
-			option.value = tariffsForDropdown[i][0];
+			option.text = tariffsForDropdown[i];
+			option.value = tariffsForDropdown[i];
 			sel.add(option);
 			if (i==0) {option.selected = true};
 		}
@@ -165,8 +186,8 @@ window.onload = function() {
 		var sel = document.getElementById("changeTariffSelectLoggedOut");
 		for (var i=0; i<tariffsForDropdown.length; i++) {
 			var option = document.createElement("option");
-			option.text = tariffsForDropdown[i][1];
-			option.value = tariffsForDropdown[i][0];
+			option.text = tariffsForDropdown[i];
+			option.value = tariffsForDropdown[i];
 			sel.add(option);
 			if (i==0) {option.selected = true};
 		}

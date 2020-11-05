@@ -672,16 +672,20 @@ function update_tariff_date() {
 }
 
 function changeTariff(val) {
+	var code;
 	if (val == "Octopus Go") {
-		var code = go_code;
+		code = go_code;
 	} else if (val == "Bulb Vari-Fair") {
-		var code = "bulb";
+		code = "bulb";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
-		var code = "ovo";
+		code = "ovo";
 	} else if (val.includes("EDF GoElectric")) {
-		var code = "edf";
+		code = "edf";
 	} else if (val == "Good Energy EV 3") {
-		var code = "goodenergy";
+		code = "goodenergy";
+	} else if (val.startsWith("Octopus Go Faster")) {
+		var split = val.split(" ");
+		code = "GO-"+split[3]+"-"+split[4];
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data["costs"];
