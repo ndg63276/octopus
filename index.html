@@ -106,6 +106,7 @@ var carbon_intensity = null;
 var carbon = 0;
 var intensityDataPoints = [];
 var tariffsForDropdown = [
+	"Octopus Agile",
 	"Octopus Go",
 	"Bulb Vari-Fair",
 	"Ovo Energy 2 Year Fixed",
@@ -159,15 +160,22 @@ window.onload = function() {
 			option.selected = true;
 		}
 		$("#changeMPANSelect").selectmenu("refresh");
-		var sel = document.getElementById("changeTariffSelect");
+		var sel1 = document.getElementById("changeTariffSelect1");
+		var sel2 = document.getElementById("changeTariffSelect2");
 		for (var i=0; i<tariffsForDropdown.length; i++) {
-			var option = document.createElement("option");
-			option.text = tariffsForDropdown[i];
-			option.value = tariffsForDropdown[i];
-			sel.add(option);
-			if (i==0) {option.selected = true};
+			var option1 = document.createElement("option");
+			var option2 = document.createElement("option");
+			option1.text = tariffsForDropdown[i];
+			option2.text = tariffsForDropdown[i];
+			option1.value = tariffsForDropdown[i];
+			option2.value = tariffsForDropdown[i];
+			sel1.add(option1);
+			sel2.add(option2);
+			if (i==0) {option1.selected = true};
+			if (i==1) {option2.selected = true};
 		}
-		$("#changeTariffSelect").selectmenu("refresh");
+		$("#changeTariffSelect1").selectmenu("refresh");
+		$("#changeTariffSelect2").selectmenu("refresh");
 		updateMeters();
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
@@ -183,15 +191,22 @@ window.onload = function() {
 			if (event.key === "Enter") { changePostcode(); }
 		});
 		$("#dwn-btn").parent().hide(); // hide CSV button
-		var sel = document.getElementById("changeTariffSelectLoggedOut");
+		var sel1 = document.getElementById("changeTariffSelectLoggedOut1");
+		var sel2 = document.getElementById("changeTariffSelectLoggedOut2");
 		for (var i=0; i<tariffsForDropdown.length; i++) {
-			var option = document.createElement("option");
-			option.text = tariffsForDropdown[i];
-			option.value = tariffsForDropdown[i];
-			sel.add(option);
-			if (i==0) {option.selected = true};
+			var option1 = document.createElement("option");
+			var option2 = document.createElement("option");
+			option1.text = tariffsForDropdown[i];
+			option2.text = tariffsForDropdown[i];
+			option1.value = tariffsForDropdown[i];
+			option2.value = tariffsForDropdown[i];
+			sel1.add(option1);
+			sel2.add(option2);
+			if (i==0) {option1.selected = true};
+			if (i==1) {option2.selected = true};
 		}
-		$("#changeTariffSelectLoggedOut").selectmenu("refresh");
+		$("#changeTariffSelectLoggedOut1").selectmenu("refresh");
+		$("#changeTariffSelectLoggedOut2").selectmenu("refresh");
 	};
 };
 
@@ -234,12 +249,21 @@ $(function() {
 <table class="w3-table-all w3-centered"><thead>
 <tr class="w3-light-grey"><td width=25%><b>Tariff</b></td><td width=25%><b>Unit Cost<span class="refresh-btn"> for this period</span></b></td>
 <td width=25%><b>Standing Charge<span class="refresh-btn"> for this period</span></b></td><td width=25%><b><span class="refresh-btn">Your </span>Carbon Footprint</b></td></tr></thead>
-<tr><td>Octopus Agile</td><td id="agile_unit_cost"></td><td id="agile_charge"></td><td id="carbon2"></td></tr>
 <tr><td>
 <div class="cost-table-row">
 <form>
 <div class="ui-field-contain cost-table-dropdown">
-<select onchange="changeTariff(this.value)" id="changeTariffSelect">
+<select onchange="changeTariff(this.id, this.value)" id="changeTariffSelect1">
+</select>
+</div>
+</form>
+</div>
+</td><td style="vertical-align:middle" id="agile_unit_cost"></td><td style="vertical-align:middle" id="agile_charge"></td><td style="vertical-align:middle" id="carbon2"></td></tr>
+<tr><td>
+<div class="cost-table-row">
+<form>
+<div class="ui-field-contain cost-table-dropdown">
+<select onchange="changeTariff(this.id, this.value)" id="changeTariffSelect2">
 </select>
 </div>
 </form>
@@ -252,9 +276,10 @@ $(function() {
 <div class="in-line-div" data-inline="true">
 <a id="loginlink" href="login.html" data-ajax="false">Log in</a> with Octopus to see your usage and compare costs.<br />
 <div class="in-line-div">
-Compare with 
-<select data-inline="true" onchange="changeTariff(this.value)" id="changeTariffSelectLoggedOut">
-</select>
+Compare
+<select data-inline="true" onchange="changeTariff(this.id, this.value)" id="changeTariffSelectLoggedOut1"></select>
+with
+<select data-inline="true" onchange="changeTariff(this.id, this.value)" id="changeTariffSelectLoggedOut2"></select>
 </div>
 Showing prices for <select id="region" data-inline="true" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
@@ -274,7 +299,7 @@ Showing prices for <select id="region" data-inline="true" onchange="changeRegion
 <option value="_P">North Scotland</option>
 </select>
 or enter your postcode:
-<div class="in-line-div"><input id="postcode" type="text"></input></div>
+<div class="in-line-div"><input id="postcode" type="text"></div>
 <br /><br /><b>Not with Octopus? Click <a href="https://share.octopus.energy/tidy-jay-1000">here</a> to join with £50 credit!</b>
 </div></center></div>
 

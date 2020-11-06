@@ -31,10 +31,10 @@ function on_consumption_change() {
 	agile_costs = agile_data["costs"];
 
 	var dataSets = [
-		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:"Octopus Go",
-			fill:false, steppedLine:true, yAxisID:"left", data:goDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:"Octopus Agile",
 			fill:false, steppedLine:false, yAxisID:"left", data:agileDataPoints},
+		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:"Octopus Go",
+			fill:false, steppedLine:true, yAxisID:"left", data:goDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#800080", borderColor:"#800080", label:"Carbon Intensity",
 			fill:false, yAxisID:"right2", data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
 	];
@@ -450,8 +450,10 @@ function changeRegion(val) {
 		delete user_info["postcode"];
 	}
 	setCookie("gsp", val, 365*24);
-	tariffSelect = document.getElementById("changeTariffSelectLoggedOut")
-	changeTariff(tariffSelect.value);
+	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1")
+	changeTariff(tariffSelect1.id, tariffSelect1.value);
+	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2")
+	changeTariff(tariffSelect2.id, tariffSelect2.value);
 }
 
 function changeMeter() {
@@ -511,21 +513,21 @@ function get_config(dataSets) {
 					footer: function(tooltipItems, data) {
 						var index = tooltipItems[0].index;
 						if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
-							var go_cost = 0;
 							var agile_cost = 0;
+							var go_cost = 0;
 							var footprint = 0;
 							tooltipItems.forEach(function(tooltipItem) {
 								if (tooltipItem.datasetIndex == 0) {
-									go_cost = tooltipItem.value * data.datasets[3].data[index].y;
-								} else if (tooltipItem.datasetIndex == 1) {
 									agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
+								} else if (tooltipItem.datasetIndex == 1) {
+									go_cost = tooltipItem.value * data.datasets[3].data[index].y;
 								} else if (tooltipItem.datasetIndex == 2) {
 									footprint = tooltipItem.value * data.datasets[3].data[index].y;
 								}
 							});
 							to_return = "";
-							if (go_cost != 0) { to_return += "Go cost: " + go_cost.toFixed(2) + "p\n"; }
 							if (agile_cost != 0) { to_return += "Agile cost: " + agile_cost.toFixed(2) + "p\n"; }
+							if (go_cost != 0) { to_return += "Go cost: " + go_cost.toFixed(2) + "p\n"; }
 							if (footprint != 0) { to_return += "Carbon footprint: " + footprint.toFixed(1) + "g"; }
 							return to_return;
 						}
@@ -671,9 +673,13 @@ function update_tariff_date() {
 	document.getElementById("tariffdate").innerHTML = date_str;
 }
 
-function changeTariff(val) {
+function changeTariff(id, val) {
 	var code;
-	if (val == "Octopus Go") {
+	var stepped = true;
+	if (val == "Octopus Agile") {
+		code = agile_code;
+		stepped = false;
+	} else if (val == "Octopus Go") {
 		code = go_code;
 	} else if (val == "Bulb Vari-Fair") {
 		code = "bulb";
@@ -689,10 +695,23 @@ function changeTariff(val) {
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data["costs"];
-	document.getElementById("go_unit_cost").innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
-	document.getElementById("go_charge").innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
-	config.data.datasets[0].data = new_data["datapoints"];
-	config.data.datasets[0].label = val;
+	var cost_el;
+	var charge_el;
+	var dataset;
+	if (id == "changeTariffSelect1" || id == "changeTariffSelectLoggedOut1") {
+		cost_el = document.getElementById("agile_unit_cost");
+		charge_el = document.getElementById("agile_charge")
+		dataset = config.data.datasets[0];
+	} else {
+		cost_el = document.getElementById("go_unit_cost")
+		charge_el = document.getElementById("go_charge")
+		dataset = config.data.datasets[1]
+	}
+	cost_el.innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
+	charge_el.innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
+	dataset.data = new_data["datapoints"];
+	dataset.label = val;
+	dataset.steppedLine = stepped;
 	myChart.update();
 }
 
@@ -709,23 +728,24 @@ function download(consumption) {
 }
 
 function createCsv() {
-	var to_return = "Interval Start,Octopus Agile Price (p/kWh),";
-	var tariff = document.getElementById("changeTariffSelect").value;
-	to_return += tariff + " Price (p/kWh),";
-	to_return += "Consumption,Octopus Agile Cost (p),";
-	to_return += tariff + " Cost (p),";
+	var tariff1 = document.getElementById("changeTariffSelect1").value;
+	var tariff2 = document.getElementById("changeTariffSelect2").value;
+	var to_return = "Interval Start,"+tariff1+" Price (p/kWh),";
+	to_return += tariff2 + " Price (p/kWh),";
+	to_return += "Consumption,"+tariff1+" Cost (p),";
+	to_return += tariff2 + " Cost (p),";
 	to_return += "Carbon Intensity (gCO2/kWh),Carbon Footprint(gCO2)\n";
 	for (j in agileDataPoints) {
 		to_return += agileDataPoints[j]["x"].format()+",";
-		to_return += agileDataPoints[j]["y"]+",";
 		// add other tariff price
 		to_return += config.data.datasets[0].data[j]["y"]+",";
+		to_return += config.data.datasets[1].data[j]["y"]+",";
 		var consumption_found = false;
 		for (i in consumption) {
 			if (agileDataPoints[j]["x"].format() == consumption[i]["interval_start"].format()) {
 				to_return += consumption[i]["consumption"]+",";
-				to_return += agileDataPoints[j]["y"]*consumption[i]["consumption"]+",";
 				to_return += config.data.datasets[0].data[j]["y"]*consumption[i]["consumption"]+",";
+				to_return += config.data.datasets[1].data[j]["y"]*consumption[i]["consumption"]+",";
 				consumption_found = true;
 				break;
 			}
