@@ -16,10 +16,10 @@ function on_consumption_change() {
 		consumption = get_consumption(user_info, startdate, enddate);
 		if (consumption.length > 0) {
 			sortByKey(consumption, "interval_start");
-			for (i in consumption) {
-				var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
-				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
-				totalConsumption += consumption[i]["consumption"];
+			for (i of consumption) {
+				var consumption_start = new Date(i["interval_start"]).toISOString()
+				consumptionDataPoints.push({x: consumption_start, y: i["consumption"]});
+				totalConsumption += i["consumption"];
 			}
 		}
 		carbon = get_carbon_from_data(consumption, carbon_intensity);
@@ -84,11 +84,10 @@ function do_login(account_no, apikey, storecreds) {
 		var last_meter_point = last_element(last_property["electricity_meter_points"])
 		to_return["mpan"] = last_meter_point["mpan"]
 		to_return["mpans"] = {};
-		for (meter_point in last_property["electricity_meter_points"]) {
-			this_meter_point = last_property["electricity_meter_points"][meter_point];
+		for (this_meter_point of last_property["electricity_meter_points"]) {
 			to_return["mpans"][this_meter_point["mpan"]] = [];
-			for (meter in this_meter_point["meters"]) {
-				to_return["mpans"][this_meter_point["mpan"]].push(this_meter_point["meters"][meter]["serial_number"]);
+			for (meter of this_meter_point["meters"]) {
+				to_return["mpans"][this_meter_point["mpan"]].push(meter["serial_number"]);
 			}
 		}
 		var last_meter = last_element(last_meter_point["meters"])
@@ -181,23 +180,23 @@ function get_costs(user_info, code, startdate, enddate, tariff_code) {
 function get_costs_from_data(consumption, unit_rates, standing_charges) {
 	var unit_cost = 0;
 	var charge_cost = 0;
-	for (period in consumption) {
-		period_start = Date.parse(consumption[period]["interval_start"]);
-		period_consumption = consumption[period]["consumption"];
-		for (rate in unit_rates) {
-			period_rate_start = Date.parse(unit_rates[rate]["date"]);
+	for (period of consumption) {
+		period_start = Date.parse(period["interval_start"]);
+		period_consumption = period["consumption"];
+		for (rate of unit_rates) {
+			period_rate_start = Date.parse(rate["date"]);
 			if (period_rate_start == period_start) {
-				period_rate = unit_rates[rate]["rate"];
+				period_rate = rate["rate"];
 				period_cost = period_rate * period_consumption;
 				unit_cost += period_cost
 			}
 		}
-		for (charge in standing_charges) {
-			charge_start = Date.parse(standing_charges[charge]["valid_from"]);
-			charge_end = Date.parse(standing_charges[charge]["valid_to"]);
+		for (charge of standing_charges) {
+			charge_start = Date.parse(charge["valid_from"]);
+			charge_end = Date.parse(charge["valid_to"]);
 			if (charge_start <= period_start && (charge_end > period_start || isNaN(charge_end))) {
 				// assume each period is 30 mins
-				period_cost = standing_charges[charge]["value_inc_vat"] / 48;
+				period_cost = charge["value_inc_vat"] / 48;
 				charge_cost += period_cost;
 			}
 		}
@@ -222,10 +221,10 @@ function get_consumption(user_info, startdate, enddate) {
 	while (j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
 		data = {}; // params not needed after first get
-		for (result in j["results"]) {
-			con = j["results"][result]["consumption"];
-			ints = moment(j["results"][result]["interval_start"])
-			inte = moment(j["results"][result]["interval_end"])
+		for (result of j["results"]) {
+			con = result["consumption"];
+			ints = moment(result["interval_start"])
+			inte = moment(result["interval_end"])
 			if (ints < enddate) {
 				results.push({"consumption":con, "interval_start": ints, "interval_end": inte});
 			}
@@ -266,7 +265,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	var headers = user_info["headers"];
 	var results = {};
 	var data = {};
-	for (index in tariff_codes) {
+	for (tariff_code of tariff_codes) {
 		if (startdate != null) {
 			data["period_from"] = startdate.toISOString();
 			if (enddate != null) {
@@ -275,13 +274,12 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 		}
 		var this_result = []
 		var j = {};
-		tariff_code = tariff_codes[index];
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 		while (j["next"] != null) {
 			var j = ajax_get(j["next"], headers, data);
 			data = {}; // params not needed after first get
-			for (result in j["results"]) {
-				this_result.push(j["results"][result]);
+			for (result of j["results"]) {
+				this_result.push(result);
 			}
 		}
 		results[tariff_code] = this_result;
@@ -308,7 +306,7 @@ function get_average_rates(results) {
 		vals = av_results[av]["value_inc_vat"];
 		sum = vals.reduce((previous, current) => current += previous);
 		avg = (sum / vals.length).toFixed(3);
-		average.push({"valid_from": av, "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
+		average.push({"valid_from": av_results[av], "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
 	}
 	return average;
 }
@@ -332,9 +330,9 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		if (d > startdate) {
 			this_rate = {};
 			this_rate["date"] = d.toISOString();
-			for (rate in rates) {
-				if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
-					this_rate["rate"] = rates[rate]["value_inc_vat"];
+			for (rate of rates) {
+				if (Date.parse(rate["valid_from"]) <= d && Date.parse(rate["valid_to"]) > d) {
+					this_rate["rate"] = rate["value_inc_vat"];
 					break;
 				}
 			}
@@ -342,9 +340,9 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		} else {
 			to_return = [{}];
 			to_return[0]["date"] = d.toISOString();
-			for (rate in rates) {
-				if (Date.parse(rates[rate]["valid_from"]) <= d && Date.parse(rates[rate]["valid_to"]) > d) {
-					to_return[0]["rate"] = rates[rate]["value_inc_vat"];
+			for (rate of rates) {
+				if (Date.parse(rate["valid_from"]) <= d && Date.parse(rate["valid_to"]) > d) {
+					to_return[0]["rate"] = rate["value_inc_vat"];
 					break;
 				}
 			}
@@ -360,8 +358,8 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 	tariff_code = get_tariff_code(user_info, code)
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
-		for (i in unit_rates) {
-			dataPoints.push({x: moment(unit_rates[i]["date"]), y: unit_rates[i]["rate"]});
+		for (i of unit_rates) {
+			dataPoints.push({x: moment(i["date"]), y: i["rate"]});
 		}
 		if (logged_in) {
 			standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
@@ -407,13 +405,13 @@ function get_carbon_intensity(startdate, enddate) {
 	}
 	url += s.toISOString() + "/" + e.toISOString();
 	var j = ajax_get(url);
-	for (i in j["data"]) {
-		var this_date = new Date(j["data"][i]["from"]);
+	for (i of j["data"]) {
+		var this_date = new Date(i["from"]);
 		if (this_date < startdate) { continue; }
-		if ("actual" in j["data"][i]["intensity"] && j["data"][i]["intensity"]["actual"] != null) {
-			var this_intensity = j["data"][i]["intensity"]["actual"];
+		if ("actual" in i["intensity"] && i["intensity"]["actual"] != null) {
+			var this_intensity = i["intensity"]["actual"];
 		} else {
-			var this_intensity = j["data"][i]["intensity"]["forecast"];
+			var this_intensity = i["intensity"]["forecast"];
 		}
 		to_return.push({"date": moment(this_date), "intensity": this_intensity})
 	}
@@ -422,13 +420,13 @@ function get_carbon_intensity(startdate, enddate) {
 
 function get_carbon_from_data(consumption, carbon_intensity) {
 	var carbon = 0;
-	for (period in consumption) {
-		period_start = Date.parse(consumption[period]["interval_start"]);
-		period_consumption = consumption[period]["consumption"];
-		for (rate in carbon_intensity) {
-			period_rate_start = Date.parse(carbon_intensity[rate]["date"])
+	for (period of consumption) {
+		period_start = Date.parse(period["interval_start"]);
+		period_consumption = period["consumption"];
+		for (rate of carbon_intensity) {
+			period_rate_start = Date.parse(rate["date"])
 			if (period_rate_start == period_start) {
-				period_rate = carbon_intensity[rate]["intensity"];
+				period_rate = rate["intensity"];
 				period_carbon = period_rate * period_consumption;
 				carbon += period_carbon;
 			}
@@ -490,9 +488,8 @@ function changeMPAN() {
 function updateMeters() {
 	$("#changeMeterSelect").empty();
 	var changeMeterSelect = document.getElementById("changeMeterSelect");
-	for (serial_no in user_info["mpans"][user_info["mpan"]]) {
+	for (this_serial_no of user_info["mpans"][user_info["mpan"]]) {
 		var option = document.createElement("option");
-		var this_serial_no = user_info["mpans"][user_info["mpan"]][serial_no];
 		option.text = "Meter: "+this_serial_no;
 		option.value = this_serial_no;
 		changeMeterSelect.add(option);
