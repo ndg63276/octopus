@@ -11,6 +11,7 @@ function on_login(address) {
 
 function on_consumption_change() {
 	if (logged_in) {
+		totalConsumption = 0;
 		consumptionDataPoints = [];
 		consumption = get_consumption(user_info, startdate, enddate);
 		if (consumption.length > 0) {
@@ -18,6 +19,7 @@ function on_consumption_change() {
 			for (i in consumption) {
 				var consumption_start = new Date(consumption[i]["interval_start"]).toISOString()
 				consumptionDataPoints.push({x: consumption_start, y: consumption[i]["consumption"]});
+				totalConsumption += consumption[i]["consumption"];
 			}
 		}
 		carbon = get_carbon_from_data(consumption, carbon_intensity);
@@ -63,6 +65,8 @@ function on_consumption_change() {
 		document.getElementById("agile_charge").innerHTML = "£"+(agile_costs["charge_cost"]/100).toFixed(2);
 		document.getElementById("carbon1").innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById("carbon2").innerHTML = (carbon).toFixed(1)+"g";
+		document.getElementById("consumption1").innerHTML = (totalConsumption).toFixed(3)+"kWh";
+		document.getElementById("consumption2").innerHTML = (totalConsumption).toFixed(3)+"kWh";
 		document.getElementById("cost_table").style.display = ""
 	}
 
@@ -537,6 +541,7 @@ function get_config(dataSets) {
 			},
 			legend: {
 				display: true,
+				onClick: on_legend_click,
 				position: "bottom",
 				labels: { fontSize: 18, usePointStyle: true }
 			},
@@ -559,7 +564,7 @@ function get_config(dataSets) {
 				},
 				{
 					id: "right2",
-					display: true,
+					display: !rightAxis,
 					position: "right",
 					type: "linear",
 					scaleLabel: { display: true, labelString: "Carbon Intensity (gCO2/kWh)" },
@@ -765,4 +770,20 @@ function createCsv() {
 		to_return += "\n";
 	}
 	return to_return;
+}
+
+var on_legend_click = function(e, legendItem) {
+	var index = legendItem.datasetIndex;
+	var ci = this.chart;
+	ci.data.datasets[index].hidden = !ci.data.datasets[index].hidden;
+	for (leg of ["Carbon", "Consumption"]) {
+		if (legendItem.text.includes(leg)) {
+			for (axis of ci.options.scales.yAxes) {
+				if (axis.scaleLabel.labelString.includes(leg)) {
+					axis.display = !ci.data.datasets[index].hidden;
+				}
+			}
+		}
+	}
+	ci.update();
 }
