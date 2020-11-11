@@ -784,3 +784,12 @@ var on_legend_click = function(e, legendItem) {
 	}
 	ci.update();
 }
+
+function logout() {
+	setCookie("account_no", "", -1);
+	setCookie("apikey", "", -1);
+	setCookie("postcode", "", -1);
+	setCookie("gsp", "", -1);
+	location.reload();
+}
+

@@ -191,6 +191,7 @@ window.onload = function() {
 			if (event.key === "Enter") { changePostcode(); }
 		});
 		$("#dwn-btn").parent().hide(); // hide CSV button
+		$("#logout-btn").parent().hide(); // hide logout button
 		var sel1 = document.getElementById("changeTariffSelectLoggedOut1");
 		var sel2 = document.getElementById("changeTariffSelectLoggedOut2");
 		for (var i=0; i<tariffsForDropdown.length; i++) {
@@ -316,7 +317,8 @@ or enter your postcode:
 <input class="big-btn" data-role="button" data-inline="true" type="button" onClick='window.location.href=pagelink+"?start=-7days&end=now";' value="Last 7 days">
 <input class="big-btn" data-role="button" data-inline="true" type="button" onClick="future_prices();" value="Future prices">
 <br /><br />
-<input class="big-btn" data-role="button" data-inline="true" type="button" id="dwn-btn" value="Save data to CSV file" onclick="download(consumption);"/><br /><br />
+<input class="big-btn" data-role="button" data-inline="true" type="button" id="dwn-btn" value="Save data to CSV file" onclick="download(consumption);"/>
+<input class="big-btn" data-role="button" data-inline="true" type="button" id="logout-btn" value="Logout" onclick="logout();"/><br /><br />
 </center><br />
 
 <small>
