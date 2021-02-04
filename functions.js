@@ -499,6 +499,43 @@ function updateMeters() {
 	$("#changeMeterSelect").selectmenu("refresh");
 }
 
+var tooltipCallbacks = {
+	footer: function(tooltipItems, data) {
+		var index = tooltipItems[0].index;
+		var xLabel = moment(tooltipItems[0].xLabel, "DD-MM-YY HH:mm:ss").format();
+		var consumptionFound = null;
+		if (data.datasets[3] != null) {
+			for (item of data.datasets[3].data) {
+				if (moment(item.x).format() == xLabel) {
+					consumptionFound = item.y;
+				}
+			}
+			var agile_cost = 0;
+			var go_cost = 0;
+			var footprint = 0;
+			if (consumptionFound != null) {
+				tooltipItems.forEach(function(tooltipItem) {
+					if (tooltipItem.datasetIndex == 0) {
+						agile_label = data.datasets[0].label;
+						agile_cost = tooltipItem.value * consumptionFound;
+					} else if (tooltipItem.datasetIndex == 1) {
+						go_label = data.datasets[1].label;
+						go_cost = tooltipItem.value * consumptionFound;
+					} else if (tooltipItem.datasetIndex == 2) {
+						footprint = tooltipItem.value * consumptionFound;
+					}
+				});
+			}
+			to_return = "";
+			if (tooltipItems[0].datasetIndex != 3 && consumptionFound != null) { to_return += "Consumption: " + consumptionFound + "kWh\n"; }
+			if (agile_cost != 0) { to_return += agile_label + " cost: " + agile_cost.toFixed(2) + "p\n"; }
+			if (go_cost != 0) { to_return += go_label + " cost: " + go_cost.toFixed(2) + "p\n"; }
+			if (footprint != 0) { to_return += "Carbon footprint: " + footprint.toFixed(1) + "g"; }
+			return to_return;
+		}
+	},
+}
+
 function get_config(dataSets) {
 	return {
 		type: "bar",
@@ -508,32 +545,9 @@ function get_config(dataSets) {
 			maintainAspectRatio: false,
 			title: { display: false },
 			tooltips: {
-				mode: "index",
+				mode: "single",
 				position: "nearest",
-				callbacks: {
-					footer: function(tooltipItems, data) {
-						var index = tooltipItems[0].index;
-						if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
-							var agile_cost = 0;
-							var go_cost = 0;
-							var footprint = 0;
-							tooltipItems.forEach(function(tooltipItem) {
-								if (tooltipItem.datasetIndex == 0) {
-									agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
-								} else if (tooltipItem.datasetIndex == 1) {
-									go_cost = tooltipItem.value * data.datasets[3].data[index].y;
-								} else if (tooltipItem.datasetIndex == 2) {
-									footprint = tooltipItem.value * data.datasets[3].data[index].y;
-								}
-							});
-							to_return = "";
-							if (agile_cost != 0) { to_return += "Agile cost: " + agile_cost.toFixed(2) + "p\n"; }
-							if (go_cost != 0) { to_return += "Go cost: " + go_cost.toFixed(2) + "p\n"; }
-							if (footprint != 0) { to_return += "Carbon footprint: " + footprint.toFixed(1) + "g"; }
-							return to_return;
-						}
-					},
-				},
+				callbacks: tooltipCallbacks,
 				footerFontStyle: "normal"
 			},
 			legend: {
