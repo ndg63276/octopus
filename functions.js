@@ -508,13 +508,14 @@ var tooltipCallbacks = {
 			for (item of data.datasets[3].data) {
 				if (moment(item.x).format() == xLabel) {
 					consumptionFound = item.y;
+					break;
 				}
 			}
 			var agile_cost = 0;
 			var go_cost = 0;
 			var footprint = 0;
 			if (consumptionFound != null) {
-				tooltipItems.forEach(function(tooltipItem) {
+				for (tooltipItem of tooltipItems) {
 					if (tooltipItem.datasetIndex == 0) {
 						agile_label = data.datasets[0].label;
 						agile_cost = tooltipItem.value * consumptionFound;
@@ -524,7 +525,7 @@ var tooltipCallbacks = {
 					} else if (tooltipItem.datasetIndex == 2) {
 						footprint = tooltipItem.value * consumptionFound;
 					}
-				});
+				};
 			}
 			to_return = "";
 			if (tooltipItems[0].datasetIndex != 3 && consumptionFound != null) { to_return += "Consumption: " + consumptionFound + "kWh\n"; }
