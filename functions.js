@@ -317,8 +317,10 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		var all_rates = get_single_rate(user_info, code);
 	} else if (code == "ovo" || code == "goodenergy") {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
-	} else if (code == "edf") {
-		var all_rates = get_edf_rates(user_info, code, startdate, enddate);
+	} else if (code == "edf98") {
+		var all_rates = get_edf98_rates(user_info, code, startdate, enddate);
+	} else if (code == "edf35") {
+		var all_rates = get_edf35_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	}
@@ -652,7 +654,7 @@ function get_e7_rates(user_info, code, startdate, enddate) {
 	return to_return;
 }
 
-function get_edf_rates(user_info, code, startdate, enddate) {
+function get_edf98_rates(user_info, code, startdate, enddate) {
 	json = get_json("tariffs.json");
 	data = json[code];
 	data = get_other_average_rates(data);
@@ -671,6 +673,29 @@ function get_edf_rates(user_info, code, startdate, enddate) {
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
 		d = new Date(d2);
 		d2.setDate(d2.getDate()+1);
+	}
+	return to_return;
+}
+
+function get_edf35_rates(user_info, code, startdate, enddate) {
+	json = get_json("tariffs.json");
+	data = json[code];
+	data = get_other_average_rates(data);
+	region_data = data[user_info["gsp"]];
+	var to_return = {};
+	to_return[code] = [];
+	var d = new Date(startdate);
+	d.setHours(0, 0, 0, 0);
+	var d2 = new Date(startdate);
+	while (d < enddate) {
+		d.setHours(0, 0, 0, 0);
+		d2.setHours(5, 0, 0, 0);
+		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
+		d.setHours(5, 0, 0, 0);
+		d2.setDate(d2.getDate()+1);
+		d2.setHours(0, 0, 0, 0);
+		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
+		d.setDate(d.getDate()+1);
 	}
 	return to_return;
 }
@@ -702,8 +727,10 @@ function changeTariff(id, val) {
 		code = "bulb";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
 		code = "ovo";
-	} else if (val.includes("EDF GoElectric")) {
-		code = "edf";
+	} else if (val.includes("EDF GoElectric98")) {
+		code = "edf98";
+	} else if (val.includes("EDF GoElectric35")) {
+		code = "edf35";
 	} else if (val == "Good Energy EV 3") {
 		code = "goodenergy";
 	} else if (val.startsWith("Octopus Go Faster")) {
