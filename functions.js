@@ -1,4 +1,4 @@
-var baseurl = "https://api.octopus.energy"
+var baseurl = "https://api.octopus.energy";
 var go_code = "GO-4H-0030";
 var agile_code = "AGILE-18-02-21";
 
@@ -17,7 +17,7 @@ function on_consumption_change() {
 		if (consumption.length > 0) {
 			sortByKey(consumption, "interval_start");
 			for (i of consumption) {
-				var consumption_start = new Date(i["interval_start"]).toISOString()
+				var consumption_start = new Date(i["interval_start"]).toISOString();
 				consumptionDataPoints.push({x: consumption_start, y: i["consumption"]});
 				totalConsumption += i["consumption"];
 			}
@@ -48,7 +48,7 @@ function on_consumption_change() {
 		rightAxis = false;
 	}
 
-	config = get_config(dataSets)
+	config = get_config(dataSets);
 
 	var loaderDiv = document.getElementById("loader");
 	loaderDiv.classList.add("hidden");
@@ -67,7 +67,7 @@ function on_consumption_change() {
 		document.getElementById("carbon2").innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById("consumption1").innerHTML = (totalConsumption).toFixed(3)+"kWh";
 		document.getElementById("consumption2").innerHTML = (totalConsumption).toFixed(3)+"kWh";
-		document.getElementById("cost_table").style.display = ""
+		document.getElementById("cost_table").style.display = "";
 	}
 
 }
@@ -76,13 +76,13 @@ function do_login(account_no, apikey, storecreds) {
 	to_return = {};
 	var url = baseurl + "/v1/accounts/" + account_no + "/";
 	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
-	var j = ajax_get(url, headers)
+	var j = ajax_get(url, headers);
 	if ("properties" in j) {
-		var last_property = last_element(j["properties"])
+		var last_property = last_element(j["properties"]);
 		to_return["address"] = last_property["address_line_1"];
 		to_return["postcode"] = last_property["postcode"];
-		var last_meter_point = last_element(last_property["electricity_meter_points"])
-		to_return["mpan"] = last_meter_point["mpan"]
+		var last_meter_point = last_element(last_property["electricity_meter_points"]);
+		to_return["mpan"] = last_meter_point["mpan"];
 		to_return["mpans"] = {};
 		for (this_meter_point of last_property["electricity_meter_points"]) {
 			to_return["mpans"][this_meter_point["mpan"]] = [];
@@ -90,8 +90,8 @@ function do_login(account_no, apikey, storecreds) {
 				to_return["mpans"][this_meter_point["mpan"]].push(meter["serial_number"]);
 			}
 		}
-		var last_meter = last_element(last_meter_point["meters"])
-		to_return["serial"] = last_meter["serial_number"]
+		var last_meter = last_element(last_meter_point["meters"]);
+		to_return["serial"] = last_meter["serial_number"];
 		to_return["headers"] = headers;
 		if (storecreds == true) {
 			setCookie("account_no", account_no, 365*24);
@@ -124,7 +124,7 @@ function check_login() {
 		to_return = do_login(account_no, apikey);
 		to_return["account_no"] = account_no;
 		to_return["apikey"] = apikey;
-		to_return["gsp"] = get_gsp(to_return)
+		to_return["gsp"] = get_gsp(to_return);
 	}
 	return to_return;
 }
@@ -155,7 +155,7 @@ function get_tariff_code(user_info, code) {
 	}
 	var gsp = user_info["gsp"];
 	if (gsp == "average") {
-		return "average"
+		return "average";
 	}
 	var url = baseurl + "/v1/products/" + code + "/";
 	var headers = user_info["headers"];
@@ -174,7 +174,7 @@ function get_costs(user_info, code, startdate, enddate, tariff_code) {
 	var consumption = get_consumption(user_info, startdate, enddate);
 	var standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
 	var unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
-	return get_costs_from_data(consumption, unit_rates, standing_charges)
+	return get_costs_from_data(consumption, unit_rates, standing_charges);
 }
 
 function get_costs_from_data(consumption, unit_rates, standing_charges) {
@@ -188,7 +188,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 			if (period_rate_start == period_start) {
 				period_rate = rate["rate"];
 				period_cost = period_rate * period_consumption;
-				unit_cost += period_cost
+				unit_cost += period_cost;
 			}
 		}
 		for (charge of standing_charges) {
@@ -223,8 +223,8 @@ function get_consumption(user_info, startdate, enddate) {
 		data = {}; // params not needed after first get
 		for (result of j["results"]) {
 			con = result["consumption"];
-			ints = moment(result["interval_start"])
-			inte = moment(result["interval_end"])
+			ints = moment(result["interval_start"]);
+			inte = moment(result["interval_end"]);
 			if (ints < enddate) {
 				results.push({"consumption":con, "interval_start": ints, "interval_end": inte});
 			}
@@ -272,7 +272,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 				data["period_to"] = enddate.toISOString();
 			}
 		}
-		var this_result = []
+		var this_result = [];
 		var j = {};
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 		while (j["next"] != null) {
@@ -289,7 +289,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 }
 
 function get_average_rates(results) {
-	average = []
+	average = [];
 	av_results = {};
 	for (tariff_code in results) {
 		for (index in results[tariff_code]) {
@@ -297,7 +297,7 @@ function get_average_rates(results) {
 			valid_to = results[tariff_code][index]["valid_to"];
 			value_inc_vat = results[tariff_code][index]["value_inc_vat"];
 			if ( ! (valid_from in av_results)) {
-				av_results[valid_from] = {"valid_to": valid_to, "value_inc_vat": []}
+				av_results[valid_from] = {"valid_to": valid_to, "value_inc_vat": []};
 			}
 			av_results[valid_from]["value_inc_vat"].push(value_inc_vat);
 		}
@@ -306,7 +306,7 @@ function get_average_rates(results) {
 		vals = av_results[av]["value_inc_vat"];
 		sum = vals.reduce((previous, current) => current += previous);
 		avg = (sum / vals.length).toFixed(3);
-		average.push({"valid_from": av_results[av], "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
+		average.push({"valid_from": av, "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
 	}
 	return average;
 }
@@ -357,7 +357,7 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 function get_tariff_data(user_info, code, logged_in, consumption) {
 	var dataPoints = [];
 	var costs = "null";
-	tariff_code = get_tariff_code(user_info, code)
+	tariff_code = get_tariff_code(user_info, code);
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
 		for (i of unit_rates) {
@@ -368,7 +368,7 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 			costs = get_costs_from_data(consumption, unit_rates, standing_charges);
 		}
 	}
-	return { "costs": costs, datapoints: dataPoints }
+	return { "costs": costs, datapoints: dataPoints };
 }
 
 function ajax_get(url, headers, data) {
@@ -399,7 +399,7 @@ function get_carbon_intensity(startdate, enddate) {
 	var to_return = [];
 	var url = "https://api.carbonintensity.org.uk/intensity/";
 	var s = new Date(startdate);
-	s.setSeconds(s.getSeconds()+1)
+	s.setSeconds(s.getSeconds()+1);
 	var e = new Date(enddate);
 	if (e-s > 1000*60*60*24*31) {
 		e = new Date(startdate);
@@ -415,7 +415,7 @@ function get_carbon_intensity(startdate, enddate) {
 		} else {
 			var this_intensity = i["intensity"]["forecast"];
 		}
-		to_return.push({"date": moment(this_date), "intensity": this_intensity})
+		to_return.push({"date": moment(this_date), "intensity": this_intensity});
 	}
 	return to_return;
 }
@@ -426,7 +426,7 @@ function get_carbon_from_data(consumption, carbon_intensity) {
 		period_start = Date.parse(period["interval_start"]);
 		period_consumption = period["consumption"];
 		for (rate of carbon_intensity) {
-			period_rate_start = Date.parse(rate["date"])
+			period_rate_start = Date.parse(rate["date"]);
 			if (period_rate_start == period_start) {
 				period_rate = rate["intensity"];
 				period_carbon = period_rate * period_consumption;
@@ -443,7 +443,7 @@ function changePostcode() {
 	setCookie("postcode", pc, 365*24);
 	var gsp = get_gsp(user_info);
 	document.getElementById("region").value = gsp;
-	$("#region").selectmenu("refresh")
+	$("#region").selectmenu("refresh");
 	changeRegion(gsp);
 }
 
@@ -454,9 +454,9 @@ function changeRegion(val) {
 		delete user_info["postcode"];
 	}
 	setCookie("gsp", val, 365*24);
-	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1")
+	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1");
 	changeTariff(tariffSelect1.id, tariffSelect1.value);
-	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2")
+	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2");
 	changeTariff(tariffSelect2.id, tariffSelect2.value);
 }
 
@@ -744,12 +744,12 @@ function changeTariff(id, val) {
 	var dataset;
 	if (id == "changeTariffSelect1" || id == "changeTariffSelectLoggedOut1") {
 		cost_el = document.getElementById("agile_unit_cost");
-		charge_el = document.getElementById("agile_charge")
+		charge_el = document.getElementById("agile_charge");
 		dataset = config.data.datasets[0];
 	} else {
-		cost_el = document.getElementById("go_unit_cost")
-		charge_el = document.getElementById("go_charge")
-		dataset = config.data.datasets[1]
+		cost_el = document.getElementById("go_unit_cost");
+		charge_el = document.getElementById("go_charge");
+		dataset = config.data.datasets[1];
 	}
 	cost_el.innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
 	charge_el.innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
