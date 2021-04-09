@@ -456,9 +456,9 @@ function changeRegion(val) {
 	}
 	setCookie("gsp", val, 365*24);
 	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1");
-	changeTariff(tariffSelect1.id, tariffSelect1.value);
+	changeTariff(tariffSelect1.id, tariffSelect1.value, true);
 	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2");
-	changeTariff(tariffSelect2.id, tariffSelect2.value);
+	changeTariff(tariffSelect2.id, tariffSelect2.value, true);
 }
 
 function changeMeter() {
@@ -755,7 +755,7 @@ function store_custom_costs() {
 	}
 }
 
-function changeTariff(id, val) {
+function changeTariff(id, val, regionChange=false) {
 	console.log("changeTariff");
 	var code;
 	var stepped = true;
@@ -765,7 +765,9 @@ function changeTariff(id, val) {
 	} else if (val == "Octopus Go") {
 		code = go_code;
 	} else if (val == "Custom") {
-		store_custom_costs();
+		if (! regionChange) {
+			store_custom_costs();
+		}
 		code = "custom";
 	} else if (val == "Bulb Vari-Fair") {
 		code = "bulb";
