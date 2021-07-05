@@ -1,6 +1,7 @@
-var baseurl = "https://api.octopus.energy"
+var baseurl = "https://api.octopus.energy";
 var go_code = "GO-4H-0030";
 var agile_code = "AGILE-18-02-21";
+var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
 function on_login(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
@@ -17,7 +18,7 @@ function on_consumption_change() {
 		if (consumption.length > 0) {
 			sortByKey(consumption, "interval_start");
 			for (i of consumption) {
-				var consumption_start = new Date(i["interval_start"]).toISOString()
+				var consumption_start = new Date(i["interval_start"]).toISOString();
 				consumptionDataPoints.push({x: consumption_start, y: i["consumption"]});
 				totalConsumption += i["consumption"];
 			}
@@ -48,7 +49,7 @@ function on_consumption_change() {
 		rightAxis = false;
 	}
 
-	config = get_config(dataSets)
+	config = get_config(dataSets);
 
 	var loaderDiv = document.getElementById("loader");
 	loaderDiv.classList.add("hidden");
@@ -67,7 +68,7 @@ function on_consumption_change() {
 		document.getElementById("carbon2").innerHTML = (carbon).toFixed(1)+"g";
 		document.getElementById("consumption1").innerHTML = (totalConsumption).toFixed(3)+"kWh";
 		document.getElementById("consumption2").innerHTML = (totalConsumption).toFixed(3)+"kWh";
-		document.getElementById("cost_table").style.display = ""
+		document.getElementById("cost_table").style.display = "";
 	}
 
 }
@@ -76,13 +77,13 @@ function do_login(account_no, apikey, storecreds) {
 	to_return = {};
 	var url = baseurl + "/v1/accounts/" + account_no + "/";
 	var headers = {"Authorization": "Basic " + btoa(apikey+":")};
-	var j = ajax_get(url, headers)
+	var j = ajax_get(url, headers);
 	if ("properties" in j) {
-		var last_property = last_element(j["properties"])
+		var last_property = last_element(j["properties"]);
 		to_return["address"] = last_property["address_line_1"];
 		to_return["postcode"] = last_property["postcode"];
-		var last_meter_point = last_element(last_property["electricity_meter_points"])
-		to_return["mpan"] = last_meter_point["mpan"]
+		var last_meter_point = last_element(last_property["electricity_meter_points"]);
+		to_return["mpan"] = last_meter_point["mpan"];
 		to_return["mpans"] = {};
 		for (this_meter_point of last_property["electricity_meter_points"]) {
 			to_return["mpans"][this_meter_point["mpan"]] = [];
@@ -90,8 +91,8 @@ function do_login(account_no, apikey, storecreds) {
 				to_return["mpans"][this_meter_point["mpan"]].push(meter["serial_number"]);
 			}
 		}
-		var last_meter = last_element(last_meter_point["meters"])
-		to_return["serial"] = last_meter["serial_number"]
+		var last_meter = last_element(last_meter_point["meters"]);
+		to_return["serial"] = last_meter["serial_number"];
 		to_return["headers"] = headers;
 		if (storecreds == true) {
 			setCookie("account_no", account_no, 365*24);
@@ -124,7 +125,7 @@ function check_login() {
 		to_return = do_login(account_no, apikey);
 		to_return["account_no"] = account_no;
 		to_return["apikey"] = apikey;
-		to_return["gsp"] = get_gsp(to_return)
+		to_return["gsp"] = get_gsp(to_return);
 	}
 	return to_return;
 }
@@ -155,7 +156,7 @@ function get_tariff_code(user_info, code) {
 	}
 	var gsp = user_info["gsp"];
 	if (gsp == "average") {
-		return "average"
+		return "average";
 	}
 	var url = baseurl + "/v1/products/" + code + "/";
 	var headers = user_info["headers"];
@@ -174,7 +175,7 @@ function get_costs(user_info, code, startdate, enddate, tariff_code) {
 	var consumption = get_consumption(user_info, startdate, enddate);
 	var standing_charges = get_standing_charges(user_info, code, startdate, enddate, tariff_code);
 	var unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
-	return get_costs_from_data(consumption, unit_rates, standing_charges)
+	return get_costs_from_data(consumption, unit_rates, standing_charges);
 }
 
 function get_costs_from_data(consumption, unit_rates, standing_charges) {
@@ -188,7 +189,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 			if (period_rate_start == period_start) {
 				period_rate = rate["rate"];
 				period_cost = period_rate * period_consumption;
-				unit_cost += period_cost
+				unit_cost += period_cost;
 			}
 		}
 		for (charge of standing_charges) {
@@ -223,8 +224,8 @@ function get_consumption(user_info, startdate, enddate) {
 		data = {}; // params not needed after first get
 		for (result of j["results"]) {
 			con = result["consumption"];
-			ints = moment(result["interval_start"])
-			inte = moment(result["interval_end"])
+			ints = moment(result["interval_start"]);
+			inte = moment(result["interval_end"]);
 			if (ints < enddate) {
 				results.push({"consumption":con, "interval_start": ints, "interval_end": inte});
 			}
@@ -272,7 +273,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 				data["period_to"] = enddate.toISOString();
 			}
 		}
-		var this_result = []
+		var this_result = [];
 		var j = {};
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 		while (j["next"] != null) {
@@ -289,7 +290,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 }
 
 function get_average_rates(results) {
-	average = []
+	average = [];
 	av_results = {};
 	for (tariff_code in results) {
 		for (index in results[tariff_code]) {
@@ -297,7 +298,7 @@ function get_average_rates(results) {
 			valid_to = results[tariff_code][index]["valid_to"];
 			value_inc_vat = results[tariff_code][index]["value_inc_vat"];
 			if ( ! (valid_from in av_results)) {
-				av_results[valid_from] = {"valid_to": valid_to, "value_inc_vat": []}
+				av_results[valid_from] = {"valid_to": valid_to, "value_inc_vat": []};
 			}
 			av_results[valid_from]["value_inc_vat"].push(value_inc_vat);
 		}
@@ -306,19 +307,21 @@ function get_average_rates(results) {
 		vals = av_results[av]["value_inc_vat"];
 		sum = vals.reduce((previous, current) => current += previous);
 		avg = (sum / vals.length).toFixed(3);
-		average.push({"valid_from": av_results[av], "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
+		average.push({"valid_from": av, "valid_to": av_results[av]["valid_to"], "value_inc_vat": avg});
 	}
 	return average;
 }
 
 
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
-	if (code == "bulb") {
+	if (code == "bulb" || code == "custom") {
 		var all_rates = get_single_rate(user_info, code);
 	} else if (code == "ovo" || code == "goodenergy") {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
-	} else if (code == "edf") {
-		var all_rates = get_edf_rates(user_info, code, startdate, enddate);
+	} else if (code == "edf98") {
+		var all_rates = get_edf98_rates(user_info, code, startdate, enddate);
+	} else if (code == "edf35") {
+		var all_rates = get_edf35_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	}
@@ -355,7 +358,7 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 function get_tariff_data(user_info, code, logged_in, consumption) {
 	var dataPoints = [];
 	var costs = "null";
-	tariff_code = get_tariff_code(user_info, code)
+	tariff_code = get_tariff_code(user_info, code);
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
 		for (i of unit_rates) {
@@ -366,7 +369,7 @@ function get_tariff_data(user_info, code, logged_in, consumption) {
 			costs = get_costs_from_data(consumption, unit_rates, standing_charges);
 		}
 	}
-	return { "costs": costs, datapoints: dataPoints }
+	return { "costs": costs, datapoints: dataPoints };
 }
 
 function ajax_get(url, headers, data) {
@@ -397,7 +400,7 @@ function get_carbon_intensity(startdate, enddate) {
 	var to_return = [];
 	var url = "https://api.carbonintensity.org.uk/intensity/";
 	var s = new Date(startdate);
-	s.setSeconds(s.getSeconds()+1)
+	s.setSeconds(s.getSeconds()+1);
 	var e = new Date(enddate);
 	if (e-s > 1000*60*60*24*31) {
 		e = new Date(startdate);
@@ -413,7 +416,7 @@ function get_carbon_intensity(startdate, enddate) {
 		} else {
 			var this_intensity = i["intensity"]["forecast"];
 		}
-		to_return.push({"date": moment(this_date), "intensity": this_intensity})
+		to_return.push({"date": moment(this_date), "intensity": this_intensity});
 	}
 	return to_return;
 }
@@ -424,7 +427,7 @@ function get_carbon_from_data(consumption, carbon_intensity) {
 		period_start = Date.parse(period["interval_start"]);
 		period_consumption = period["consumption"];
 		for (rate of carbon_intensity) {
-			period_rate_start = Date.parse(rate["date"])
+			period_rate_start = Date.parse(rate["date"]);
 			if (period_rate_start == period_start) {
 				period_rate = rate["intensity"];
 				period_carbon = period_rate * period_consumption;
@@ -441,7 +444,7 @@ function changePostcode() {
 	setCookie("postcode", pc, 365*24);
 	var gsp = get_gsp(user_info);
 	document.getElementById("region").value = gsp;
-	$("#region").selectmenu("refresh")
+	$("#region").selectmenu("refresh");
 	changeRegion(gsp);
 }
 
@@ -452,10 +455,10 @@ function changeRegion(val) {
 		delete user_info["postcode"];
 	}
 	setCookie("gsp", val, 365*24);
-	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1")
-	changeTariff(tariffSelect1.id, tariffSelect1.value);
-	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2")
-	changeTariff(tariffSelect2.id, tariffSelect2.value);
+	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1");
+	changeTariff(tariffSelect1.id, tariffSelect1.value, true);
+	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2");
+	changeTariff(tariffSelect2.id, tariffSelect2.value, true);
 }
 
 function changeMeter() {
@@ -499,6 +502,44 @@ function updateMeters() {
 	$("#changeMeterSelect").selectmenu("refresh");
 }
 
+var tooltipCallbacks = {
+	footer: function(tooltipItems, data) {
+		var index = tooltipItems[0].index;
+		var xLabel = moment(tooltipItems[0].xLabel, "DD-MM-YY HH:mm:ss").format();
+		var consumptionFound = null;
+		if (data.datasets[3] != null) {
+			for (item of data.datasets[3].data) {
+				if (moment(item.x).format() == xLabel) {
+					consumptionFound = item.y;
+					break;
+				}
+			}
+			var agile_cost = 0;
+			var go_cost = 0;
+			var footprint = 0;
+			if (consumptionFound != null) {
+				for (tooltipItem of tooltipItems) {
+					if (tooltipItem.datasetIndex == 0) {
+						agile_label = data.datasets[0].label;
+						agile_cost = tooltipItem.value * consumptionFound;
+					} else if (tooltipItem.datasetIndex == 1) {
+						go_label = data.datasets[1].label;
+						go_cost = tooltipItem.value * consumptionFound;
+					} else if (tooltipItem.datasetIndex == 2) {
+						footprint = tooltipItem.value * consumptionFound;
+					}
+				};
+			}
+			to_return = "";
+			if (tooltipItems[0].datasetIndex != 3 && consumptionFound != null) { to_return += "Consumption: " + consumptionFound + "kWh\n"; }
+			if (agile_cost != 0) { to_return += agile_label + " cost: " + agile_cost.toFixed(2) + "p\n"; }
+			if (go_cost != 0) { to_return += go_label + " cost: " + go_cost.toFixed(2) + "p\n"; }
+			if (footprint != 0) { to_return += "Carbon footprint: " + footprint.toFixed(1) + "g"; }
+			return to_return;
+		}
+	},
+}
+
 function get_config(dataSets) {
 	return {
 		type: "bar",
@@ -508,32 +549,9 @@ function get_config(dataSets) {
 			maintainAspectRatio: false,
 			title: { display: false },
 			tooltips: {
-				mode: "index",
+				mode: "single",
 				position: "nearest",
-				callbacks: {
-					footer: function(tooltipItems, data) {
-						var index = tooltipItems[0].index;
-						if (data.datasets[3] != null && data.datasets[3].data[index] != null) {
-							var agile_cost = 0;
-							var go_cost = 0;
-							var footprint = 0;
-							tooltipItems.forEach(function(tooltipItem) {
-								if (tooltipItem.datasetIndex == 0) {
-									agile_cost = tooltipItem.value * data.datasets[3].data[index].y;
-								} else if (tooltipItem.datasetIndex == 1) {
-									go_cost = tooltipItem.value * data.datasets[3].data[index].y;
-								} else if (tooltipItem.datasetIndex == 2) {
-									footprint = tooltipItem.value * data.datasets[3].data[index].y;
-								}
-							});
-							to_return = "";
-							if (agile_cost != 0) { to_return += "Agile cost: " + agile_cost.toFixed(2) + "p\n"; }
-							if (go_cost != 0) { to_return += "Go cost: " + go_cost.toFixed(2) + "p\n"; }
-							if (footprint != 0) { to_return += "Carbon footprint: " + footprint.toFixed(1) + "g"; }
-							return to_return;
-						}
-					},
-				},
+				callbacks: tooltipCallbacks,
 				footerFontStyle: "normal"
 			},
 			legend: {
@@ -580,11 +598,28 @@ function get_config(dataSets) {
 	};
 }
 
+function get_custom_rates() {
+	var data = {};
+	custom_charge_cost = parseFloat(getCookie("custom_charge_cost"));
+	if ( isNaN(custom_charge_cost) || custom_charge_cost == "" ) { custom_charge_cost = 0 };
+	custom_unit_cost = parseFloat(getCookie("custom_unit_cost"));
+	if ( isNaN(custom_unit_cost) || custom_unit_cost == "" ) { custom_unit_cost = 0 };
+	for (gsp of gsps) {
+		data[gsp] = {"charge_cost": custom_charge_cost, "unit_cost": custom_unit_cost};
+	}
+	return data;
+}
+
 function get_single_rate(user_info, code) {
-	json = get_json("tariffs.json");
-	data = json[code];
-	data = get_other_average_rates(data);
-	region_data = data[user_info["gsp"]];
+	console.log("get_single_rate");
+	if (code == "custom") {
+		data = get_custom_rates();
+	} else {
+		json = get_json("tariffs.json");
+		data = json[code];
+	}
+	var data = get_other_average_rates(data);
+	var region_data = data[user_info["gsp"]];
 	var to_return = {};
 	to_return[code] = [];
 	to_return[code].push({"valid_from": "2000-01-01T00:00:00Z", "valid_to": "2100-01-01T00:00:00Z", "value_inc_vat": region_data["unit_cost"]});
@@ -592,6 +627,7 @@ function get_single_rate(user_info, code) {
 }
 
 function get_other_average_rates(data) {
+	console.log("get_other_average_rates");
 	var day_sum = 0;
 	var night_sum = 0;
 	var unit_sum = 0;
@@ -616,6 +652,7 @@ function get_other_average_rates(data) {
 }
 
 function get_e7_rates(user_info, code, startdate, enddate) {
+	console.log("get_e7_rates");
 	json = get_json("tariffs.json");
 	data = json[code];
 	data = get_other_average_rates(data);
@@ -637,7 +674,8 @@ function get_e7_rates(user_info, code, startdate, enddate) {
 	return to_return;
 }
 
-function get_edf_rates(user_info, code, startdate, enddate) {
+function get_edf98_rates(user_info, code, startdate, enddate) {
+	console.log("get_edf98_rates");
 	json = get_json("tariffs.json");
 	data = json[code];
 	data = get_other_average_rates(data);
@@ -660,9 +698,38 @@ function get_edf_rates(user_info, code, startdate, enddate) {
 	return to_return;
 }
 
-function get_other_standing_charges(user_info, code, startdate, enddate) {
+function get_edf35_rates(user_info, code, startdate, enddate) {
+	console.log("get_edf35_rates");
 	json = get_json("tariffs.json");
 	data = json[code];
+	data = get_other_average_rates(data);
+	region_data = data[user_info["gsp"]];
+	var to_return = {};
+	to_return[code] = [];
+	var d = new Date(startdate);
+	d.setHours(0, 0, 0, 0);
+	var d2 = new Date(startdate);
+	while (d < enddate) {
+		d.setHours(0, 0, 0, 0);
+		d2.setHours(5, 0, 0, 0);
+		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
+		d.setHours(5, 0, 0, 0);
+		d2.setDate(d2.getDate()+1);
+		d2.setHours(0, 0, 0, 0);
+		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
+		d.setDate(d.getDate()+1);
+	}
+	return to_return;
+}
+
+function get_other_standing_charges(user_info, code, startdate, enddate) {
+	console.log("get_other_standing_charges");
+	if (code == "custom") {
+		data = get_custom_rates();
+	} else {
+		json = get_json("tariffs.json");
+		data = json[code];
+	}
 	data = get_other_average_rates(data);
 	region_data = data[user_info["gsp"]];
 	to_return = [{"valid_from": startdate.toISOString(), "valid_to": enddate.toISOString(), "value_inc_vat": region_data["charge_cost"]}];
@@ -675,7 +742,21 @@ function update_tariff_date() {
 	document.getElementById("tariffdate").innerHTML = date_str;
 }
 
-function changeTariff(id, val) {
+function store_custom_costs() {
+	var custom_unit_cost = prompt("Please enter the unit cost in pence per kWh", getCookie("custom_unit_cost"));
+	if (! isNaN(custom_unit_cost)) {
+		setCookie("custom_unit_cost", custom_unit_cost, 24*365);
+	}
+	if (logged_in) {
+		var custom_charge_cost = prompt("Please enter the standing charge in pence per day", getCookie("custom_charge_cost"));
+		if (! isNaN(custom_charge_cost)) {
+			setCookie("custom_charge_cost", custom_charge_cost, 24*365);
+		}
+	}
+}
+
+function changeTariff(id, val, regionChange=false) {
+	console.log("changeTariff");
 	var code;
 	var stepped = true;
 	if (val == "Octopus Agile") {
@@ -683,12 +764,19 @@ function changeTariff(id, val) {
 		stepped = false;
 	} else if (val == "Octopus Go") {
 		code = go_code;
+	} else if (val == "Custom") {
+		if (! regionChange) {
+			store_custom_costs();
+		}
+		code = "custom";
 	} else if (val == "Bulb Vari-Fair") {
 		code = "bulb";
 	} else if (val == "Ovo Energy 2 Year Fixed") {
 		code = "ovo";
-	} else if (val.includes("EDF GoElectric")) {
-		code = "edf";
+	} else if (val.includes("EDF GoElectric98")) {
+		code = "edf98";
+	} else if (val.includes("EDF GoElectric35")) {
+		code = "edf35";
 	} else if (val == "Good Energy EV 3") {
 		code = "goodenergy";
 	} else if (val.startsWith("Octopus Go Faster")) {
@@ -702,12 +790,12 @@ function changeTariff(id, val) {
 	var dataset;
 	if (id == "changeTariffSelect1" || id == "changeTariffSelectLoggedOut1") {
 		cost_el = document.getElementById("agile_unit_cost");
-		charge_el = document.getElementById("agile_charge")
+		charge_el = document.getElementById("agile_charge");
 		dataset = config.data.datasets[0];
 	} else {
-		cost_el = document.getElementById("go_unit_cost")
-		charge_el = document.getElementById("go_charge")
-		dataset = config.data.datasets[1]
+		cost_el = document.getElementById("go_unit_cost");
+		charge_el = document.getElementById("go_charge");
+		dataset = config.data.datasets[1];
 	}
 	cost_el.innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
 	charge_el.innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
