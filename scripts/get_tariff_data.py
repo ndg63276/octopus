@@ -39,8 +39,9 @@ regions = {
 "_N": "SouthScotland",
 }
 
-bulb_query="""query Tariffs($postcode: String!) {
-  tariffs(postcode: $postcode) {
+bulb_query="""query Tariffs($postcode: String!, $pricingAtDate: String!) {
+  tariffs(postcode: $postcode
+  pricingAtDate: $pricingAtDate) {
     residential {
       electricity {
         credit {
@@ -60,9 +61,13 @@ bulb_query="""query Tariffs($postcode: String!) {
 
 def get_bulb_tariffs(tariffs):
 	tariffs['bulb'] = {}
-	url = 'https://gr.bulb.co.uk/graphql'
+	url = 'https://join-gateway.bulb.co.uk/graphql'
+	if datetime.now() > datetime(2021, 10, 2):
+		pricingAtDate = datetime.strftime(datetime.now(), "%Y-%m-%d")
+	else:
+		pricingAtDate = "2021-10-17"
 	for gsp in postcodes:
-		data = {'operationName':'Tariffs','variables':{'postcode':postcodes[gsp]}, 'query': bulb_query}
+		data = {'operationName':'Tariffs','variables':{'postcode':postcodes[gsp], 'pricingAtDate':pricingAtDate}, 'query': bulb_query}
 		r = requests.post(url, json=data)
 		charge_cost = r.json()['data']['tariffs']['residential']['electricity']['credit']['standard'][0]['standingCharge']
 		unit_cost = r.json()['data']['tariffs']['residential']['electricity']['credit']['standard'][0]['unitRates']['standard']
