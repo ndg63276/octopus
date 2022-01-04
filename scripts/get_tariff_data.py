@@ -84,8 +84,8 @@ def get_ovo_tariffs(tariffs):
 	#	return tariffs
 	#api_token = r.json()['API_TOKEN']
 	api_token = environ['OVO_API_TOKEN']
-	headers = {'x-ovo-api-key': api_token}
-	url = 'https://quote.ovoenergy.com/v3/quick-quote'
+	headers = {'x-api-key': api_token}
+	url = 'https://api.switch.ovoenergy.com/quote/quick-quote'
 	params = {
 		'economy7': True,
 		'forceFullService': False,
