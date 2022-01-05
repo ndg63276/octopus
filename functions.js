@@ -1,5 +1,5 @@
 var baseurl = "https://api.octopus.energy";
-var go_code = "GO-4H-0030";
+var go_code = "GO-21-12-23";
 var agile_code = "AGILE-18-02-21";
 var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
@@ -781,7 +781,7 @@ function changeTariff(id, val, regionChange=false) {
 		code = "goodenergy";
 	} else if (val.startsWith("Octopus Go Faster")) {
 		var split = val.split(" ");
-		code = "GO-"+split[3]+"-"+split[4];
+		code = "GO-"+split[3]+"-"+split[4]+"-21-12-23";
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption);
 	new_costs = new_data["costs"];
