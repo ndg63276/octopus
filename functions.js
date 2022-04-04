@@ -316,7 +316,7 @@ function get_average_rates(results) {
 function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	if (code == "bulb" || code == "custom") {
 		var all_rates = get_single_rate(user_info, code);
-	} else if (code == "ovo" || code == "goodenergy") {
+	} else if (code == "ovo") {
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else if (code == "edf98") {
 		var all_rates = get_edf98_rates(user_info, code, startdate, enddate);
@@ -769,16 +769,14 @@ function changeTariff(id, val, regionChange=false) {
 			store_custom_costs();
 		}
 		code = "custom";
-	} else if (val == "Bulb Vari-Fair") {
+	} else if (val.includes("Bulb")) {
 		code = "bulb";
-	} else if (val == "Ovo Energy 2 Year Fixed") {
+	} else if (val.includes("Ovo Energy")) {
 		code = "ovo";
 	} else if (val.includes("EDF GoElectric98")) {
 		code = "edf98";
 	} else if (val.includes("EDF GoElectric35")) {
 		code = "edf35";
-	} else if (val == "Good Energy EV 3") {
-		code = "goodenergy";
 	} else if (val.startsWith("Octopus Go Faster")) {
 		var split = val.split(" ");
 		code = "GO-"+split[3]+"-"+split[4]+"-21-12-23";
