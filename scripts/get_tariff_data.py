@@ -111,9 +111,10 @@ def get_ovo_tariffs(tariffs):
 		params['postcode'] = postcodes[gsp]
 		params['region'] = regions[gsp]
 		r = requests.get(url, headers=headers, params=params)
-		charge_cost = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['standingCharge']
-		unit_cost_day = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['unitRate']
-		unit_cost_night = r.json()['tariffs']['2YearFixed']['tils']['Electricity']['nightUnitRate']
+		#print(r.json()['tariffs'])
+		charge_cost = r.json()['tariffs']['Variable']['tils']['Electricity']['standingCharge']
+		unit_cost_day = r.json()['tariffs']['Variable']['tils']['Electricity']['unitRate']
+		unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['nightUnitRate']
 		tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
 	return tariffs
 
