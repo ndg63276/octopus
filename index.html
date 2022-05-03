@@ -137,6 +137,9 @@ window.onload = function() {
 
 	on_consumption_change();
 
+	var tariff1 = getCookie("tariff1");
+	var tariff2 = getCookie("tariff2");
+
 	if (logged_in) {
 		document.getElementById("changeMPANDiv").classList.remove("hidden");
 		document.getElementById("changeMeterDiv").classList.remove("hidden");
@@ -162,8 +165,14 @@ window.onload = function() {
 			option2.value = tariffsForDropdown[i];
 			sel1.add(option1);
 			sel2.add(option2);
-			if (i==0) {option1.selected = true};
-			if (i==1) {option2.selected = true};
+			if ((tariff1 == null && i==0) || tariff1 == tariffsForDropdown[i]) {
+				option1.selected = true;
+				changeTariff("changeTariffSelect1", tariffsForDropdown[i]);
+			};
+			if ((tariff2 == null && i==1) || tariff2 == tariffsForDropdown[i]) {
+				option2.selected = true;
+				changeTariff("changeTariffSelect2", tariffsForDropdown[i]);
+			};
 		}
 		$("#changeTariffSelect1").selectmenu("refresh");
 		$("#changeTariffSelect2").selectmenu("refresh");
@@ -194,8 +203,14 @@ window.onload = function() {
 			option2.value = tariffsForDropdown[i];
 			sel1.add(option1);
 			sel2.add(option2);
-			if (i==0) {option1.selected = true};
-			if (i==1) {option2.selected = true};
+			if ((tariff1 == null && i==0) || tariff1 == tariffsForDropdown[i]) {
+				option1.selected = true;
+				changeTariff("changeTariffSelectLoggedOut1", tariffsForDropdown[i]);
+			};
+			if ((tariff2 == null && i==1) || tariff2 == tariffsForDropdown[i]) {
+				option2.selected = true;
+				changeTariff("changeTariffSelectLoggedOut2", tariffsForDropdown[i]);
+			};
 		}
 		$("#changeTariffSelectLoggedOut1").selectmenu("refresh");
 		$("#changeTariffSelectLoggedOut2").selectmenu("refresh");

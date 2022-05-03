@@ -790,10 +790,12 @@ function changeTariff(id, val, regionChange=false) {
 		cost_el = document.getElementById("agile_unit_cost");
 		charge_el = document.getElementById("agile_charge");
 		dataset = config.data.datasets[0];
+		setCookie("tariff1", val, 365*24);
 	} else {
 		cost_el = document.getElementById("go_unit_cost");
 		charge_el = document.getElementById("go_charge");
 		dataset = config.data.datasets[1];
+		setCookie("tariff2", val, 365*24);
 	}
 	cost_el.innerHTML = "£"+(new_costs["unit_cost"]/100).toFixed(2);
 	charge_el.innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
