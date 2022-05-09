@@ -738,8 +738,10 @@ function get_other_standing_charges(user_info, code, startdate, enddate) {
 
 function update_tariff_date() {
 	json = get_json("tariffs.json");
-	date_str = json["meta"]["updated"];
-	document.getElementById("tariffdate").innerHTML = date_str;
+	if ("meta" in json) {
+		date_str = json["meta"]["updated"];
+		document.getElementById("tariffdate").innerHTML = date_str;
+	}
 }
 
 function store_custom_costs() {
