@@ -1,6 +1,7 @@
 var baseurl = "https://api.octopus.energy";
 var go_code = "GO-22-03-29";
 var agile_code = "AGILE-18-02-21";
+var agile_outgoing_code = "AGILE-OUTGOING-19-05-13"
 var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
 function on_login(address) {
@@ -764,6 +765,9 @@ function changeTariff(id, val, regionChange=false) {
 	if (val == "Octopus Agile") {
 		code = agile_code;
 		stepped = false;
+	} else if (val == "Octopus Agile Outgoing") {
+		code = agile_outgoing_code;
+		stepped = false
 	} else if (val == "Octopus Go") {
 		code = go_code;
 	} else if (val == "Custom") {
