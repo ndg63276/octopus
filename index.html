@@ -203,11 +203,11 @@ window.onload = function() {
 			option2.value = tariffsForDropdown[i];
 			sel1.add(option1);
 			sel2.add(option2);
-			if ((tariff1 == null && i==0) || tariff1 == tariffsForDropdown[i]) {
+			if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
 				option1.selected = true;
 				changeTariff("changeTariffSelectLoggedOut1", tariffsForDropdown[i]);
 			};
-			if ((tariff2 == null && i==1) || tariff2 == tariffsForDropdown[i]) {
+			if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
 				option2.selected = true;
 				changeTariff("changeTariffSelectLoggedOut2", tariffsForDropdown[i]);
 			};
