@@ -161,10 +161,14 @@ window.onload = function() {
 		for (var i=0; i<tariffsForDropdown.length; i++) {
 			var option1 = document.createElement("option");
 			var option2 = document.createElement("option");
-			option1.text = tariffsForDropdown[i];
-			option2.text = tariffsForDropdown[i];
-			option1.value = tariffsForDropdown[i];
-			option2.value = tariffsForDropdown[i];
+			var thisVal = tariffsForDropdown[i]
+			option1.value = thisVal;
+			option2.value = thisVal;
+			if (thisVal == "My Tariff") {
+				thisVal += " ("+get_code_from_tariff_code(user_info["tariff_code"])+")";
+			}
+			option1.text = thisVal;
+			option2.text = thisVal;
 			sel1.add(option1);
 			sel2.add(option2);
 			if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
