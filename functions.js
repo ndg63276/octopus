@@ -94,6 +94,7 @@ function do_login(account_no, apikey, storecreds) {
 			}
 		}
 		var last_meter = last_element(last_meter_point["meters"]);
+		to_return["tariff_code"] = last_element(last_meter_point["agreements"])["tariff_code"];
 		to_return["serial"] = last_meter["serial_number"];
 		to_return["headers"] = headers;
 		if (storecreds == true) {
@@ -357,10 +358,14 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 	return to_return;
 }
 
-function get_tariff_data(user_info, code, logged_in, consumption) {
+function get_tariff_data(user_info, code, logged_in, consumption, val) {
 	var dataPoints = [];
 	var costs = "null";
-	tariff_code = get_tariff_code(user_info, code);
+	if (val != null && val.startsWith("My Tariff")) {
+		tariff_code = user_info["tariff_code"];
+	} else {
+		tariff_code = get_tariff_code(user_info, code);
+	}
 	if (tariff_code != null) {
 		unit_rates = get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code);
 		for (i of unit_rates) {
@@ -759,8 +764,26 @@ function store_custom_costs() {
 	}
 }
 
+function get_code_from_tariff_code(tariff_code) {
+	if (tariff_code.includes("GO")) {
+		var split = tariff_code.split("-");
+		if (split.length == 7) {
+			// go
+			code = split.slice(2,6).join("-");
+		} else {
+			// go faster
+			code = split.slice(2,8).join("-");
+		}
+	} else if (tariff_code.includes("AGILE")) {
+		code = agile_code;
+	} else {
+		code = tariff_code;
+	}
+	return code;
+}
+
 function changeTariff(id, val, regionChange=false) {
-	console.log("changeTariff");
+	console.log("changeTariff: "+val);
 	var code;
 	var stepped = true;
 	if (val == "Octopus Agile") {
@@ -787,8 +810,10 @@ function changeTariff(id, val, regionChange=false) {
 	} else if (val.startsWith("Octopus Go Faster")) {
 		var split = val.split(" ");
 		code = "GO-"+split[3]+"-"+split[4]+go_date;
+	} else if (val.startsWith("My Tariff")) {
+		code = get_code_from_tariff_code(user_info["tariff_code"]);
 	}
-	new_data = get_tariff_data(user_info, code, logged_in, consumption);
+	new_data = get_tariff_data(user_info, code, logged_in, consumption, val);
 	new_costs = new_data["costs"];
 	var cost_el;
 	var charge_el;

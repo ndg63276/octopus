@@ -142,6 +142,7 @@ window.onload = function() {
 	var tariff2 = getCookie("tariff2");
 
 	if (logged_in) {
+		tariffsForDropdown.unshift("My Tariff"); // ("+get_code_from_tariff_code(user_info["tariff_code"])+")");
 		document.getElementById("changeMPANDiv").classList.remove("hidden");
 		document.getElementById("changeMeterDiv").classList.remove("hidden");
 		document.getElementById("changeMPANDiv").classList.add("in-line-div");
@@ -166,11 +167,11 @@ window.onload = function() {
 			option2.value = tariffsForDropdown[i];
 			sel1.add(option1);
 			sel2.add(option2);
-			if ((tariff1 == null && i==0) || tariff1 == tariffsForDropdown[i]) {
+			if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
 				option1.selected = true;
 				changeTariff("changeTariffSelect1", tariffsForDropdown[i]);
 			};
-			if ((tariff2 == null && i==1) || tariff2 == tariffsForDropdown[i]) {
+			if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
 				option2.selected = true;
 				changeTariff("changeTariffSelect2", tariffsForDropdown[i]);
 			};
