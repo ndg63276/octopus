@@ -1,7 +1,7 @@
 const baseurl = "https://api.octopus.energy";
 const go_date = "-22-03-29";
 var go_code = "GO" + go_date;
-var agile_code = "AGILE-18-02-21";
+var agile_code = "AGILE-22-07-22";
 var agile_outgoing_code = "AGILE-OUTGOING-19-05-13"
 var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
