@@ -88,9 +88,10 @@ function do_login(account_no, apikey, storecreds) {
 		to_return["mpan"] = last_meter_point["mpan"];
 		to_return["mpans"] = {};
 		for (this_meter_point of last_property["electricity_meter_points"]) {
-			to_return["mpans"][this_meter_point["mpan"]] = [];
+			tariff_code = last_element(this_meter_point["agreements"])["tariff_code"];
+			to_return["mpans"][this_meter_point["mpan"]] = {"serial_nos": [], "tariff_code": tariff_code};
 			for (meter of this_meter_point["meters"]) {
-				to_return["mpans"][this_meter_point["mpan"]].push(meter["serial_number"]);
+				to_return["mpans"][this_meter_point["mpan"]]["serial_nos"].push(meter["serial_number"]);
 			}
 		}
 		var last_meter = last_element(last_meter_point["meters"]);
@@ -362,7 +363,8 @@ function get_tariff_data(user_info, code, logged_in, consumption, val) {
 	var dataPoints = [];
 	var costs = "null";
 	if (val != null && val.startsWith("My Tariff")) {
-		tariff_code = user_info["tariff_code"];
+		current_mpan = user_info["mpan"];
+		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
 	} else {
 		tariff_code = get_tariff_code(user_info, code);
 	}
@@ -488,6 +490,7 @@ function changeMPAN() {
 	chartSpace.classList.add("hidden");
 	var val = document.getElementById("changeMPANSelect").value;
 	user_info["mpan"] = val;
+	user_info["tariff_code"] = user_info["mpans"][val]["tariff_code"];
 	updateMeters();
 	setTimeout(function(){
 		on_consumption_change();
@@ -498,7 +501,7 @@ function changeMPAN() {
 function updateMeters() {
 	$("#changeMeterSelect").empty();
 	var changeMeterSelect = document.getElementById("changeMeterSelect");
-	for (this_serial_no of user_info["mpans"][user_info["mpan"]]) {
+	for (this_serial_no of user_info["mpans"][user_info["mpan"]]["serial_nos"]) {
 		var option = document.createElement("option");
 		option.text = "Meter: "+this_serial_no;
 		option.value = this_serial_no;
@@ -811,7 +814,9 @@ function changeTariff(id, val, regionChange=false) {
 		var split = val.split(" ");
 		code = "GO-"+split[3]+"-"+split[4]+go_date;
 	} else if (val.startsWith("My Tariff")) {
-		code = get_code_from_tariff_code(user_info["tariff_code"]);
+		current_mpan = user_info["mpan"];
+		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
+		code = get_code_from_tariff_code(tariff_code);
 	}
 	new_data = get_tariff_data(user_info, code, logged_in, consumption, val);
 	new_costs = new_data["costs"];
