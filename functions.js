@@ -465,9 +465,9 @@ function changeRegion(val) {
 	}
 	setCookie("gsp", val, 365*24);
 	tariffSelect1 = document.getElementById("changeTariffSelectLoggedOut1");
-	changeTariff(tariffSelect1.id, tariffSelect1.value, true);
+	changeTariff(1, tariffSelect1.value, true);
 	tariffSelect2 = document.getElementById("changeTariffSelectLoggedOut2");
-	changeTariff(tariffSelect2.id, tariffSelect2.value, true);
+	changeTariff(2, tariffSelect2.value, true);
 }
 
 function changeMeter() {
@@ -496,6 +496,52 @@ function changeMPAN() {
 		on_consumption_change();
 		myChart.update();
 	}, 1);
+}
+
+function updateTariffList(logged_in) {
+	var tariff1 = getCookie("tariff1");
+	var tariff2 = getCookie("tariff2");
+	if (logged_in) {
+		if (tariffsForDropdown[0] != "My Tariff") {
+			tariffsForDropdown.unshift("My Tariff"); // ("+get_code_from_tariff_code(user_info["tariff_code"])+")");
+		}
+		var sel1 = document.getElementById("changeTariffSelect1");
+		var sel2 = document.getElementById("changeTariffSelect2");
+	} else {
+		var sel1 = document.getElementById("changeTariffSelectLoggedOut1");
+		var sel2 = document.getElementById("changeTariffSelectLoggedOut2");
+	}
+	sel1.innerHTML = "";
+	sel2.innerHTML = "";
+	for (var i=0; i<tariffsForDropdown.length; i++) {
+		var option1 = document.createElement("option");
+		var option2 = document.createElement("option");
+		var thisVal = tariffsForDropdown[i]
+		option1.value = thisVal;
+		option2.value = thisVal;
+		if (thisVal == "My Tariff") {
+			thisVal += " ("+get_code_from_tariff_code(user_info["tariff_code"])+")";
+		}
+		option1.text = thisVal;
+		option2.text = thisVal;
+		sel1.add(option1);
+		sel2.add(option2);
+		if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
+			option1.selected = true;
+			changeTariff(1, tariffsForDropdown[i]);
+		};
+		if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
+			option2.selected = true;
+			changeTariff(2, tariffsForDropdown[i]);
+		};
+	}
+	if (logged_in) {
+		$("#changeTariffSelect1").selectmenu("refresh");
+		$("#changeTariffSelect2").selectmenu("refresh");
+	} else {
+		$("#changeTariffSelectLoggedOut1").selectmenu("refresh");
+		$("#changeTariffSelectLoggedOut2").selectmenu("refresh");
+	}
 }
 
 function updateMeters() {
@@ -823,7 +869,7 @@ function changeTariff(id, val, regionChange=false) {
 	var cost_el;
 	var charge_el;
 	var dataset;
-	if (id == "changeTariffSelect1" || id == "changeTariffSelectLoggedOut1") {
+	if (id == 1) {
 		cost_el = document.getElementById("agile_unit_cost");
 		charge_el = document.getElementById("agile_charge");
 		dataset = config.data.datasets[0];

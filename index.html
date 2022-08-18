@@ -138,11 +138,9 @@ window.onload = function() {
 
 	on_consumption_change();
 
-	var tariff1 = getCookie("tariff1");
-	var tariff2 = getCookie("tariff2");
+	updateTariffList(logged_in);
 
 	if (logged_in) {
-		tariffsForDropdown.unshift("My Tariff"); // ("+get_code_from_tariff_code(user_info["tariff_code"])+")");
 		document.getElementById("changeMPANDiv").classList.remove("hidden");
 		document.getElementById("changeMeterDiv").classList.remove("hidden");
 		document.getElementById("changeMPANDiv").classList.add("in-line-div");
@@ -156,32 +154,6 @@ window.onload = function() {
 			option.selected = true;
 		}
 		$("#changeMPANSelect").selectmenu("refresh");
-		var sel1 = document.getElementById("changeTariffSelect1");
-		var sel2 = document.getElementById("changeTariffSelect2");
-		for (var i=0; i<tariffsForDropdown.length; i++) {
-			var option1 = document.createElement("option");
-			var option2 = document.createElement("option");
-			var thisVal = tariffsForDropdown[i]
-			option1.value = thisVal;
-			option2.value = thisVal;
-			if (thisVal == "My Tariff") {
-				thisVal += " ("+get_code_from_tariff_code(user_info["tariff_code"])+")";
-			}
-			option1.text = thisVal;
-			option2.text = thisVal;
-			sel1.add(option1);
-			sel2.add(option2);
-			if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
-				option1.selected = true;
-				changeTariff("changeTariffSelect1", tariffsForDropdown[i]);
-			};
-			if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
-				option2.selected = true;
-				changeTariff("changeTariffSelect2", tariffsForDropdown[i]);
-			};
-		}
-		$("#changeTariffSelect1").selectmenu("refresh");
-		$("#changeTariffSelect2").selectmenu("refresh");
 		updateMeters();
 	} else {
 		document.getElementById("not_logged_in").style.display = "";
@@ -198,28 +170,6 @@ window.onload = function() {
 		});
 		$("#dwn-btn").parent().hide(); // hide CSV button
 		$("#logout-btn").parent().hide(); // hide logout button
-		var sel1 = document.getElementById("changeTariffSelectLoggedOut1");
-		var sel2 = document.getElementById("changeTariffSelectLoggedOut2");
-		for (var i=0; i<tariffsForDropdown.length; i++) {
-			var option1 = document.createElement("option");
-			var option2 = document.createElement("option");
-			option1.text = tariffsForDropdown[i];
-			option2.text = tariffsForDropdown[i];
-			option1.value = tariffsForDropdown[i];
-			option2.value = tariffsForDropdown[i];
-			sel1.add(option1);
-			sel2.add(option2);
-			if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
-				option1.selected = true;
-				changeTariff("changeTariffSelectLoggedOut1", tariffsForDropdown[i]);
-			};
-			if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
-				option2.selected = true;
-				changeTariff("changeTariffSelectLoggedOut2", tariffsForDropdown[i]);
-			};
-		}
-		$("#changeTariffSelectLoggedOut1").selectmenu("refresh");
-		$("#changeTariffSelectLoggedOut2").selectmenu("refresh");
 	};
 };
 
@@ -269,7 +219,7 @@ $(function() {
 <tr><td>
 <div class="cost-table-row"><form>
 <div class="ui-field-contain cost-table-dropdown">
-<select onchange="changeTariff(this.id, this.value)" id="changeTariffSelect1"></select>
+<select onchange="changeTariff(1, this.value)" id="changeTariffSelect1"></select>
 </div></form>
 </div></td>
 <td class="oct_table_opt" id="consumption1"></td>
@@ -279,7 +229,7 @@ $(function() {
 <tr><td>
 <div class="cost-table-row">
 <form><div class="ui-field-contain cost-table-dropdown">
-<select onchange="changeTariff(this.id, this.value)" id="changeTariffSelect2"></select>
+<select onchange="changeTariff(2, this.value)" id="changeTariffSelect2"></select>
 </div></form>
 </div></td>
 <td class="oct_table_opt" id="consumption2"></td>
@@ -294,9 +244,9 @@ $(function() {
 <a id="loginlink" href="login.html" data-ajax="false">Log in</a> with Octopus to see your usage and compare costs.<br />
 <div class="in-line-div">
 Compare
-<select data-inline="true" onchange="changeTariff(this.id, this.value)" id="changeTariffSelectLoggedOut1"></select>
+<select data-inline="true" onchange="changeTariff(1, this.value)" id="changeTariffSelectLoggedOut1"></select>
 with
-<select data-inline="true" onchange="changeTariff(this.id, this.value)" id="changeTariffSelectLoggedOut2"></select>
+<select data-inline="true" onchange="changeTariff(2, this.value)" id="changeTariffSelectLoggedOut2"></select>
 </div>
 Showing prices for <select id="region" data-inline="true" onchange="changeRegion(this.value)">
 <option value="average" selected="selected">National Average</option>
