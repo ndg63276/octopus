@@ -338,7 +338,7 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 			this_rate = {};
 			this_rate["date"] = d.toISOString();
 			for (rate of rates) {
-				if (Date.parse(rate["valid_from"]) <= d && Date.parse(rate["valid_to"]) > d) {
+				if (Date.parse(rate["valid_from"]) <= d && (Date.parse(rate["valid_to"]) > d || rate["valid_to"] == null)) {
 					this_rate["rate"] = rate["value_inc_vat"];
 					break;
 				}
@@ -348,7 +348,7 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 			to_return = [{}];
 			to_return[0]["date"] = d.toISOString();
 			for (rate of rates) {
-				if (Date.parse(rate["valid_from"]) <= d && Date.parse(rate["valid_to"]) > d) {
+				if (Date.parse(rate["valid_from"]) <= d && (Date.parse(rate["valid_to"]) > d || rate["valid_to"] == null)) {
 					to_return[0]["rate"] = rate["value_inc_vat"];
 					break;
 				}
@@ -492,6 +492,7 @@ function changeMPAN() {
 	user_info["mpan"] = val;
 	user_info["tariff_code"] = user_info["mpans"][val]["tariff_code"];
 	updateMeters();
+	updateTariffList(true);
 	setTimeout(function(){
 		on_consumption_change();
 		myChart.update();
