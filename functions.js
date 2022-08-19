@@ -239,7 +239,7 @@ function get_consumption(user_info, startdate, enddate) {
 }
 
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
-	if (! code.startsWith("GO") && ! code.startsWith("AGILE")) {
+	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("OUTGOING")) {
 		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
 	if (tariff_code == null) {
@@ -816,13 +816,8 @@ function store_custom_costs() {
 function get_code_from_tariff_code(tariff_code) {
 	if (tariff_code.includes("GO")) {
 		var split = tariff_code.split("-");
-		if (split.length == 7) {
-			// go
-			code = split.slice(2,6).join("-");
-		} else {
-			// go faster
-			code = split.slice(2,8).join("-");
-		}
+		var end = split.length - 1;
+		code = split.slice(2,end).join("-");
 	} else if (tariff_code.includes("AGILE")) {
 		code = agile_code;
 	} else {
