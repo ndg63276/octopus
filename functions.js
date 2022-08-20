@@ -139,7 +139,11 @@ function get_gsp(user_info) {
 	var headers = user_info["headers"];
 	var data = {"postcode": user_info["postcode"]};
 	var j = ajax_get(url, headers, data);
-	return j["results"][0]["group_id"];
+	if ("results" in j) {
+		return j["results"][0]["group_id"];
+	} else {
+		return "_C"  // London
+	}
 }
 
 function get_all_tariff_codes(code) {
@@ -223,15 +227,17 @@ function get_consumption(user_info, startdate, enddate) {
 	}
 	var j = {};
 	j["next"] = baseurl+"/v1/electricity-meter-points/"+mpan+"/meters/"+serial+"/consumption/";
-	while (j["next"] != null) {
+	while ("next" in j && j["next"] != null) {
 		var j = ajax_get(j["next"], headers, data);
-		data = {}; // params not needed after first get
-		for (result of j["results"]) {
-			con = result["consumption"];
-			ints = moment(result["interval_start"]);
-			inte = moment(result["interval_end"]);
-			if (ints < enddate) {
-				results.push({"consumption":con, "interval_start": ints, "interval_end": inte});
+		if ("results" in j) {
+			data = {}; // params not needed after first get
+			for (result of j["results"]) {
+				con = result["consumption"];
+				ints = moment(result["interval_start"]);
+				inte = moment(result["interval_end"]);
+				if (ints < enddate) {
+					results.push({"consumption":con, "interval_start": ints, "interval_end": inte});
+				}
 			}
 		}
 	}
@@ -255,7 +261,11 @@ function get_standing_charges(user_info, code, startdate, enddate, tariff_code) 
 	}
 	var url = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standing-charges/";
 	var j = ajax_get(url, headers, data);
-	return j["results"];
+	if ("results" in j) {
+		return j["results"];
+	} else {
+		return [];
+	}
 }
 
 function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
@@ -280,11 +290,13 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 		var this_result = [];
 		var j = {};
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
-		while (j["next"] != null) {
-			var j = ajax_get(j["next"], headers, data);
-			data = {}; // params not needed after first get
-			for (result of j["results"]) {
-				this_result.push(result);
+		while ("next" in j && j["next"] != null) {
+			j = ajax_get(j["next"], headers, data);
+			if ("results" in j) {
+				data = {}; // params not needed after first get
+				for (result of j["results"]) {
+					this_result.push(result);
+				}
 			}
 		}
 		results[tariff_code] = this_result;
@@ -417,15 +429,17 @@ function get_carbon_intensity(startdate, enddate) {
 	}
 	url += s.toISOString() + "/" + e.toISOString();
 	var j = ajax_get(url);
-	for (i of j["data"]) {
-		var this_date = new Date(i["from"]);
-		if (this_date < startdate) { continue; }
-		if ("actual" in i["intensity"] && i["intensity"]["actual"] != null) {
-			var this_intensity = i["intensity"]["actual"];
-		} else {
-			var this_intensity = i["intensity"]["forecast"];
+	if ("data" in j) {
+		for (i of j["data"]) {
+			var this_date = new Date(i["from"]);
+			if (this_date < startdate) { continue; }
+			if ("actual" in i["intensity"] && i["intensity"]["actual"] != null) {
+				var this_intensity = i["intensity"]["actual"];
+			} else {
+				var this_intensity = i["intensity"]["forecast"];
+			}
+			to_return.push({"date": moment(this_date), "intensity": this_intensity});
 		}
-		to_return.push({"date": moment(this_date), "intensity": this_intensity});
 	}
 	return to_return;
 }
