@@ -10,7 +10,7 @@ s3_client = boto3.client('s3')
 
 baseurl = 'https://api.octopus.energy/'
 qcurl = 'https://quickchart.io/chart'
-agile_code = 'AGILE-22-07-22'
+agile_code = 'AGILE-22-08-31'
 images_dir = '/tmp/images/'
 if not os.path.exists(images_dir):
 	os.mkdir(images_dir)
