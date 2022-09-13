@@ -57,7 +57,7 @@ function on_consumption_change() {
 		rightAxis = false;
 	}
 
-	config = get_config(dataSets);
+	config = get_config(dataSets, rightAxis);
 
 	var loaderDiv = document.getElementById("loader");
 	loaderDiv.classList.add("hidden");
@@ -616,7 +616,7 @@ var tooltipCallbacks = {
 	},
 }
 
-function get_config(dataSets) {
+function get_config(dataSets, rightAxis) {
 	return {
 		type: "bar",
 		data: { datasets: dataSets },
