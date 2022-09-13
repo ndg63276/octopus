@@ -63,7 +63,6 @@ function on_consumption_change() {
 	loaderDiv.classList.add("hidden");
 	var chartSpace = document.getElementById("chartSpace");
 	chartSpace.classList.remove("hidden");
-	chartSpace.innerHTML = '<div class="chart-container"><canvas id="octopus-chart" height=500></canvas></div>';
 	var ctx = document.getElementById("octopus-chart").getContext("2d");
 	myChart = new Chart(ctx, config);
 

@@ -67,9 +67,6 @@ var startdate = new Date();
 if (urlParams.has("start")) {
 	var start = urlParams.get("start");
 	startdate = parseDateParam(start);
-//} else if (logged_in) {
-//	startdate.setDate(startdate.getDate() - 2);
-//	startdate.setHours(0, 0, 0, 0);
 } else {
 	// startdate is now
 }
@@ -275,7 +272,9 @@ or enter your postcode:
 <center>
 
 <div class="loader" id="loader"></div>
-<div class="hidden" id="chartSpace"></div>
+<div class="hidden chart-container" id="chartSpace">
+<canvas id="octopus-chart" height=500></canvas>
+</div>
 
 <br />
 <input class="big-btn" data-role="button" data-inline="true" type="button" onClick='window.location.href=pagelink+"?start=-30days&end=now";' value="Last 30 days">
