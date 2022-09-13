@@ -18,7 +18,7 @@ function on_login(address) {
 	setTimeout(function () {location.href = "index.html"+window.location.search}, 3000);
 }
 
-function on_consumption_change() {
+function on_consumption_change(load_data) {
 	if (logged_in) {
 		totalConsumption = 0;
 		consumptionDataPoints = [];
@@ -34,12 +34,16 @@ function on_consumption_change() {
 		carbon = get_carbon_from_data(consumption, carbon_intensity);
 	}
 
-	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
-	var goDataPoints = go_data["datapoints"];
-	go_costs = go_data["costs"];
-	var agile_data = get_tariff_data(user_info, agile_codes["default"], logged_in, consumption);
-	agileDataPoints = agile_data["datapoints"];
-	agile_costs = agile_data["costs"];
+	var goDataPoints = [];
+	var agileDataPoints = [];
+	if (load_data) {
+		var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+		goDataPoints = go_data["datapoints"];
+		go_costs = go_data["costs"];
+		var agile_data = get_tariff_data(user_info, agile_codes["default"], logged_in, consumption);
+		agileDataPoints = agile_data["datapoints"];
+		agile_costs = agile_data["costs"];
+	}
 
 	var dataSets = [
 		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:"Octopus Agile",
@@ -497,7 +501,7 @@ function changeMeter() {
 	var val = document.getElementById("changeMeterSelect").value;
 	user_info["serial"] = val;
 	setTimeout(function(){
-		on_consumption_change();
+		on_consumption_change(true);
 		myChart.update();
 	}, 1);
 }
@@ -513,7 +517,7 @@ function changeMPAN() {
 	updateMeters();
 	updateTariffList(true);
 	setTimeout(function(){
-		on_consumption_change();
+		on_consumption_change(true);
 		myChart.update();
 	}, 1);
 }

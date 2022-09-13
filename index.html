@@ -135,7 +135,7 @@ window.onload = function() {
 		intensityDataPoints.push({x: carbon_intensity[i]["date"], y: carbon_intensity[i]["intensity"]});
 	}
 
-	on_consumption_change();
+	on_consumption_change(false);
 
 	updateTariffList(logged_in);
 
