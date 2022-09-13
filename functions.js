@@ -1,8 +1,14 @@
 const baseurl = "https://api.octopus.energy";
 const go_date = "-22-07-05";
 var go_code = "GO" + go_date;
-var agile_code = "AGILE-22-08-31";
-var agile_outgoing_code = "AGILE-OUTGOING-19-05-13"
+var agile_codes = {
+	"default" : "AGILE-22-08-31",
+	"(Aug 22)": "AGILE-22-08-31",
+	"(Jul 22)": "AGILE-22-07-22",
+	"(Feb 18)": "AGILE-18-02-21",
+	"Outgoing": "AGILE-OUTGOING-19-05-13",
+}
+
 var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
 function on_login(address) {
@@ -31,7 +37,7 @@ function on_consumption_change() {
 	var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
 	var goDataPoints = go_data["datapoints"];
 	go_costs = go_data["costs"];
-	var agile_data = get_tariff_data(user_info, agile_code, logged_in, consumption);
+	var agile_data = get_tariff_data(user_info, agile_codes["default"], logged_in, consumption);
 	agileDataPoints = agile_data["datapoints"];
 	agile_costs = agile_data["costs"];
 
@@ -845,12 +851,9 @@ function changeTariff(id, val, regionChange=false) {
 	console.log("changeTariff: "+val);
 	var code;
 	var stepped = true;
-	if (val == "Octopus Agile") {
-		code = agile_code;
+	if (val.startsWith("Octopus Agile")) {
+		code = agile_codes[val.substr(14)];
 		stepped = false;
-	} else if (val == "Octopus Agile Outgoing") {
-		code = agile_outgoing_code;
-		stepped = false
 	} else if (val == "Octopus Go") {
 		code = go_code;
 	} else if (val == "Custom") {
