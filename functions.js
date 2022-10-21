@@ -1,8 +1,15 @@
 const baseurl = "https://api.octopus.energy";
-const go_date = "-22-07-05";
-var go_code = "GO" + go_date;
+const go_faster_date = "-22-07-05";
+var go_codes = {
+	"default": "GO-GREEN-VAR-22-10-14",
+	"(Oct 22)": "GO-GREEN-VAR-22-10-14",
+	"(Jul 22)": "GO-22-07-05",
+	"(Mar 22)": "GO-22-03-29",
+	"(Dec 21)": "GO-21-12-23",
+}
 var agile_codes = {
-	"default" : "AGILE-22-08-31",
+	"default" : "AGILE-VAR-22-10-19",
+	"(Oct 22)": "AGILE-VAR-22-10-19",
 	"(Aug 22)": "AGILE-22-08-31",
 	"(Jul 22)": "AGILE-22-07-22",
 	"(Feb 18)": "AGILE-18-02-21",
@@ -37,7 +44,7 @@ function on_consumption_change(load_data) {
 	var goDataPoints = [];
 	var agileDataPoints = [];
 	if (load_data) {
-		var go_data = get_tariff_data(user_info, go_code, logged_in, consumption);
+		var go_data = get_tariff_data(user_info, go_codes["default"], logged_in, consumption);
 		goDataPoints = go_data["datapoints"];
 		go_costs = go_data["costs"];
 		var agile_data = get_tariff_data(user_info, agile_codes["default"], logged_in, consumption);
@@ -110,9 +117,11 @@ function do_login(account_no, apikey, storecreds) {
 		if (storecreds == true) {
 			setCookie("account_no", account_no, 365*24);
 			setCookie("apikey", apikey, 365*24);
+			setCookie("tariff1", "My Tariff", 365*24)
 		} else if (storecreds == false) {
 			setCookie("account_no", account_no, 1);
 			setCookie("apikey", apikey, 1);
+			setCookie("tariff1", "My Tariff", 1)
 		}
 	}
 	return to_return;
@@ -538,6 +547,12 @@ function updateTariffList(logged_in) {
 	sel1.innerHTML = "";
 	sel2.innerHTML = "";
 	for (var i=0; i<tariffsForDropdown.length; i++) {
+		if (tariff1 == "" && tariffsForDropdown[i].startsWith("Octopus Go")) {
+			tariff1 = tariffsForDropdown[i];
+		}
+		if (tariff2 == "" && tariffsForDropdown[i].startsWith("Octopus Agile")) {
+			tariff2 = tariffsForDropdown[i];
+		}
 		var option1 = document.createElement("option");
 		var option2 = document.createElement("option");
 		var thisVal = tariffsForDropdown[i]
@@ -550,11 +565,11 @@ function updateTariffList(logged_in) {
 		option2.text = thisVal;
 		sel1.add(option1);
 		sel2.add(option2);
-		if ((tariff1 == "" && i==0) || tariff1 == tariffsForDropdown[i]) {
+		if (tariff1 == tariffsForDropdown[i]) {
 			option1.selected = true;
 			changeTariff(1, tariffsForDropdown[i]);
 		};
-		if ((tariff2 == "" && i==1) || tariff2 == tariffsForDropdown[i]) {
+		if (tariff2 == tariffsForDropdown[i]) {
 			option2.selected = true;
 			changeTariff(2, tariffsForDropdown[i]);
 		};
@@ -843,7 +858,7 @@ function get_code_from_tariff_code(tariff_code) {
 		var end = split.length - 1;
 		code = split.slice(2,end).join("-");
 	} else if (tariff_code.includes("AGILE")) {
-		code = agile_code;
+		code = agile_codes["default"];
 	} else {
 		code = tariff_code;
 	}
@@ -857,8 +872,11 @@ function changeTariff(id, val, regionChange=false) {
 	if (val.startsWith("Octopus Agile")) {
 		code = agile_codes[val.substr(14)];
 		stepped = false;
-	} else if (val == "Octopus Go") {
-		code = go_code;
+	} else if (val.startsWith("Octopus Go Faster")) {
+		var split = val.split(" ");
+		code = "GO-"+split[3]+"-"+split[4]+go_faster_date;
+	} else if (val.startsWith("Octopus Go")) {
+		code = go_codes[val.substr(11)];
 	} else if (val == "Custom") {
 		if (! regionChange) {
 			store_custom_costs();
@@ -872,9 +890,6 @@ function changeTariff(id, val, regionChange=false) {
 		code = "edf98";
 	} else if (val.includes("EDF GoElectric35")) {
 		code = "edf35";
-	} else if (val.startsWith("Octopus Go Faster")) {
-		var split = val.split(" ");
-		code = "GO-"+split[3]+"-"+split[4]+go_date;
 	} else if (val.startsWith("My Tariff")) {
 		current_mpan = user_info["mpan"];
 		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
