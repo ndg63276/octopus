@@ -263,7 +263,8 @@ function get_consumption(user_info, startdate, enddate) {
 }
 
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
-	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("OUTGOING")) {
+	console.log("get_standing_charges: "+code);
+	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("OUTGOING") && ! code.startsWith("EPG")) {
 		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
 	if (tariff_code == null) {
@@ -308,6 +309,9 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 		var this_result = [];
 		var j = {};
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
+		if (tariff_code.startsWith("E-2R")) {
+			j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/day-unit-rates/";
+		}
 		while ("next" in j && j["next"] != null) {
 			j = ajax_get(j["next"], headers, data);
 			if ("results" in j) {
@@ -853,7 +857,7 @@ function store_custom_costs() {
 }
 
 function get_code_from_tariff_code(tariff_code) {
-	if (tariff_code.includes("GO")) {
+	if (tariff_code.includes("GO") || tariff_code.includes("EPG")) {
 		var split = tariff_code.split("-");
 		var end = split.length - 1;
 		code = split.slice(2,end).join("-");
