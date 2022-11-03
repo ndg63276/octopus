@@ -299,6 +299,7 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 	var headers = user_info["headers"];
 	var results = {};
 	var data = {};
+	var get_night_rates = false;
 	for (tariff_code of tariff_codes) {
 		if (startdate != null) {
 			data["period_from"] = startdate.toISOString();
@@ -311,17 +312,44 @@ function get_unit_rates(user_info, code, startdate, enddate, tariff_code) {
 		j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/standard-unit-rates/";
 		if (tariff_code.startsWith("E-2R")) {
 			j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/day-unit-rates/";
+			get_night_rates = true;
 		}
 		while ("next" in j && j["next"] != null) {
 			j = ajax_get(j["next"], headers, data);
 			if ("results" in j) {
 				data = {}; // params not needed after first get
 				for (result of j["results"]) {
-					this_result.push(result);
+					if (get_night_rates) {
+						var d = new Date(startdate.getTime());
+						d.setHours(0, 0, 0, 0);
+						var offset = -d.getTimezoneOffset()/60;
+						while (d < enddate) {
+							cloneResult = { ...result };
+							cloneResult["valid_from"] = d.toISOString();
+							d.setHours(0+offset, 30, 0, 0);
+							cloneResult["valid_to"] = d.toISOString();
+							this_result.push(cloneResult);
+							cloneResult2 = { ...result };
+							d.setHours(7+offset, 30, 0, 0);
+							offset = -d.getTimezoneOffset()/60;
+							d.setHours(7+offset, 30, 0, 0);
+							cloneResult2["valid_from"] = d.toISOString();
+							d.setHours(24, 0, 0, 0);
+							cloneResult2["valid_to"] = d.toISOString();
+							this_result.push(cloneResult2);
+						}
+					} else {
+						this_result.push(result);
+					}
 				}
+			}
+			if (get_night_rates) {
+				j["next"] = baseurl+"/v1/products/"+code+"/electricity-tariffs/"+tariff_code+"/night-unit-rates/";
+				get_night_rates = false;
 			}
 		}
 		results[tariff_code] = this_result;
+
 	}
 	results["average"] = get_average_rates(results);
 	return results;
