@@ -497,14 +497,15 @@ function get_carbon_intensity(startdate, enddate) {
 function get_carbon_from_data(consumption, carbon_intensity) {
 	var carbon = 0;
 	for (period of consumption) {
-		period_start = Date.parse(period["interval_start"]);
+		period_start = period["interval_start"];
 		period_consumption = period["consumption"];
 		for (rate of carbon_intensity) {
-			period_rate_start = Date.parse(rate["date"]);
-			if (period_rate_start == period_start) {
+			period_rate_start = rate["date"];
+			if (period_rate_start.isSame(period_start)) {
 				period_rate = rate["intensity"];
 				period_carbon = period_rate * period_consumption;
 				carbon += period_carbon;
+				break;
 			}
 		}
 	}
