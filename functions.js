@@ -216,6 +216,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 				period_rate = rate["rate"];
 				period_cost = period_rate * period_consumption;
 				unit_cost += period_cost;
+				break;
 			}
 		}
 		for (charge of standing_charges) {
@@ -225,6 +226,7 @@ function get_costs_from_data(consumption, unit_rates, standing_charges) {
 				// assume each period is 30 mins
 				period_cost = charge["value_inc_vat"] / 48;
 				charge_cost += period_cost;
+				break;
 			}
 		}
 	}
