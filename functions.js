@@ -1,14 +1,15 @@
 const baseurl = "https://api.octopus.energy";
 const go_faster_date = "-22-07-05";
 var go_codes = {
-	"default": "GO-GREEN-VAR-22-10-14",
+	"default" : "GO-GREEN-VAR-22-10-14",
 	"(Oct 22)": "GO-GREEN-VAR-22-10-14",
 	"(Jul 22)": "GO-22-07-05",
 	"(Mar 22)": "GO-22-03-29",
 	"(Dec 21)": "GO-21-12-23",
 }
 var agile_codes = {
-	"default" : "AGILE-VAR-22-10-19",
+	"default" : "AGILE-FLEX-22-11-25",
+	"(Nov 22)": "AGILE-FLEX-22-11-25",
 	"(Oct 22)": "AGILE-VAR-22-10-19",
 	"(Aug 22)": "AGILE-22-08-31",
 	"(Jul 22)": "AGILE-22-07-22",
