@@ -178,7 +178,7 @@ function get_all_tariff_codes(code) {
 }
 
 function get_tariff_code(user_info, code) {
-	if (! code.startsWith("GO") && ! code.startsWith("AGILE")) {
+	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("COSY")) {
 		return code;
 	}
 	var gsp = user_info["gsp"];
@@ -267,7 +267,12 @@ function get_consumption(user_info, startdate, enddate) {
 
 function get_standing_charges(user_info, code, startdate, enddate, tariff_code) {
 	console.log("get_standing_charges: "+code);
-	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("OUTGOING") && ! code.startsWith("EPG")) {
+	if (! code.startsWith("GO") &&
+			! code.startsWith("AGILE") &&
+			! code.startsWith("OUTGOING") &&
+			! code.startsWith("EPG") &&
+			! code.startsWith("COSY")
+	) {
 		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
 	if (tariff_code == null) {
@@ -913,6 +918,8 @@ function changeTariff(id, val, regionChange=false) {
 		code = "GO-"+split[3]+"-"+split[4]+go_faster_date;
 	} else if (val.startsWith("Octopus Go")) {
 		code = go_codes[val.substr(11)];
+	} else if (val == "Octopus Cosy") {
+		code = "COSY-22-12-08";
 	} else if (val == "Custom") {
 		if (! regionChange) {
 			store_custom_costs();
