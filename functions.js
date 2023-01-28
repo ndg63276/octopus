@@ -50,9 +50,9 @@ function on_consumption_change(load_data) {
 
 	goDataPoints = [];
 	agileDataPoints = [];
+	var val1 = document.getElementById("changeTariffSelect1").value;
+	var val2 = document.getElementById("changeTariffSelect2").value;
 	if (load_data) {
-		var val1 = document.getElementById("changeTariffSelect1").value;
-		var val2 = document.getElementById("changeTariffSelect2").value;
 		var code1 = get_code_from_dropdown_value(val1);
 		var code2 = get_code_from_dropdown_value(val2);
 		var agile_data = get_tariff_data(user_info, code1, logged_in, consumption);
@@ -64,9 +64,9 @@ function on_consumption_change(load_data) {
 	}
 
 	dataSets = [
-		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:"Octopus Agile",
+		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:val1,
 			fill:false, steppedLine:false, yAxisID:"left", data:agileDataPoints},
-		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:"Octopus Go",
+		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:val2,
 			fill:false, steppedLine:true, yAxisID:"left", data:goDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#800080", borderColor:"#800080", label:"Carbon Intensity",
 			fill:false, yAxisID:"right2", data:intensityDataPoints, hidden: consumptionDataPoints.length > 0}
