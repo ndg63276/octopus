@@ -143,24 +143,26 @@ window.onload = function() {
 
 	on_consumption_change(false);
 
-	updateTariffList(logged_in);
-
 	if (logged_in) {
 		document.getElementById("changeMPANDiv").classList.remove("hidden");
 		document.getElementById("changeMeterDiv").classList.remove("hidden");
 		document.getElementById("changeMPANDiv").classList.add("in-line-div");
 		document.getElementById("changeMeterDiv").classList.add("in-line-div");
+		var mpanCookie = getCookie("mpan");
 		var changeMPANSelect = document.getElementById("changeMPANSelect");
 		for (mpan in user_info["mpans"]) {
 			var option = document.createElement("option");
 			option.text = "MPAN: "+mpan;
 			option.value = mpan;
 			changeMPANSelect.add(option);
-			option.selected = true;
+			if (mpan == mpanCookie) {
+				option.selected = true;
+			}
 		}
 		$("#changeMPANSelect").selectmenu("refresh");
-		updateMeters();
+		changeMPAN();
 	} else {
+		updateTariffList(logged_in);
 		document.getElementById("not_logged_in").style.display = "";
 		var postcode = getCookie("postcode");
 		document.getElementById("postcode").value = postcode;

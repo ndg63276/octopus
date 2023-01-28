@@ -102,7 +102,19 @@ function do_login(account_no, apikey, storecreds) {
 		to_return["address"] = last_property["address_line_1"];
 		to_return["postcode"] = last_property["postcode"];
 		var last_meter_point = last_element(last_property["electricity_meter_points"]);
-		to_return["mpan"] = last_meter_point["mpan"];
+		var mpanCookie = getCookie("mpan");
+		if (mpanCookie != "") {
+			for (meter_point of last_property["electricity_meter_points"]) {
+				if (meter_point["mpan"] == mpanCookie) {
+					mpan_found = true;
+					to_return["mpan"] = mpanCookie;
+					break;
+				}
+			}
+		}
+		if (!("mpan" in to_return)) {
+			to_return["mpan"] = last_meter_point["mpan"];
+		}
 		to_return["mpans"] = {};
 		for (this_meter_point of last_property["electricity_meter_points"]) {
 			tariff_code = last_element(this_meter_point["agreements"])["tariff_code"];
@@ -562,6 +574,7 @@ function changeMPAN() {
 	var chartSpace = document.getElementById("chartSpace");
 	chartSpace.classList.add("hidden");
 	var val = document.getElementById("changeMPANSelect").value;
+	setCookie("mpan", val, 365*24);
 	user_info["mpan"] = val;
 	user_info["tariff_code"] = user_info["mpans"][val]["tariff_code"];
 	updateMeters();
