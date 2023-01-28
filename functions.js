@@ -51,12 +51,16 @@ function on_consumption_change(load_data) {
 	goDataPoints = [];
 	agileDataPoints = [];
 	if (load_data) {
-		var go_data = get_tariff_data(user_info, go_codes["default"], logged_in, consumption);
-		goDataPoints = go_data["datapoints"];
-		go_costs = go_data["costs"];
-		var agile_data = get_tariff_data(user_info, agile_codes["default"], logged_in, consumption);
+		var val1 = document.getElementById("changeTariffSelect1").value;
+		var val2 = document.getElementById("changeTariffSelect2").value;
+		var code1 = get_code_from_dropdown_value(val1);
+		var code2 = get_code_from_dropdown_value(val2);
+		var agile_data = get_tariff_data(user_info, code1, logged_in, consumption);
 		agileDataPoints = agile_data["datapoints"];
 		agile_costs = agile_data["costs"];
+		var go_data = get_tariff_data(user_info, code2, logged_in, consumption);
+		goDataPoints = go_data["datapoints"];
+		go_costs = go_data["costs"];
 	}
 
 	dataSets = [
@@ -928,10 +932,8 @@ function get_code_from_tariff_code(tariff_code) {
 	return code;
 }
 
-function changeTariff(id, val, regionChange=false) {
-	console.log("changeTariff: "+val);
+function get_code_from_dropdown_value(val) {
 	var code;
-	var stepped = true;
 	if (val.startsWith("Octopus Agile")) {
 		code = agile_codes[val.substr(14)];
 		stepped = false;
@@ -960,6 +962,13 @@ function changeTariff(id, val, regionChange=false) {
 		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
 		code = get_code_from_tariff_code(tariff_code);
 	}
+	return code;
+}
+
+function changeTariff(id, val, regionChange=false) {
+	console.log("changeTariff: "+val);
+	var stepped = true;
+	var code = get_code_from_dropdown_value(val);
 	new_data = get_tariff_data(user_info, code, logged_in, consumption, val);
 	new_costs = new_data["costs"];
 	var cost_el;
