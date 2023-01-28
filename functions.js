@@ -19,6 +19,12 @@ var agile_codes = {
 
 var gsps = ["_A","_B","_C","_D","_E","_F","_G","_H","_J","_K","_L","_M","_N","_P"];
 
+var dataSets;
+var goDataPoints;
+var agileDataPoints;
+var config;
+var myChart;
+
 function on_login(address) {
 	document.getElementById("loginstate").innerHTML = "You are logged in as "+address+".";
 	document.getElementById("loginform").classList.add("hidden");
@@ -42,8 +48,8 @@ function on_consumption_change(load_data) {
 		carbon = get_carbon_from_data(consumption, carbon_intensity);
 	}
 
-	var goDataPoints = [];
-	var agileDataPoints = [];
+	goDataPoints = [];
+	agileDataPoints = [];
 	if (load_data) {
 		var go_data = get_tariff_data(user_info, go_codes["default"], logged_in, consumption);
 		goDataPoints = go_data["datapoints"];
@@ -53,7 +59,7 @@ function on_consumption_change(load_data) {
 		agile_costs = agile_data["costs"];
 	}
 
-	var dataSets = [
+	dataSets = [
 		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:"Octopus Agile",
 			fill:false, steppedLine:false, yAxisID:"left", data:agileDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:"Octopus Go",
@@ -76,6 +82,9 @@ function on_consumption_change(load_data) {
 	var chartSpace = document.getElementById("chartSpace");
 	chartSpace.classList.remove("hidden");
 	var ctx = document.getElementById("octopus-chart").getContext("2d");
+	if (myChart) {
+		myChart.destroy();
+	}
 	myChart = new Chart(ctx, config);
 
 	if (logged_in) {
