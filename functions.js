@@ -203,7 +203,12 @@ function get_all_tariff_codes(code) {
 }
 
 function get_tariff_code(user_info, code) {
-	if (! code.startsWith("GO") && ! code.startsWith("AGILE") && ! code.startsWith("COSY")) {
+	console.log("get_tariff_code: "+code);
+	if (! code.startsWith("GO") &&
+			! code.startsWith("AGILE") &&
+			! code.startsWith("COSY") &&
+			! code.startsWith("VAR")
+	) {
 		return code;
 	}
 	var gsp = user_info["gsp"];
@@ -296,7 +301,8 @@ function get_standing_charges(user_info, code, startdate, enddate, tariff_code) 
 			! code.startsWith("AGILE") &&
 			! code.startsWith("OUTGOING") &&
 			! code.startsWith("EPG") &&
-			! code.startsWith("COSY")
+			! code.startsWith("COSY") &&
+			! code.startsWith("VAR")
 	) {
 		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
@@ -920,7 +926,7 @@ function store_custom_costs() {
 }
 
 function get_code_from_tariff_code(tariff_code) {
-	if (tariff_code.includes("GO") || tariff_code.includes("EPG")) {
+	if (tariff_code.includes("GO") || tariff_code.includes("EPG") || tariff_code.includes("VAR")) {
 		var split = tariff_code.split("-");
 		var end = split.length - 1;
 		code = split.slice(2,end).join("-");
