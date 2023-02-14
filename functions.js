@@ -65,7 +65,7 @@ function on_consumption_change(load_data) {
 
 	dataSets = [
 		{type: "line", pointHitRadius:20, backgroundColor:"#00ff00", borderColor:"#00ff00", label:val1,
-			fill:false, steppedLine:false, yAxisID:"left", data:agileDataPoints},
+			fill:false, steppedLine:true, yAxisID:"left", data:agileDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#ff0000", borderColor:"#ff0000", label:val2,
 			fill:false, steppedLine:true, yAxisID:"left", data:goDataPoints},
 		{type: "line", pointHitRadius:20, backgroundColor:"#800080", borderColor:"#800080", label:"Carbon Intensity",
@@ -944,7 +944,6 @@ function get_code_from_dropdown_value(val) {
 	var code;
 	if (val.startsWith("Octopus Agile")) {
 		code = agile_codes[val.substr(14)];
-		stepped = false;
 	} else if (val.startsWith("Octopus Go Faster")) {
 		var split = val.split(" ");
 		code = "GO-"+split[3]+"-"+split[4]+go_faster_date;
@@ -979,7 +978,6 @@ function get_code_from_dropdown_value(val) {
 
 function changeTariff(id, val, regionChange=false) {
 	console.log("changeTariff: "+val);
-	var stepped = true;
 	var code = get_code_from_dropdown_value(val);
 	new_data = get_tariff_data(user_info, code, logged_in, consumption, val);
 	new_costs = new_data["costs"];
@@ -1001,7 +999,6 @@ function changeTariff(id, val, regionChange=false) {
 	charge_el.innerHTML = "£"+(new_costs["charge_cost"]/100).toFixed(2);
 	dataset.data = new_data["datapoints"];
 	dataset.label = val;
-	dataset.steppedLine = stepped;
 	myChart.update();
 }
 
