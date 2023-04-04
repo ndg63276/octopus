@@ -93,9 +93,9 @@ def get_ovo_tariffs(tariffs):
 	#	print("Ovo tariffs not found")
 	#	return tariffs
 	#api_token = r.json()['API_TOKEN']
-	api_token = environ['OVO_API_TOKEN']
-	headers = {'x-api-key': api_token}
-	url = 'https://api.switch.ovoenergy.com/quote/quick-quote'
+	#api_token = environ['OVO_API_TOKEN']
+	#headers = {'x-api-key': api_token}
+	url = 'https://api.switch.ovoenergy.com/osp/quote'
 	params = {
 		'economy7': True,
 		'forceFullService': False,
@@ -110,11 +110,12 @@ def get_ovo_tariffs(tariffs):
 	for gsp in postcodes:
 		params['postcode'] = postcodes[gsp]
 		params['region'] = regions[gsp]
-		r = requests.get(url, headers=headers, params=params)
+		r = requests.get(url, params=params)
 		#print(r.json()['tariffs'])
 		charge_cost = r.json()['tariffs']['Variable']['tils']['Electricity']['standingCharge']
 		unit_cost_day = r.json()['tariffs']['Variable']['tils']['Electricity']['unitRate']
-		unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['nightUnitRate']
+		unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['unitRate']
+		#unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['nightUnitRate']
 		tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
 	return tariffs
 
@@ -124,20 +125,20 @@ def get_edf_tariffs(tariffs):
 	# https://www.edfenergy.com/sites/default/files/goelectric_new_epg_prices.pdf
 	# Sept 24
 	tariffs['edf98'] = {
-		'_A': {'charge_cost': 38.00, 'unit_cost_day': 47.44, 'unit_cost_night': 12.72}, # Eastern
-		'_B': {'charge_cost': 44.84, 'unit_cost_day': 44.22, 'unit_cost_night': 12.72}, # East Midlands
-		'_C': {'charge_cost': 32.23, 'unit_cost_day': 48.07, 'unit_cost_night': 12.72}, # London
-		'_D': {'charge_cost': 47.66, 'unit_cost_day': 51.26, 'unit_cost_night': 12.72}, # North Wales
-		'_E': {'charge_cost': 48.21, 'unit_cost_day': 45.32, 'unit_cost_night': 12.72}, # West Midlands
-		'_F': {'charge_cost': 49.00, 'unit_cost_day': 44.22, 'unit_cost_night': 12.72}, # North East
-		'_G': {'charge_cost': 42.33, 'unit_cost_day': 45.15, 'unit_cost_night': 12.72}, # North West
-		'_J': {'charge_cost': 41.75, 'unit_cost_day': 48.15, 'unit_cost_night': 12.72}, # South East
-		'_H': {'charge_cost': 43.49, 'unit_cost_day': 46.49, 'unit_cost_night': 12.72}, # Southern
-		'_K': {'charge_cost': 48.23, 'unit_cost_day': 45.82, 'unit_cost_night': 12.72}, # South Wales
-		'_L': {'charge_cost': 51.71, 'unit_cost_day': 46.59, 'unit_cost_night': 12.72}, # South West
-		'_M': {'charge_cost': 48.61, 'unit_cost_day': 44.22, 'unit_cost_night': 12.72}, # Yorkshire
-		'_P': {'charge_cost': 50.14, 'unit_cost_day': 44.22, 'unit_cost_night': 12.72}, # North Scotland
-		'_N': {'charge_cost': 49.73, 'unit_cost_day': 46.58, 'unit_cost_night': 12.72}, # South Scotland
+		'_A': {'charge_cost': 38.00, 'unit_cost_day': 46.56, 'unit_cost_night': 11.84}, # Eastern
+		'_B': {'charge_cost': 44.84, 'unit_cost_day': 43.57, 'unit_cost_night': 12.07}, # East Midlands
+		'_C': {'charge_cost': 32.23, 'unit_cost_day': 47.55, 'unit_cost_night': 12.18}, # London
+		'_D': {'charge_cost': 47.66, 'unit_cost_day': 49.04, 'unit_cost_night': 10.50}, # North Wales
+		'_E': {'charge_cost': 48.21, 'unit_cost_day': 44.71, 'unit_cost_night': 12.11}, # West Midlands
+		'_F': {'charge_cost': 49.00, 'unit_cost_day': 42.86, 'unit_cost_night': 11.36}, # North East
+		'_G': {'charge_cost': 42.33, 'unit_cost_day': 44.33, 'unit_cost_night': 11.89}, # North West
+		'_J': {'charge_cost': 41.75, 'unit_cost_day': 47.07, 'unit_cost_night': 11.63}, # South East
+		'_H': {'charge_cost': 43.49, 'unit_cost_day': 45.57, 'unit_cost_night': 11.80}, # Southern
+		'_K': {'charge_cost': 48.23, 'unit_cost_day': 45.12, 'unit_cost_night': 12.02}, # South Wales
+		'_L': {'charge_cost': 51.71, 'unit_cost_day': 45.25, 'unit_cost_night': 11.38}, # South West
+		'_M': {'charge_cost': 48.61, 'unit_cost_day': 43.59, 'unit_cost_night': 12.09}, # Yorkshire
+		'_P': {'charge_cost': 50.14, 'unit_cost_day': 43.72, 'unit_cost_night': 12.22}, # North Scotland
+		'_N': {'charge_cost': 49.73, 'unit_cost_day': 45.18, 'unit_cost_night': 11.31}, # South Scotland
 	}
 	tariffs['edf35'] = {
 		'_A': {'charge_cost': 38.00, 'unit_cost_day': 51.87, 'unit_cost_night': 4.50}, # Eastern
