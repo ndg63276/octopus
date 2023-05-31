@@ -6,6 +6,7 @@ import requests
 import os
 from pytz import timezone, utc
 import boto3
+import tweepy
 s3_client = boto3.client('s3')
 
 baseurl = 'https://api.octopus.energy/'
@@ -137,12 +138,25 @@ def save_image(content, filename):
 
 
 def send_tweet():
-	url = os.environ['IFTTT_URL']
-	body = {
-		'value1': 'Octopus Agile prices for the next day have been released! See your usage and costs at https://smartathome.co.uk/octopus #smartathome',
-		'value2': 'https://s3-eu-west-1.amazonaws.com/smartathome.co.uk/octopus/images/average.png'
-	}
-	r = requests.post(url, json=body)
+	auth = tweepy.OAuth1UserHandler(
+		os.environ["consumer_key"],
+		os.environ["consumer_secret"],
+	)
+	auth.set_access_token(
+		os.environ["access_token"],
+		os.environ["access_token_secret"],
+	)
+	api = tweepy.API(auth)
+	media = api.simple_upload(images_dir+"average.png")
+	tweet = 'Octopus Agile prices for the next day have been released! See your usage and costs at https://smartathome.co.uk/octopus #smartathome'
+	client = tweepy.Client(
+		bearer_token=os.environ["bearer_token"],
+		access_token=os.environ["access_token"],
+		access_token_secret=os.environ["access_token_secret"],
+		consumer_key=os.environ["consumer_key"],
+		consumer_secret=os.environ["consumer_secret"],
+	)
+	client.create_tweet(text=tweet, media_ids=[media.media_id])
 
 
 def lambda_handler(event, context):
