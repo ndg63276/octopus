@@ -427,7 +427,7 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else if (code == "edf98") {
 		var all_rates = get_edf98_rates(user_info, code, startdate, enddate);
-	} else if (code == "edf35") {
+	} else if (code == "edf35" || code == "edf_overnight") {
 		var all_rates = get_edf35_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
@@ -964,6 +964,8 @@ function get_code_from_dropdown_value(val) {
 		code = "bulb";
 	} else if (val.includes("Ovo Energy")) {
 		code = "ovo";
+	} else if (val.includes("EDF GoElectric Overnight")) {
+		code = "edf_overnight";
 	} else if (val.includes("EDF GoElectric98")) {
 		code = "edf98";
 	} else if (val.includes("EDF GoElectric35")) {
