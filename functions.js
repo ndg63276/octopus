@@ -853,14 +853,14 @@ function get_edf98_rates(user_info, code, startdate, enddate) {
 	var to_return = {};
 	to_return[code] = [];
 	var d = new Date(startdate);
-	d.setHours(0, 0, 0, 0);
+	d.setUTCHours(0, 0, 0, 0);
 	var d2 = new Date(startdate);
 	while (d < enddate) {
 		while (d2.getDay() == 0 || d2.getDay() == 6) { d2.setDate(d2.getDate()+1) };
-		d2.setHours(7, 0, 0, 0);
+		d2.setUTCHours(7, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
 		d = new Date(d2);
-		d2.setHours(21, 0, 0, 0);
+		d2.setUTCHours(21, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
 		d = new Date(d2);
 		d2.setDate(d2.getDate()+1);
@@ -877,15 +877,15 @@ function get_edf35_rates(user_info, code, startdate, enddate) {
 	var to_return = {};
 	to_return[code] = [];
 	var d = new Date(startdate);
-	d.setHours(0, 0, 0, 0);
+	d.setUTCHours(0, 0, 0, 0);
 	var d2 = new Date(startdate);
 	while (d < enddate) {
-		d.setHours(0, 0, 0, 0);
-		d2.setHours(5, 0, 0, 0);
+		d.setUTCHours(0, 0, 0, 0);
+		d2.setUTCHours(5, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
-		d.setHours(5, 0, 0, 0);
+		d.setUTCHours(5, 0, 0, 0);
 		d2.setDate(d2.getDate()+1);
-		d2.setHours(0, 0, 0, 0);
+		d2.setUTCHours(0, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
 		d.setDate(d.getDate()+1);
 	}
