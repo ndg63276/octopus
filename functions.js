@@ -206,9 +206,12 @@ function get_tariff_code(user_info, code) {
 	console.log("get_tariff_code: "+code);
 	if (! code.startsWith("GO") &&
 			! code.startsWith("AGILE") &&
+			! code.startsWith("OUTGOING") &&
+			! code.startsWith("EPG") &&
 			! code.startsWith("COSY") &&
 			! code.startsWith("FLUX") &&
-			! code.startsWith("VAR")
+			! code.startsWith("VAR") &&
+			! code.startsWith("INTELLI")
 	) {
 		return code;
 	}
@@ -304,7 +307,8 @@ function get_standing_charges(user_info, code, startdate, enddate, tariff_code) 
 			! code.startsWith("EPG") &&
 			! code.startsWith("COSY") &&
 			! code.startsWith("FLUX") &&
-			! code.startsWith("VAR")
+			! code.startsWith("VAR") &&
+			! code.startsWith("INTELLI")
 	) {
 		return get_other_standing_charges(user_info, code, startdate, enddate);
 	}
@@ -951,6 +955,8 @@ function get_code_from_dropdown_value(val) {
 		code = go_codes[val.substr(11)];
 	} else if (val == "Octopus Cosy") {
 		code = "COSY-22-12-08";
+	} else if (val == "Octopus Intelligent") {
+		code = "INTELLI-VAR-22-10-14";
 	} else if (val == "Octopus Flux Import") {
 		code = "FLUX-IMPORT-23-02-14";
 	} else if (val == "Octopus Flux Export") {
