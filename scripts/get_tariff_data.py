@@ -39,51 +39,6 @@ regions = {
 "_N": "SouthScotland",
 }
 
-bulb_query="""query Tariffs($postcode: String!, $pricingAtDate: String!, $availableAtDate: String!) {
-  tariffs(
-    postcode: $postcode
-    pricingAtDate: $pricingAtDate
-    availableAtDate: $availableAtDate
-  ) {
-    residential {
-      electricity {
-        credit {
-          standard {
-            standingCharge
-            unitRates {
-              standard
-            }
-          }
-        }
-      }
-    }
-  }
-}
-"""
-
-
-def get_bulb_tariffs(tariffs):
-	tariffs['bulb'] = {}
-	url = 'https://join-gateway.bulb.co.uk/graphql'
-	if datetime.now() > datetime(2022, 5, 11):
-		pricingAtDate = datetime.strftime(datetime.now(), "%Y-%m-%d")
-	else:
-		pricingAtDate = "2022-05-11"
-	for gsp in postcodes:
-		data = {
-			'operationName':'Tariffs',
-			'variables':{
-				'postcode':postcodes[gsp],
-				'pricingAtDate':pricingAtDate,
-				'availableAtDate':datetime.strftime(datetime.now(), "%Y-%m-%d")
-			},
-			'query': bulb_query}
-		r = requests.post(url, json=data)
-		charge_cost = r.json()['data']['tariffs']['residential']['electricity']['credit']['standard'][0]['standingCharge']
-		unit_cost = r.json()['data']['tariffs']['residential']['electricity']['credit']['standard'][0]['unitRates']['standard']
-		tariffs['bulb'][gsp] = {'charge_cost': charge_cost, 'unit_cost': unit_cost}
-	return tariffs
-
 
 def get_ovo_tariffs(tariffs):
 	tariffs['ovo'] = {}
@@ -182,7 +137,6 @@ def get_meta_data(tariffs):
 
 def lambda_handler(event, context):
 	tariffs = {}
-	tariffs = get_bulb_tariffs(tariffs)
 	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
