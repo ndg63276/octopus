@@ -50,7 +50,7 @@ def get_ovo_tariffs(tariffs):
 	#api_token = r.json()['API_TOKEN']
 	#api_token = environ['OVO_API_TOKEN']
 	#headers = {'x-api-key': api_token}
-	url = 'https://api.switch.ovoenergy.com/osp/quote'
+	url = 'https://journey.products.ovoenergy.com/qs/quote'
 	params = {
 		'economy7': True,
 		'forceFullService': False,
