@@ -50,17 +50,13 @@ def get_ovo_tariffs(tariffs):
 	#api_token = r.json()['API_TOKEN']
 	#api_token = environ['OVO_API_TOKEN']
 	#headers = {'x-api-key': api_token}
-	url = 'https://journey.products.ovoenergy.com/qs/quote'
+	url = 'https://journey.products.ovoenergy.com/quote'
 	params = {
-		'economy7': True,
-		'forceFullService': False,
 		'fuel': 'Electricity',
-		'onDemandPaymentMethod': False,
-		'includeSSR': True,
 		'paymentMethod': 'Paym',
-		'retailer': 'OVO',
-		'serviceType': 'FullService',
-		'usage': 'High'
+		'usage': 'High',
+		'propertyOwner': 'Yes',
+		'propertySearchId': ''
 	}
 	for gsp in postcodes:
 		params['postcode'] = postcodes[gsp]
