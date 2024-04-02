@@ -13,13 +13,13 @@ postcodes = {
 "_E": "ST11DB",
 "_F": "YO17JA",
 "_G": "OL114LT",
-"_P": "AB166NS",
-"_N": "G21NF",
-"_J": "CT11AF",
 "_H": "OX43TA",
+"_J": "CT11AF",
 "_K": "CF242AJ",
 "_L": "BS11DB",
 "_M": "S11DA",
+"_N": "G21NF",
+"_P": "AB166NS",
 }
 
 regions = {
@@ -30,13 +30,13 @@ regions = {
 "_E": "WestMidlands",
 "_F": "NorthEastEngland",
 "_G": "NorthWestEngland",
-"_J": "SouthEastEngland",
 "_H": "SouthernEngland",
+"_J": "SouthEastEngland",
 "_K": "SouthWales",
 "_L": "SouthWestEngland",
 "_M": "Yorkshire",
-"_P": "NorthScotland",
 "_N": "SouthScotland",
+"_P": "NorthScotland",
 }
 
 
