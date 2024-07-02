@@ -108,20 +108,20 @@ def get_edf_tariffs(tariffs):
 		'_N': {'charge_cost': 49.73, 'unit_cost_day': 50.11, 'unit_cost_night': 4.50}, # South Scotland
 	}
 	tariffs['edf_overnight'] = {
-		'_A': {'charge_cost': 50.46, 'unit_cost_day': 29.54, 'unit_cost_night': 8.99}, # Eastern
-		'_B': {'charge_cost': 55.72, 'unit_cost_day': 28.48, 'unit_cost_night': 8.99}, # East Midlands
-		'_C': {'charge_cost': 40.76, 'unit_cost_day': 30.59, 'unit_cost_night': 8.99}, # London
-		'_D': {'charge_cost': 66.94, 'unit_cost_day': 30.15, 'unit_cost_night': 8.99}, # North Wales
-		'_E': {'charge_cost': 62.83, 'unit_cost_day': 28.13, 'unit_cost_night': 8.99}, # West Midlands
-		'_F': {'charge_cost': 70.93, 'unit_cost_day': 27.14, 'unit_cost_night': 8.99}, # North East
-		'_G': {'charge_cost': 51.01, 'unit_cost_day': 29.72, 'unit_cost_night': 8.99}, # North West
-		'_H': {'charge_cost': 63.72, 'unit_cost_day': 28.12, 'unit_cost_night': 8.99}, # Southern
-		'_J': {'charge_cost': 57.40, 'unit_cost_day': 29.27, 'unit_cost_night': 8.99}, # South East
-		'_K': {'charge_cost': 62.79, 'unit_cost_day': 28.74, 'unit_cost_night': 8.99}, # South Wales
-		'_L': {'charge_cost': 67.93, 'unit_cost_day': 28.38, 'unit_cost_night': 8.99}, # South West
-		'_M': {'charge_cost': 67.39, 'unit_cost_day': 27.40, 'unit_cost_night': 8.99}, # Yorkshire
-		'_N': {'charge_cost': 64.57, 'unit_cost_day': 29.00, 'unit_cost_night': 8.99}, # South Scotland
-		'_P': {'charge_cost': 62.25, 'unit_cost_day': 29.26, 'unit_cost_night': 8.99}, # North Scotland
+		'_A': {'charge_cost': 50.44, 'unit_cost_day': 26.12, 'unit_cost_night': 8.99}, # Eastern
+		'_B': {'charge_cost': 55.72, 'unit_cost_day': 24.87, 'unit_cost_night': 8.99}, # East Midlands
+		'_C': {'charge_cost': 40.70, 'unit_cost_day': 26.59, 'unit_cost_night': 8.99}, # London
+		'_D': {'charge_cost': 66.91, 'unit_cost_day': 26.50, 'unit_cost_night': 8.99}, # North Wales
+		'_E': {'charge_cost': 62.79, 'unit_cost_day': 24.96, 'unit_cost_night': 8.99}, # West Midlands
+		'_F': {'charge_cost': 70.91, 'unit_cost_day': 24.43, 'unit_cost_night': 8.99}, # North East
+		'_G': {'charge_cost': 50.97, 'unit_cost_day': 25.32, 'unit_cost_night': 8.99}, # North West
+		'_H': {'charge_cost': 63.70, 'unit_cost_day': 25.69, 'unit_cost_night': 8.99}, # Southern
+		'_J': {'charge_cost': 57.39, 'unit_cost_day': 26.30, 'unit_cost_night': 8.99}, # South East
+		'_K': {'charge_cost': 62.76, 'unit_cost_day': 25.60, 'unit_cost_night': 8.99}, # South Wales
+		'_L': {'charge_cost': 67.91, 'unit_cost_day': 25.34, 'unit_cost_night': 8.99}, # South West
+		'_M': {'charge_cost': 67.37, 'unit_cost_day': 24.43, 'unit_cost_night': 8.99}, # Yorkshire
+		'_N': {'charge_cost': 64.50, 'unit_cost_day': 25.06, 'unit_cost_night': 8.99}, # South Scotland
+		'_P': {'charge_cost': 62.22, 'unit_cost_day': 25.36, 'unit_cost_night': 8.99}, # North Scotland
 	}
 	return tariffs
 
