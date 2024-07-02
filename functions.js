@@ -1,14 +1,14 @@
 const baseurl = "https://api.octopus.energy";
-const go_faster_date = "-22-07-05";
 var go_codes = {
-	"default" : "GO-GREEN-VAR-22-10-14",
-	"(Oct 22)": "GO-GREEN-VAR-22-10-14",
+	"default" : "GO-VAR-22-10-14",
+	"(Oct 22)": "GO-VAR-22-10-14",
 	"(Jul 22)": "GO-22-07-05",
 	"(Mar 22)": "GO-22-03-29",
 	"(Dec 21)": "GO-21-12-23",
 }
 var agile_codes = {
-	"default" : "AGILE-FLEX-22-11-25",
+	"default" : "AGILE-24-04-03",
+	"(Apr 24)": "AGILE-24-04-03",
 	"(Nov 22)": "AGILE-FLEX-22-11-25",
 	"(Oct 22)": "AGILE-VAR-22-10-19",
 	"(Aug 22)": "AGILE-22-08-31",
@@ -948,14 +948,11 @@ function get_code_from_dropdown_value(val) {
 	var code;
 	if (val.startsWith("Octopus Agile")) {
 		code = agile_codes[val.substr(14)];
-	} else if (val.startsWith("Octopus Go Faster")) {
-		var split = val.split(" ");
-		code = "GO-"+split[3]+"-"+split[4]+go_faster_date;
 	} else if (val.startsWith("Octopus Go")) {
 		code = go_codes[val.substr(11)];
 	} else if (val == "Octopus Cosy") {
 		code = "COSY-22-12-08";
-	} else if (val == "Octopus Intelligent") {
+	} else if (val == "Octopus Intelligent Go") {
 		code = "INTELLI-VAR-22-10-14";
 	} else if (val == "Octopus Flux Import") {
 		code = "FLUX-IMPORT-23-02-14";
