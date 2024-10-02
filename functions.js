@@ -967,10 +967,6 @@ function get_code_from_dropdown_value(val) {
 		code = "ovo";
 	} else if (val.includes("EDF GoElectric Overnight")) {
 		code = "edf_overnight";
-	} else if (val.includes("EDF GoElectric98")) {
-		code = "edf98";
-	} else if (val.includes("EDF GoElectric35")) {
-		code = "edf35";
 	} else if (val.startsWith("My Tariff")) {
 		current_mpan = user_info["mpan"];
 		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
