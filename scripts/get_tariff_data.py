@@ -42,32 +42,22 @@ regions = {
 
 def get_ovo_tariffs(tariffs):
 	tariffs['ovo'] = {}
-	#config_url = 'https://switch.ovoenergy.com/ev/config.json'
-	#r = requests.get(config_url)
-	#if 'API_TOKEN' not in r.json():
-	#	print("Ovo tariffs not found")
-	#	return tariffs
-	#api_token = r.json()['API_TOKEN']
-	#api_token = environ['OVO_API_TOKEN']
-	#headers = {'x-api-key': api_token}
-	url = 'https://journey.products.ovoenergy.com/quote'
+	url = 'https://dzt2p7wlleqwbavh3lymhc6z640rzskz.lambda-url.eu-west-1.on.aws/tariffs'
 	params = {
-		'fuel': 'Electricity',
-		'paymentMethod': 'Paym',
-		'usage': 'High',
-		'propertyOwner': 'Yes',
-		'propertySearchId': ''
+		'fuel': 'electricity',
+		'for_sale': 'true',
 	}
 	for gsp in postcodes:
-		params['postcode'] = postcodes[gsp]
-		params['region'] = regions[gsp]
+		params['region'] = gsp
 		r = requests.get(url, params=params)
-		#print(r.json()['tariffs'])
-		charge_cost = r.json()['tariffs']['Variable']['tils']['Electricity']['standingCharge']
-		unit_cost_day = r.json()['tariffs']['Variable']['tils']['Electricity']['unitRate']
-		unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['unitRate']
-		#unit_cost_night = r.json()['tariffs']['Variable']['tils']['Electricity']['nightUnitRate']
-		tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
+		for tariff in r.json()['tariffs']:
+			if tariff['name'] == 'Simpler Energy':
+				for n in tariff['tariffInformationLabels']:
+					if len(n['ratesByTimingCategory']) == 1:
+						charge_cost = 100 * n['standingCharge']
+						unit_cost_day = 100 * n['ratesByTimingCategory'][0]['unitRate']
+						unit_cost_night = 100 * n['ratesByTimingCategory'][0]['unitRate']
+						tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
 	return tariffs
 
 
@@ -100,7 +90,7 @@ def get_meta_data(tariffs):
 
 def lambda_handler(event, context):
 	tariffs = {}
-	#tariffs = get_ovo_tariffs(tariffs)
+	tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
