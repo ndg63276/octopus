@@ -13,13 +13,13 @@ postcodes = {
 "_E": "ST11DB",
 "_F": "YO17JA",
 "_G": "OL114LT",
-"_P": "AB166NS",
-"_N": "G21NF",
-"_J": "CT11AF",
 "_H": "OX43TA",
+"_J": "CT11AF",
 "_K": "CF242AJ",
 "_L": "BS11DB",
 "_M": "S11DA",
+"_N": "G21NF",
+"_P": "AB166NS",
 }
 
 regions = {
@@ -30,13 +30,13 @@ regions = {
 "_E": "WestMidlands",
 "_F": "NorthEastEngland",
 "_G": "NorthWestEngland",
-"_J": "SouthEastEngland",
 "_H": "SouthernEngland",
+"_J": "SouthEastEngland",
 "_K": "SouthWales",
 "_L": "SouthWestEngland",
 "_M": "Yorkshire",
-"_P": "NorthScotland",
 "_N": "SouthScotland",
+"_P": "NorthScotland",
 }
 
 
@@ -50,17 +50,13 @@ def get_ovo_tariffs(tariffs):
 	#api_token = r.json()['API_TOKEN']
 	#api_token = environ['OVO_API_TOKEN']
 	#headers = {'x-api-key': api_token}
-	url = 'https://journey.products.ovoenergy.com/qs/quote'
+	url = 'https://journey.products.ovoenergy.com/quote'
 	params = {
-		'economy7': True,
-		'forceFullService': False,
 		'fuel': 'Electricity',
-		'onDemandPaymentMethod': False,
-		'includeSSR': True,
 		'paymentMethod': 'Paym',
-		'retailer': 'OVO',
-		'serviceType': 'FullService',
-		'usage': 'High'
+		'usage': 'High',
+		'propertyOwner': 'Yes',
+		'propertySearchId': ''
 	}
 	for gsp in postcodes:
 		params['postcode'] = postcodes[gsp]
@@ -112,20 +108,20 @@ def get_edf_tariffs(tariffs):
 		'_N': {'charge_cost': 49.73, 'unit_cost_day': 50.11, 'unit_cost_night': 4.50}, # South Scotland
 	}
 	tariffs['edf_overnight'] = {
-		'_A': {'charge_cost': 43.76, 'unit_cost_day': 35.61, 'unit_cost_night': 8.00}, # Eastern
-		'_B': {'charge_cost': 50.40, 'unit_cost_day': 34.00, 'unit_cost_night': 8.00}, # East Midlands
-		'_C': {'charge_cost': 38.28, 'unit_cost_day': 35.64, 'unit_cost_night': 8.00}, # London
-		'_D': {'charge_cost': 61.91, 'unit_cost_day': 35.91, 'unit_cost_night': 8.00}, # North Wales
-		'_E': {'charge_cost': 54.06, 'unit_cost_day': 34.35, 'unit_cost_night': 8.00}, # West Midlands
-		'_F': {'charge_cost': 57.12, 'unit_cost_day': 34.02, 'unit_cost_night': 8.00}, # North East
-		'_G': {'charge_cost': 51.51, 'unit_cost_day': 34.25, 'unit_cost_night': 8.00}, # North West
-		'_H': {'charge_cost': 49.69, 'unit_cost_day': 35.37, 'unit_cost_night': 8.00}, # Southern
-		'_J': {'charge_cost': 47.31, 'unit_cost_day': 35.94, 'unit_cost_night': 8.00}, # South East
-		'_K': {'charge_cost': 53.92, 'unit_cost_day': 35.01, 'unit_cost_night': 8.00}, # South Wales
-		'_L': {'charge_cost': 58.37, 'unit_cost_day': 34.59, 'unit_cost_night': 8.00}, # South West
-		'_M': {'charge_cost': 55.70, 'unit_cost_day': 34.00, 'unit_cost_night': 8.00}, # Yorkshire
-		'_N': {'charge_cost': 61.77, 'unit_cost_day': 33.85, 'unit_cost_night': 8.00}, # South Scotland
-		'_P': {'charge_cost': 59.08, 'unit_cost_day': 34.68, 'unit_cost_night': 8.00}, # North Scotland
+		'_A': {'charge_cost': 50.44, 'unit_cost_day': 26.12, 'unit_cost_night': 8.99}, # Eastern
+		'_B': {'charge_cost': 55.72, 'unit_cost_day': 24.87, 'unit_cost_night': 8.99}, # East Midlands
+		'_C': {'charge_cost': 40.70, 'unit_cost_day': 26.59, 'unit_cost_night': 8.99}, # London
+		'_D': {'charge_cost': 66.91, 'unit_cost_day': 26.50, 'unit_cost_night': 8.99}, # North Wales
+		'_E': {'charge_cost': 62.79, 'unit_cost_day': 24.96, 'unit_cost_night': 8.99}, # West Midlands
+		'_F': {'charge_cost': 70.91, 'unit_cost_day': 24.43, 'unit_cost_night': 8.99}, # North East
+		'_G': {'charge_cost': 50.97, 'unit_cost_day': 25.32, 'unit_cost_night': 8.99}, # North West
+		'_H': {'charge_cost': 63.70, 'unit_cost_day': 25.69, 'unit_cost_night': 8.99}, # Southern
+		'_J': {'charge_cost': 57.39, 'unit_cost_day': 26.30, 'unit_cost_night': 8.99}, # South East
+		'_K': {'charge_cost': 62.76, 'unit_cost_day': 25.60, 'unit_cost_night': 8.99}, # South Wales
+		'_L': {'charge_cost': 67.91, 'unit_cost_day': 25.34, 'unit_cost_night': 8.99}, # South West
+		'_M': {'charge_cost': 67.37, 'unit_cost_day': 24.43, 'unit_cost_night': 8.99}, # Yorkshire
+		'_N': {'charge_cost': 64.50, 'unit_cost_day': 25.06, 'unit_cost_night': 8.99}, # South Scotland
+		'_P': {'charge_cost': 62.22, 'unit_cost_day': 25.36, 'unit_cost_night': 8.99}, # North Scotland
 	}
 	return tariffs
 
