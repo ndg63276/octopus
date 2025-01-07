@@ -65,20 +65,20 @@ def get_edf_tariffs(tariffs):
 	# https://www.edfenergy.com/electric-cars/ev-tariffs ->
 	# Request a quote
 	tariffs['edf_overnight'] = {
-		'_A': {'charge_cost': 51.26, 'unit_cost_day': 25.23, 'unit_cost_night': 8.99}, # Eastern
-		'_B': {'charge_cost': 56.62, 'unit_cost_day': 23.84, 'unit_cost_night': 8.99}, # East Midlands
-		'_C': {'charge_cost': 41.50, 'unit_cost_day': 25.58, 'unit_cost_night': 8.99}, # London
-		'_D': {'charge_cost': 67.70, 'unit_cost_day': 26.72, 'unit_cost_night': 8.99}, # North Wales
-		'_E': {'charge_cost': 63.61, 'unit_cost_day': 23.67, 'unit_cost_night': 8.99}, # West Midlands
-		'_F': {'charge_cost': 71.77, 'unit_cost_day': 22.82, 'unit_cost_night': 8.99}, # North East
-		'_G': {'charge_cost': 51.81, 'unit_cost_day': 25.87, 'unit_cost_night': 8.99}, # North West
-		'_H': {'charge_cost': 64.54, 'unit_cost_day': 23.27, 'unit_cost_night': 8.99}, # Southern
-		'_J': {'charge_cost': 58.22, 'unit_cost_day': 25.32, 'unit_cost_night': 8.99}, # South East
-		'_K': {'charge_cost': 63.62, 'unit_cost_day': 24.63, 'unit_cost_night': 8.99}, # South Wales
-		'_L': {'charge_cost': 68.69, 'unit_cost_day': 24.43, 'unit_cost_night': 8.99}, # South West
-		'_M': {'charge_cost': 68.18, 'unit_cost_day': 23.31, 'unit_cost_night': 8.99}, # Yorkshire
-		'_N': {'charge_cost': 65.16, 'unit_cost_day': 23.80, 'unit_cost_night': 8.99}, # South Scotland
-		'_P': {'charge_cost': 62.93, 'unit_cost_day': 25.64, 'unit_cost_night': 8.99}, # North Scotland
+		'_A': {'charge_cost': 50.85, 'unit_cost_day': 27.27, 'unit_cost_night': 8.99}, # Eastern
+		'_B': {'charge_cost': 56.89, 'unit_cost_day': 25.15, 'unit_cost_night': 8.99}, # East Midlands
+		'_C': {'charge_cost': 41.57, 'unit_cost_day': 26.82, 'unit_cost_night': 8.99}, # London
+		'_D': {'charge_cost': 67.88, 'unit_cost_day': 28.83, 'unit_cost_night': 8.99}, # North Wales
+		'_E': {'charge_cost': 63.61, 'unit_cost_day': 24.90, 'unit_cost_night': 8.99}, # West Midlands
+		'_F': {'charge_cost': 72.10, 'unit_cost_day': 23.96, 'unit_cost_night': 8.99}, # North East
+		'_G': {'charge_cost': 52.03, 'unit_cost_day': 27.84, 'unit_cost_night': 8.99}, # North West
+		'_H': {'charge_cost': 64.28, 'unit_cost_day': 24.73, 'unit_cost_night': 8.99}, # Southern
+		'_J': {'charge_cost': 57.84, 'unit_cost_day': 26.63, 'unit_cost_night': 8.99}, # South East
+		'_K': {'charge_cost': 64.11, 'unit_cost_day': 25.91, 'unit_cost_night': 8.99}, # South Wales
+		'_L': {'charge_cost': 68.11, 'unit_cost_day': 25.90, 'unit_cost_night': 8.99}, # South West
+		'_M': {'charge_cost': 68.31, 'unit_cost_day': 24.52, 'unit_cost_night': 8.99}, # Yorkshire
+		'_N': {'charge_cost': 64.16, 'unit_cost_day': 25.25, 'unit_cost_night': 8.99}, # South Scotland
+		'_P': {'charge_cost': 61.98, 'unit_cost_day': 27.77, 'unit_cost_night': 8.99}, # North Scotland
 	}
 	return tariffs
 
@@ -90,7 +90,7 @@ def get_meta_data(tariffs):
 
 def lambda_handler(event, context):
 	tariffs = {}
-	tariffs = get_ovo_tariffs(tariffs)
+	#tariffs = get_ovo_tariffs(tariffs)
 	tariffs = get_edf_tariffs(tariffs)
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
