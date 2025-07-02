@@ -5,6 +5,23 @@ import json
 from datetime import datetime
 from os import environ
 
+regions = {
+"_A": "EastEngland",
+"_B": "EastMidlands",
+"_C": "London",
+"_D": "MerseysideAndNorthWales",
+"_E": "WestMidlands",
+"_F": "NorthEastEngland",
+"_G": "NorthWestEngland",
+"_H": "SouthernEngland",
+"_J": "SouthEastEngland",
+"_K": "SouthWales",
+"_L": "SouthWestEngland",
+"_M": "Yorkshire",
+"_N": "SouthScotland",
+"_P": "NorthScotland",
+}
+
 postcodes = {
 "_A": "NR11BD",
 "_B": "CV11DD",
@@ -22,22 +39,25 @@ postcodes = {
 "_P": "AB166NS",
 }
 
-regions = {
-"_A": "EastEngland",
-"_B": "EastMidlands",
-"_C": "London",
-"_D": "MerseysideAndNorthWales",
-"_E": "WestMidlands",
-"_F": "NorthEastEngland",
-"_G": "NorthWestEngland",
-"_H": "SouthernEngland",
-"_J": "SouthEastEngland",
-"_K": "SouthWales",
-"_L": "SouthWestEngland",
-"_M": "Yorkshire",
-"_N": "SouthScotland",
-"_P": "NorthScotland",
-}
+def get_edf_tariffs(tariffs):
+	# https://www.edfenergy.com/electric-cars/go-electric-tariff-prices
+	tariffs['edf_overnight'] = {
+		'_A': {'charge_cost': 49.74, 'unit_cost_day': 26.00, 'unit_cost_night': 8.99}, # Eastern
+		'_B': {'charge_cost': 55.80, 'unit_cost_day': 24.30, 'unit_cost_night': 8.99}, # East Midlands
+		'_C': {'charge_cost': 40.49, 'unit_cost_day': 26.48, 'unit_cost_night': 8.99}, # London
+		'_D': {'charge_cost': 66.78, 'unit_cost_day': 24.67, 'unit_cost_night': 8.99}, # North Wales
+		'_E': {'charge_cost': 62.51, 'unit_cost_day': 24.35, 'unit_cost_night': 8.99}, # West Midlands
+		'_F': {'charge_cost': 71.01, 'unit_cost_day': 23.71, 'unit_cost_night': 8.99}, # North East
+		'_G': {'charge_cost': 50.94, 'unit_cost_day': 25.74, 'unit_cost_night': 8.99}, # North West
+		'_H': {'charge_cost': 63.18, 'unit_cost_day': 24.28, 'unit_cost_night': 8.99}, # Southern
+		'_J': {'charge_cost': 56.74, 'unit_cost_day': 25.98, 'unit_cost_night': 8.99}, # South East
+		'_K': {'charge_cost': 63.02, 'unit_cost_day': 25.17, 'unit_cost_night': 8.99}, # South Wales
+		'_L': {'charge_cost': 67.02, 'unit_cost_day': 24.64, 'unit_cost_night': 8.99}, # South West
+		'_M': {'charge_cost': 71.01, 'unit_cost_day': 23.71, 'unit_cost_night': 8.99}, # Yorkshire
+		'_N': {'charge_cost': 63.08, 'unit_cost_day': 24.42, 'unit_cost_night': 8.99}, # South Scotland
+		'_P': {'charge_cost': 60.88, 'unit_cost_day': 25.47, 'unit_cost_night': 8.99}, # North Scotland
+	}
+	return tariffs
 
 
 def get_ovo_tariffs(tariffs):
@@ -58,28 +78,6 @@ def get_ovo_tariffs(tariffs):
 						unit_cost_day = 100 * n['ratesByTimingCategory'][0]['unitRate']
 						unit_cost_night = 100 * n['ratesByTimingCategory'][0]['unitRate']
 						tariffs['ovo'][gsp] = {'charge_cost': charge_cost, 'unit_cost_day': unit_cost_day, 'unit_cost_night': unit_cost_night}
-	return tariffs
-
-
-def get_edf_tariffs(tariffs):
-	# https://www.edfenergy.com/electric-cars/ev-tariffs ->
-	# Request a quote
-	tariffs['edf_overnight'] = {
-		'_A': {'charge_cost': 50.85, 'unit_cost_day': 27.27, 'unit_cost_night': 8.99}, # Eastern
-		'_B': {'charge_cost': 56.89, 'unit_cost_day': 25.15, 'unit_cost_night': 8.99}, # East Midlands
-		'_C': {'charge_cost': 41.57, 'unit_cost_day': 26.82, 'unit_cost_night': 8.99}, # London
-		'_D': {'charge_cost': 67.88, 'unit_cost_day': 28.83, 'unit_cost_night': 8.99}, # North Wales
-		'_E': {'charge_cost': 63.61, 'unit_cost_day': 24.90, 'unit_cost_night': 8.99}, # West Midlands
-		'_F': {'charge_cost': 72.10, 'unit_cost_day': 23.96, 'unit_cost_night': 8.99}, # North East
-		'_G': {'charge_cost': 52.03, 'unit_cost_day': 27.84, 'unit_cost_night': 8.99}, # North West
-		'_H': {'charge_cost': 64.28, 'unit_cost_day': 24.73, 'unit_cost_night': 8.99}, # Southern
-		'_J': {'charge_cost': 57.84, 'unit_cost_day': 26.63, 'unit_cost_night': 8.99}, # South East
-		'_K': {'charge_cost': 64.11, 'unit_cost_day': 25.91, 'unit_cost_night': 8.99}, # South Wales
-		'_L': {'charge_cost': 68.11, 'unit_cost_day': 25.90, 'unit_cost_night': 8.99}, # South West
-		'_M': {'charge_cost': 68.31, 'unit_cost_day': 24.52, 'unit_cost_night': 8.99}, # Yorkshire
-		'_N': {'charge_cost': 64.16, 'unit_cost_day': 25.25, 'unit_cost_night': 8.99}, # South Scotland
-		'_P': {'charge_cost': 61.98, 'unit_cost_day': 27.77, 'unit_cost_night': 8.99}, # North Scotland
-	}
 	return tariffs
 
 
