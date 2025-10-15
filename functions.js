@@ -952,6 +952,8 @@ function get_code_from_dropdown_value(val) {
 		code = go_codes[val.substr(11)];
 	} else if (val == "Octopus Cosy") {
 		code = "COSY-22-12-08";
+	} else if (val == "Octopus Cosy 12M Fixed") {
+		code = "COSY-FIX-12M-25-09-24";
 	} else if (val == "Octopus Intelligent Go") {
 		code = "INTELLI-VAR-22-10-14";
 	} else if (val == "Octopus Flux Import") {
