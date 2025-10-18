@@ -932,7 +932,7 @@ function store_custom_costs() {
 }
 
 function get_code_from_tariff_code(tariff_code) {
-	if (tariff_code.includes("GO") || tariff_code.includes("EPG") || tariff_code.includes("VAR")) {
+	if (tariff_code.includes("GO") || tariff_code.includes("EPG") || tariff_code.includes("VAR") || tariff_code.includes("COSY")) {
 		var split = tariff_code.split("-");
 		var end = split.length - 1;
 		code = split.slice(2,end).join("-");
