@@ -40,24 +40,28 @@ postcodes = {
 }
 
 def get_edf_tariffs(tariffs):
-	# https://www.edfenergy.com/electric-cars/go-electric-tariff-prices
-	tariffs['edf_overnight'] = {
-		'_A': {'charge_cost': 49.74, 'unit_cost_day': 28.91, 'unit_cost_night': 8.99}, # Eastern
-		'_B': {'charge_cost': 55.80, 'unit_cost_day': 26.65, 'unit_cost_night': 8.99}, # East Midlands
-		'_C': {'charge_cost': 40.49, 'unit_cost_day': 27.72, 'unit_cost_night': 8.99}, # London
-		'_D': {'charge_cost': 66.78, 'unit_cost_day': 27.79, 'unit_cost_night': 8.99}, # North Wales
-		'_E': {'charge_cost': 62.51, 'unit_cost_day': 26.11, 'unit_cost_night': 8.99}, # West Midlands
-		'_F': {'charge_cost': 71.01, 'unit_cost_day': 24.98, 'unit_cost_night': 8.99}, # North East
-		'_G': {'charge_cost': 50.94, 'unit_cost_day': 29.39, 'unit_cost_night': 8.99}, # North West
-		'_H': {'charge_cost': 63.18, 'unit_cost_day': 25.96, 'unit_cost_night': 8.99}, # Southern
-		'_J': {'charge_cost': 56.74, 'unit_cost_day': 28.26, 'unit_cost_night': 8.99}, # South East
-		'_K': {'charge_cost': 63.02, 'unit_cost_day': 27.28, 'unit_cost_night': 8.99}, # South Wales
-		'_L': {'charge_cost': 67.02, 'unit_cost_day': 26.87, 'unit_cost_night': 8.99}, # South West
-		'_M': {'charge_cost': 71.01, 'unit_cost_day': 24.98, 'unit_cost_night': 8.99}, # Yorkshire
-		'_N': {'charge_cost': 63.08, 'unit_cost_day': 25.64, 'unit_cost_night': 8.99}, # South Scotland
-		'_P': {'charge_cost': 60.88, 'unit_cost_day': 27.19, 'unit_cost_night': 8.99}, # North Scotland
-	}
-	return tariffs
+    tariffs['edf_goelectric'] = {}
+    url = "https://api.edfgb-kraken.energy/v1/graphql/"
+    body = {
+        "operationName": "GetEvEnergyProducts",
+        "variables": { "postcode": "" },
+        "query": "query GetEvEnergyProducts($postcode: String!, $cursor: String) { energyProducts( postcode: $postcode brands: [\"EDF\"] tags: [\"ev\"] first: 50 after: $cursor filterBy: [SMART] availability: AVAILABLE ) { pageInfo { endCursor hasNextPage __typename } totalCount edges { node { __typename id fullName code displayName description isVariable isFixed isGreen isBusiness isDomestic isPrepay isAvailable isUnavailable isChargedHalfHourly exitFees notes availableTo availableFrom tags tariffs(postcode: $postcode, paymentMethod: DIRECT_DEBIT, first: 10) { edges { node { __typename ... on DayNightTariff { id displayName fullName description standingCharge dayRate nightRate __typename } ... on StandardTariff { id displayName fullName description standingCharge unitRate __typename } } __typename } __typename } } __typename } __typename }}"
+    }
+    for gsp in postcodes:
+        body["variables"]["postcode"] = postcodes[gsp]
+        r = requests.post(url, json=body)
+        if r.status_code != 200:
+            print("error getting data")
+            continue
+        for i in r.json()['data']['energyProducts']['edges']:
+            if i["node"]["code"] != "EDF_EV_FIX_GOELEC_12M_HH":
+                continue
+            tariffs['edf_goelectric'][gsp] = {
+                "charge_cost": i['node']['tariffs']['edges'][0]['node']['standingCharge'],
+                "unit_cost_day": i['node']['tariffs']['edges'][0]['node']['dayRate'],
+                "unit_cost_night": i['node']['tariffs']['edges'][0]['node']['nightRate'],
+            }
+    return tariffs
 
 
 def get_ovo_tariffs(tariffs):
@@ -93,7 +97,7 @@ def lambda_handler(event, context):
 	tariffs = get_meta_data(tariffs)
 	with open('/tmp/tariffs.json', 'w') as f:
 		json.dump(tariffs, f)
-	if event is not None:
+	if event is not None or False:
 		import boto3
 		s3_client = boto3.client('s3')
 		s3_client.upload_file('/tmp/tariffs.json', 'smartathome.co.uk', 'octopus/tariffs.json', ExtraArgs={'ContentType': 'text/json'})

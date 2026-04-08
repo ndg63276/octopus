@@ -431,8 +431,8 @@ function get_30min_unit_rates(user_info, code, startdate, enddate, tariff_code) 
 		var all_rates = get_e7_rates(user_info, code, startdate, enddate);
 	} else if (code == "edf98") {
 		var all_rates = get_edf98_rates(user_info, code, startdate, enddate);
-	} else if (code == "edf35" || code == "edf_overnight") {
-		var all_rates = get_edf35_rates(user_info, code, startdate, enddate);
+	} else if (code == "edf_goelectric") {
+		var all_rates = get_edf_goelectric_rates(user_info, code, startdate, enddate);
 	} else {
 		var all_rates = get_unit_rates(user_info, code, startdate, enddate, tariff_code);
 	}
@@ -872,8 +872,8 @@ function get_edf98_rates(user_info, code, startdate, enddate) {
 	return to_return;
 }
 
-function get_edf35_rates(user_info, code, startdate, enddate) {
-	console.log("get_edf35_rates");
+function get_edf_goelectric_rates(user_info, code, startdate, enddate) {
+	console.log("get_edf_goelectric_rates");
 	json = get_json("tariffs.json");
 	data = json[code];
 	data = get_other_average_rates(data);
@@ -881,16 +881,19 @@ function get_edf35_rates(user_info, code, startdate, enddate) {
 	var to_return = {};
 	to_return[code] = [];
 	var d = new Date(startdate);
-	d.setUTCHours(0, 0, 0, 0);
+	d.setHours(0, 0, 0, 0);
 	var d2 = new Date(startdate);
-	while (d < enddate) {
-		d.setUTCHours(0, 0, 0, 0);
-		d2.setUTCHours(5, 0, 0, 0);
+	while (d.getDate() <= enddate.getDate()) {
+		d.setHours(0, 0, 0, 0);
+		d2.setHours(6, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
-		d.setUTCHours(5, 0, 0, 0);
-		d2.setDate(d2.getDate()+1);
-		d2.setUTCHours(0, 0, 0, 0);
+		d.setHours(6, 0, 0, 0);
+		d2.setHours(23, 0, 0, 0);
 		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_day"]});
+		d.setHours(23, 0, 0, 0);
+		d2.setDate(d2.getDate()+1);
+		d2.setHours(0, 0, 0, 0);
+		to_return[code].push({"valid_from": d.toISOString(), "valid_to": d2.toISOString(), "value_inc_vat": region_data["unit_cost_night"]});
 		d.setDate(d.getDate()+1);
 	}
 	return to_return;
@@ -967,8 +970,8 @@ function get_code_from_dropdown_value(val) {
 		code = "custom";
 	} else if (val.includes("Ovo Energy")) {
 		code = "ovo";
-	} else if (val.includes("EDF GoElectric Overnight")) {
-		code = "edf_overnight";
+	} else if (val.includes("EDF GoElectric 12m")) {
+		code = "edf_goelectric";
 	} else if (val.startsWith("My Tariff")) {
 		current_mpan = user_info["mpan"];
 		tariff_code = user_info["mpans"][current_mpan]["tariff_code"];
